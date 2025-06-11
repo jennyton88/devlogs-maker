@@ -9,8 +9,12 @@ I will update it as I go.
 
 ### Requirements
 - Godot 4.3
-- Config file
 - Github permissions (user tokens)
+- Config file
+
+For the config file, would need to manually enter the repo info and app info.
+Also need to add the user name and email under user info.
+And the url for the base repo under urls.
 
 ### Assets
 - Courier Prime Regular Font
