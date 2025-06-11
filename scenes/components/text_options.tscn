@@ -1,0 +1,61 @@
+[gd_scene load_steps=2 format=3 uid="uid://dfwpe1mowrb25"]
+
+[ext_resource type="Script" path="res://scripts/button_manager.gd" id="1_cqf7y"]
+
+[node name="TextOptions" type="VBoxContainer"]
+size_flags_horizontal = 3
+alignment = 1
+script = ExtResource("1_cqf7y")
+
+[node name="MarginContainer3" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer5" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ClearText" type="Button" parent="."]
+layout_mode = 2
+text = "Clear Text
+"
+
+[node name="AddPostTemplate" type="Button" parent="."]
+visible = false
+layout_mode = 2
+text = "Add Template"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ImportText" type="Button" parent="."]
+layout_mode = 2
+text = "Import Text
+"
+
+[node name="ExportText" type="Button" parent="."]
+layout_mode = 2
+text = "Export Text
+"
+
+[node name="MarginContainer4" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="GetPosts" type="Button" parent="."]
+layout_mode = 2
+text = "Get Posts"
+
+[node name="EditPost" type="Button" parent="."]
+layout_mode = 2
+text = "Edit Post"
+
+[node name="Post" type="Button" parent="."]
+layout_mode = 2
+text = "Post"
+
+[node name="MarginContainer2" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3

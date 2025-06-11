@@ -1,0 +1,154 @@
+[gd_resource type="Theme" load_steps=13 format=3 uid="uid://bg45fa5ynd7fs"]
+
+[ext_resource type="FontFile" uid="uid://b7htxquxgsgdt" path="res://assets/fonts/CourierPrime-Regular.ttf" id="1_pwgot"]
+[ext_resource type="StyleBox" uid="uid://tcvdwqsymvwa" path="res://assets/themes/components/tab_mail.tres" id="2_go4nu"]
+[ext_resource type="StyleBox" uid="uid://bqxkndhvjaki0" path="res://assets/themes/components/tab_unselected_mail.tres" id="3_d7f4l"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f210i"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.412152, 0.412152, 0.412152, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_76p2e"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uy00f"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t0g74"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.77084, 0.770839, 0.770839, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m82ni"]
+content_margin_left = 15.0
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ktjnr"]
+bg_color = Color(0.660396, 0.660396, 0.660396, 1)
+corner_detail = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sysrr"]
+content_margin_left = 30.0
+content_margin_top = 50.0
+content_margin_right = 30.0
+content_margin_bottom = 50.0
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bo1ie"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(1, 1, 1, 1)
+border_color = Color(0.45098, 0.733333, 1, 1)
+shadow_color = Color(0, 0, 0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_flmgt"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(1, 1, 1, 1)
+border_color = Color(0.45098, 0.733333, 1, 1)
+shadow_color = Color(0, 0, 0, 0)
+
+[resource]
+Button/colors/font_color = Color(0, 0, 0, 1)
+Button/colors/font_disabled_color = Color(0.87451, 0.87451, 0.87451, 1)
+Button/colors/font_focus_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_color = Color(0.372251, 0.372251, 0.372251, 1)
+Button/colors/font_hover_pressed_color = Color(0.372549, 0.372549, 0.372549, 1)
+Button/colors/font_pressed_color = Color(0, 0, 0, 1)
+Button/constants/align_to_largest_stylebox = 0
+Button/constants/h_separation = 4
+Button/constants/icon_max_width = 0
+Button/constants/outline_size = 0
+Button/font_sizes/font_size = 20
+Button/fonts/font = ExtResource("1_pwgot")
+Button/styles/disabled = SubResource("StyleBoxFlat_f210i")
+Button/styles/hover = SubResource("StyleBoxFlat_76p2e")
+Button/styles/normal = SubResource("StyleBoxFlat_uy00f")
+Button/styles/pressed = SubResource("StyleBoxFlat_t0g74")
+Label/colors/font_color = Color(0, 0, 0, 1)
+Label/font_sizes/font_size = 20
+Label/fonts/font = ExtResource("1_pwgot")
+Label/styles/normal = SubResource("StyleBoxFlat_m82ni")
+LineEdit/colors/caret_color = Color(0, 0, 0, 1)
+LineEdit/colors/font_color = Color(0, 0, 0, 1)
+LineEdit/colors/font_placeholder_color = Color(0.352941, 0.352941, 0.352941, 1)
+LineEdit/font_sizes/font_size = 20
+LineEdit/fonts/font = ExtResource("1_pwgot")
+LineEdit/styles/normal = ExtResource("2_go4nu")
+LinkButton/colors/font_color = Color(2.5028e-06, 0.888589, 0.987104, 1)
+LinkButton/colors/font_hover_color = Color(0.85098, 0.94902, 0.94902, 1)
+LinkButton/colors/font_hover_pressed_color = Color(0, 0, 0.517647, 1)
+LinkButton/colors/font_pressed_color = Color(0, 0, 0.517647, 1)
+LinkButton/font_sizes/font_size = 20
+LinkButton/fonts/font = ExtResource("1_pwgot")
+PopupPanel/styles/panel = SubResource("StyleBoxFlat_ktjnr")
+RichTextLabel/colors/default_color = Color(0, 0, 0, 1)
+RichTextLabel/font_sizes/bold_font_size = 20
+RichTextLabel/font_sizes/bold_italics_font_size = 20
+RichTextLabel/font_sizes/italics_font_size = 20
+RichTextLabel/font_sizes/mono_font_size = 20
+RichTextLabel/font_sizes/normal_font_size = 20
+RichTextLabel/fonts/normal_font = ExtResource("1_pwgot")
+RichTextLabel/styles/normal = SubResource("StyleBoxFlat_sysrr")
+TabBar/font_sizes/font_size = 20
+TabBar/fonts/font = ExtResource("1_pwgot")
+TabContainer/colors/font_hovered_color = Color(0.372549, 0.372549, 0.372549, 1)
+TabContainer/colors/font_selected_color = Color(0, 0, 0, 1)
+TabContainer/colors/font_unselected_color = Color(0, 0, 0, 1)
+TabContainer/font_sizes/font_size = 20
+TabContainer/fonts/font = ExtResource("1_pwgot")
+TabContainer/styles/tab_hovered = ExtResource("2_go4nu")
+TabContainer/styles/tab_selected = ExtResource("2_go4nu")
+TabContainer/styles/tab_unselected = ExtResource("3_d7f4l")
+TextEdit/colors/caret_color = Color(0, 0, 0, 1)
+TextEdit/colors/font_color = Color(0, 0, 0, 1)
+TextEdit/colors/font_placeholder_color = Color(0.352941, 0.352941, 0.352941, 1)
+TextEdit/colors/font_readonly_color = Color(0, 0, 0, 1)
+TextEdit/font_sizes/font_size = 20
+TextEdit/fonts/font = ExtResource("1_pwgot")
+TextEdit/styles/normal = SubResource("StyleBoxFlat_bo1ie")
+TextEdit/styles/read_only = SubResource("StyleBoxFlat_flmgt")

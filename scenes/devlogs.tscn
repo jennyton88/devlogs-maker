@@ -1,0 +1,307 @@
+[gd_scene load_steps=9 format=3 uid="uid://cg4hagqhec5ke"]
+
+[ext_resource type="Theme" uid="uid://bg45fa5ynd7fs" path="res://assets/themes/theme_mail.tres" id="1_i2wg7"]
+[ext_resource type="Script" path="res://scripts/devlogs.gd" id="2_00vko"]
+[ext_resource type="Shader" path="res://assets/shaders/scrolling_bg.gdshader" id="3_oqjq2"]
+[ext_resource type="PackedScene" uid="uid://dfwpe1mowrb25" path="res://scenes/components/text_options.tscn" id="4_bwtfv"]
+[ext_resource type="Texture2D" uid="uid://c68nqgvrw67ro" path="res://assets/imgs/airplane.png" id="4_enp6g"]
+[ext_resource type="PackedScene" uid="uid://dvjxapeupcitp" path="res://scenes/components/border.tscn" id="6_hcaqf"]
+[ext_resource type="PackedScene" uid="uid://b7134j8afntpo" path="res://scenes/verify_user.tscn" id="7_36a3x"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1bv88"]
+shader = ExtResource("3_oqjq2")
+
+[node name="Devlogs" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_i2wg7")
+script = ExtResource("2_00vko")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 2
+color = Color(0.129412, 0.878431, 0.886275, 1)
+
+[node name="TextureRect" type="TextureRect" parent="."]
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_1bv88")
+clip_contents = true
+layout_mode = 2
+size_flags_stretch_ratio = 0.0
+texture = ExtResource("4_enp6g")
+stretch_mode = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="S1" type="MarginContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="TextOptions" parent="HBoxContainer" instance=ExtResource("4_bwtfv")]
+layout_mode = 2
+
+[node name="S2" type="MarginContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="VB2" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 5.0
+
+[node name="S3" type="MarginContainer" parent="HBoxContainer/VB2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.05
+
+[node name="MC1" type="MarginContainer" parent="HBoxContainer/VB2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Workspace" type="TabContainer" parent="HBoxContainer/VB2/MC1"]
+layout_mode = 2
+current_tab = 0
+drag_to_rearrange_enabled = true
+
+[node name="Editor" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+metadata/_tab_index = 0
+
+[node name="EditText" type="TextEdit" parent="HBoxContainer/VB2/MC1/Workspace/Editor"]
+layout_mode = 2
+wrap_mode = 1
+autowrap_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="Finalize" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+metadata/_tab_index = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize"]
+layout_mode = 2
+
+[node name="Date" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+text = "Today is"
+
+[node name="MarginContainer7" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="Header" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+text = "Title:"
+
+[node name="Title" type="LineEdit" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="MarginContainer4" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="Header2" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+text = "Summary:"
+
+[node name="Summary" type="TextEdit" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+wrap_mode = 1
+autowrap_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="MarginContainer5" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="Header1" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+text = "File Name:"
+
+[node name="FileName" type="LineEdit" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="AddFileName" type="Button" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+text = "Create file name from today's date"
+
+[node name="MarginContainer6" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="UpdatePreview" type="Button" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+text = ">> Format Post <<"
+
+[node name="MarginContainer8" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="Preview" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+metadata/_tab_index = 2
+
+[node name="PostPreview" type="TextEdit" parent="HBoxContainer/VB2/MC1/Workspace/Preview"]
+layout_mode = 2
+editable = false
+wrap_mode = 1
+autowrap_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="Devlogs List" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+metadata/_tab_index = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VB2/MC1/Workspace/Devlogs List"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Devlogs List/VBoxContainer"]
+layout_mode = 2
+text = "Current Devlogs"
+
+[node name="Verify User" parent="HBoxContainer/VB2/MC1/Workspace" instance=ExtResource("7_36a3x")]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 4
+
+[node name="Border" parent="HBoxContainer/VB2/MC1" instance=ExtResource("6_hcaqf")]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_top = 30
+
+[node name="ErrorPopup" type="MarginContainer" parent="HBoxContainer/VB2/MC1"]
+visible = false
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="HBoxContainer/VB2/MC1/ErrorPopup"]
+layout_mode = 2
+
+[node name="S7" type="MarginContainer" parent="HBoxContainer/VB2/MC1/ErrorPopup"]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 20
+
+[node name="VBC2" type="VBoxContainer" parent="HBoxContainer/VB2/MC1/ErrorPopup/S7"]
+layout_mode = 2
+alignment = 1
+
+[node name="Message" type="Label" parent="HBoxContainer/VB2/MC1/ErrorPopup/S7/VBC2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "404 Error
+There has been an error."
+horizontal_alignment = 1
+
+[node name="Ok" type="Button" parent="HBoxContainer/VB2/MC1/ErrorPopup/S7/VBC2"]
+layout_mode = 2
+text = "Ok"
+
+[node name="DeletePopup" type="MarginContainer" parent="HBoxContainer/VB2/MC1"]
+visible = false
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="HBoxContainer/VB2/MC1/DeletePopup"]
+layout_mode = 2
+
+[node name="S7" type="MarginContainer" parent="HBoxContainer/VB2/MC1/DeletePopup"]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 20
+
+[node name="VBC2" type="VBoxContainer" parent="HBoxContainer/VB2/MC1/DeletePopup/S7"]
+layout_mode = 2
+alignment = 1
+
+[node name="Message" type="Label" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Are you sure you want to delete this post?"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2"]
+layout_mode = 2
+alignment = 1
+
+[node name="Yes" type="Button" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_hover_pressed_color = Color(0.756863, 0, 0, 1)
+text = "Yes"
+
+[node name="ClearTextYes" type="Button" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_hover_pressed_color = Color(0.756863, 0, 0, 1)
+text = "Yes"
+
+[node name="No" type="Button" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer"]
+layout_mode = 2
+text = "No"
+
+[node name="S4" type="MarginContainer" parent="HBoxContainer/VB2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.05
+
+[node name="S5" type="MarginContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(374, 219)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+use_native_dialog = true
