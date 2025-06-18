@@ -1,103 +1,126 @@
-[gd_scene format=3 uid="uid://bc4tgg3t4a85l"]
+[gd_scene load_steps=2 format=3 uid="uid://bc4tgg3t4a85l"]
+
+[ext_resource type="Script" path="res://scripts/settings.gd" id="1_bl41m"]
 
 [node name="Settings" type="MarginContainer"]
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+offset_top = 427.0
+offset_right = 140.0
+offset_bottom = 455.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 metadata/_tab_index = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 2
 alignment = 1
 
-[node name="Title" type="Label" parent="VBoxContainer"]
+[node name="Title" type="Label" parent="VBox"]
 layout_mode = 2
-text = "Repository Owner"
+text = "Repo Owner"
 
-[node name="RepoOwner" type="LineEdit" parent="VBoxContainer"]
+[node name="RepoOwner" type="LineEdit" parent="VBox"]
 layout_mode = 2
-placeholder_text = "owner"
 caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
-[node name="S6" type="MarginContainer" parent="VBoxContainer"]
+[node name="S6" type="MarginContainer" parent="VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="Title2" type="Label" parent="VBoxContainer"]
+[node name="Title2" type="Label" parent="VBox"]
 layout_mode = 2
-text = "Repository"
+text = "Repo"
 
-[node name="Repository" type="LineEdit" parent="VBoxContainer"]
+[node name="Repository" type="LineEdit" parent="VBox"]
 layout_mode = 2
-placeholder_text = "repo"
 caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
-[node name="S5" type="MarginContainer" parent="VBoxContainer"]
+[node name="S5" type="MarginContainer" parent="VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="Title3" type="Label" parent="VBoxContainer"]
+[node name="Title3" type="Label" parent="VBox"]
 layout_mode = 2
 text = "Branch"
 
-[node name="BranchName" type="LineEdit" parent="VBoxContainer"]
+[node name="BranchName" type="LineEdit" parent="VBox"]
 layout_mode = 2
-placeholder_text = "curr. branch"
 caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
-[node name="S4" type="MarginContainer" parent="VBoxContainer"]
+[node name="S4" type="MarginContainer" parent="VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="Title4" type="Label" parent="VBoxContainer"]
+[node name="Title4" type="Label" parent="VBox"]
 layout_mode = 2
 text = "File Path"
 
-[node name="RepoPath" type="LineEdit" parent="VBoxContainer"]
+[node name="RepoPath" type="LineEdit" parent="VBox"]
 layout_mode = 2
-placeholder_text = "path to files"
 caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
-[node name="S3" type="MarginContainer" parent="VBoxContainer"]
+[node name="S3" type="MarginContainer" parent="VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="Title5" type="Label" parent="VBoxContainer"]
+[node name="Title5" type="Label" parent="VBox"]
 layout_mode = 2
-text = "Author of Commit"
+text = "Author"
 
-[node name="Author" type="LineEdit" parent="VBoxContainer"]
+[node name="Author" type="LineEdit" parent="VBox"]
 layout_mode = 2
-placeholder_text = "name"
 caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
-[node name="S2" type="MarginContainer" parent="VBoxContainer"]
+[node name="S2" type="MarginContainer" parent="VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="Title6" type="Label" parent="VBoxContainer"]
+[node name="Title6" type="Label" parent="VBox"]
 layout_mode = 2
 text = "Email"
 
-[node name="Email" type="LineEdit" parent="VBoxContainer"]
+[node name="Email" type="LineEdit" parent="VBox"]
 layout_mode = 2
-placeholder_text = "you@email.com"
 caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
+
+[node name="S8" type="MarginContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+script = ExtResource("1_bl41m")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Apply" type="Button" parent="VBox/HBoxContainer"]
+layout_mode = 2
+text = "Apply"
+
+[node name="Cancel" type="Button" parent="VBox/HBoxContainer"]
+layout_mode = 2
+text = "Cancel
+"
+
+[node name="S7" type="MarginContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
