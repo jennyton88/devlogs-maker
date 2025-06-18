@@ -9,7 +9,6 @@ signal enable_buttons;
 @onready var request_code = $HBC1/VBC1/ReqCode;
 @onready var refresh_token = $HBC1/VBC1/RefreshToken;
 @onready var refresh_app = $HBC1/VBC1/RefreshApp;
-@onready var override = $HBC1/VBC1/Override;
 
 # Labels =====
 @onready var code_label = $HBC1/VBC1/Code;
@@ -49,7 +48,6 @@ func _ready():
 	refresh_token.pressed.connect(_on_refresh_token_pressed);
 	refresh_app.pressed.connect(_on_refresh_app_pressed);
 	error_button.pressed.connect(_on_error_button_pressed);
-	override.pressed.connect(_on_override_pressed);
 	
 	request_code.disabled = true;
 	request_code.pressed.connect(_on_request_code_pressed);
@@ -214,12 +212,6 @@ func _on_refresh_token_pressed():
 
 func _on_refresh_app_pressed():
 	poll_verification(false);
-
-
-func _on_override_pressed():
-	request_code.disabled = false;
-	refresh_token.disabled = false;
-	refresh_app.disabled = false;
 
 
 func _on_expire_timeout() -> void:
