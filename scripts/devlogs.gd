@@ -73,6 +73,11 @@ func _ready():
 	verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));
 	verify_user.user_token_expired.connect(_on_token_expired.bind(false));
 	
+	post_title.text_changed.connect(_on_text_changed_preview);
+	text_editor.text_changed.connect(_on_update_preview);
+	post_summary.text_changed.connect(_on_update_preview);
+	file_name.text_changed.connect(_on_update_preview);
+	
 	
 	error_button.pressed.connect(_on_error_button_pressed);
 	
@@ -85,9 +90,6 @@ func _ready():
 	
 	add_file_name_button.pressed.connect(_on_add_file_name);
 	
-	update_preview.pressed.connect(_on_update_preview);
-	
-		
 	settings.apply.pressed.connect(settings._on_save_settings_pressed.bind(true));
 	settings.cancel.pressed.connect(settings._on_save_settings_pressed.bind(false));
 	
@@ -325,6 +327,10 @@ func _on_export_file():
 	file_dialog.show();
 
 
+func _on_text_changed_preview(_new_text: String) -> void:
+	_on_update_preview();
+
+
 func _on_http_post_completed(result, response_code, _headers, body):
 	if (failed_checks(result, response_code)):
 		return;
@@ -498,7 +504,7 @@ func _on_serious_clear_button_pressed():
 		text_editor.remove_meta("sha");
 
 
-func _on_update_preview(): # TODO automatically format as you type please
+func _on_update_preview():
 	text_preview.text = "";
 	
 	# edit date
@@ -512,6 +518,7 @@ func _on_update_preview(): # TODO automatically format as you type please
 	
 	text_preview.text += post_title.text + ";\n";
 	text_preview.text += post_summary.text + ";\n";
+	
 	text_preview.text += text_editor.text;
 
 
