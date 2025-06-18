@@ -7,6 +7,7 @@ extends MarginContainer
 @onready var text_editor = $HBoxContainer/VB2/MC1/Workspace/Editor/EditText;
 @onready var verify_user = $"HBoxContainer/VB2/MC1/Workspace/Verify User";
 @onready var text_preview = $HBoxContainer/VB2/MC1/Workspace/Preview/PostPreview;
+@onready var settings = $HBoxContainer/VB2/MC1/Workspace/Settings;
 
 # Finalize
 @onready var post_title = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/Title;
@@ -34,6 +35,7 @@ extends MarginContainer
 
 # Post list
 @onready var post_list = $"HBoxContainer/VB2/MC1/Workspace/Devlogs List/VBoxContainer";
+
 
 
 enum Month {
@@ -85,9 +87,14 @@ func _ready():
 	
 	update_preview.pressed.connect(_on_update_preview);
 	
+		
+	settings.apply.pressed.connect(settings._on_save_settings_pressed.bind(true));
+	settings.cancel.pressed.connect(settings._on_save_settings_pressed.bind(false));
+	
 	get_curr_date();
 	
 	verify_user.setup_tokens();
+	settings.setup_settings();
 
 
 # ==========================
