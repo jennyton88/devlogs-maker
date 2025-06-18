@@ -70,10 +70,11 @@ size_flags_vertical = 3
 
 [node name="Workspace" type="TabContainer" parent="HBoxContainer/VB2/MC1"]
 layout_mode = 2
-current_tab = 0
+current_tab = 1
 drag_to_rearrange_enabled = true
 
 [node name="Editor" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 14
@@ -90,16 +91,16 @@ caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
 [node name="Finalize" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
-visible = false
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 metadata/_tab_index = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize"]
 layout_mode = 2
+alignment = 1
 
 [node name="Date" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
 layout_mode = 2
@@ -156,20 +157,6 @@ caret_mid_grapheme = true
 [node name="AddFileName" type="Button" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
 layout_mode = 2
 text = "Create file name from today's date"
-
-[node name="MarginContainer6" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.15
-
-[node name="UpdatePreview" type="Button" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-text = ">> Format Post <<"
-
-[node name="MarginContainer8" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.15
 
 [node name="Preview" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
 visible = false
