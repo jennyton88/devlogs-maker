@@ -110,11 +110,6 @@ size_flags_stretch_ratio = 0.1
 layout_mode = 2
 horizontal_alignment = 1
 
-[node name="Override" type="Button" parent="HBC1/VBC1"]
-layout_mode = 2
-text = "Override
-"
-
 [node name="S5" type="MarginContainer" parent="HBC1/VBC1"]
 layout_mode = 2
 size_flags_vertical = 3
