@@ -389,6 +389,8 @@ func _on_http_download_text_completed(result, response_code, _headers, body):
 					str_len += split_text[i].length();
 			
 				text_editor.text = text.substr(str_len + 4, -1); # 4 is for the ;'s and \n counted
+				
+				_on_update_preview();
 			else:
 				set_error("Not formatted correctly! Please edit a different file.");
 		_:
@@ -439,6 +441,8 @@ func file_selected(path: String):
 			text += txt_file.get_line() + "\n";
 		
 		text_editor.text = text;
+		
+		_on_update_preview();
 	else:
 		var txt_file = FileAccess.open(path, FileAccess.WRITE);
 		txt_file.store_string(text_preview.text);
