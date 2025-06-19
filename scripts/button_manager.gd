@@ -4,7 +4,6 @@ extends VBoxContainer;
 ## Signals =====
 
 signal get_devlogs;
-signal edit_curr_text;
 signal post_curr_text;
 
 signal import_file;
@@ -37,7 +36,6 @@ func _ready():
 	clear_post.pressed.connect(_on_clear_text_pressed);
 	
 	get_posts.pressed.connect(_on_get_posts_pressed);
-	edit_post.pressed.connect(_on_edit_post_pressed);
 	post.pressed.connect(_on_post_pressed);
 	
 	import_text.pressed.connect(_on_import_pressed);
@@ -46,10 +44,6 @@ func _ready():
 
 func _on_get_posts_pressed():
 	get_devlogs.emit();
-
-
-func _on_edit_post_pressed():
-	edit_curr_text.emit();
 
 
 func _on_post_pressed():
