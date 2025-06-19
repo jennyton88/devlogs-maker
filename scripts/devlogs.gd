@@ -380,15 +380,15 @@ func _on_http_download_text_completed(result, response_code, _headers, body):
 			var text = body.get_string_from_utf8();
 			var split_text = text.rsplit("\n");
 			if (split_text.size() > 3): # TODO Fix better checks please for formatted code
-				creation_date = split_text[1].rstrip(";");
-				post_title.text = split_text[2].rstrip(";");
-				post_summary.text = split_text[3].rstrip(";");
+				creation_date = split_text[1];
+				post_title.text = split_text[2];
+				post_summary.text = split_text[3];
 				
 				var str_len = 0;
 				for i in range(4):
 					str_len += split_text[i].length();
 			
-				text_editor.text = text.substr(str_len + 4, -1); # 4 is for the ;'s and \n counted
+				text_editor.text = text.substr(str_len + 4, -1); # 4 is for the \n counted
 				
 				_on_update_preview();
 			else:
@@ -428,13 +428,13 @@ func file_selected(path: String):
 		txt_file.get_line(); # ignore first line, date edited
 		
 		var curr_str = txt_file.get_line();
-		creation_date = curr_str.substr(0, curr_str.length() - 1);
+		creation_date = curr_str.substr(0, curr_str.length());
 		
 		curr_str = txt_file.get_line();
-		post_title.text = curr_str.substr(0, curr_str.length() - 1);
+		post_title.text = curr_str.substr(0, curr_str.length());
 		
 		curr_str = txt_file.get_line();
-		post_summary.text = curr_str.substr(0, curr_str.length() - 1);
+		post_summary.text = curr_str.substr(0, curr_str.length());
 		
 		var text = "";
 		while txt_file.get_position() < txt_file.get_length():
@@ -512,16 +512,16 @@ func _on_update_preview():
 	text_preview.text = "";
 	
 	# edit date
-	text_preview.text += get_curr_formatted_date() + ";\n";
+	text_preview.text += get_curr_formatted_date() + "\n";
 	
 	# first created
 	if (creation_date != ""):
-		text_preview.text += creation_date + ";\n"; 
+		text_preview.text += creation_date + "\n"; 
 	else:
-		text_preview.text += get_curr_formatted_date() + ";\n";
+		text_preview.text += get_curr_formatted_date() + "\n";
 	
-	text_preview.text += post_title.text + ";\n";
-	text_preview.text += post_summary.text + ";\n";
+	text_preview.text += post_title.text + "\n";
+	text_preview.text += post_summary.text + "\n";
 	
 	text_preview.text += text_editor.text;
 
