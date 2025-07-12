@@ -27,7 +27,6 @@ signal clear_text;
 ## Send it ======
 
 @onready var get_posts = $GetPosts;
-@onready var edit_post = $EditPost;
 @onready var post = $Post;
 
 
