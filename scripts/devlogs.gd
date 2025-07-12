@@ -55,14 +55,14 @@ enum Month {
 
 
 # Temporary Variables
-var edit_post_info = null;
+var edit_button_ref = null;
+
 var creation_date = "";
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	menu_options.get_devlogs.connect(_on_get_devlogs);
-	menu_options.edit_curr_text.connect(_on_post_curr_text.bind(true));
-	menu_options.post_curr_text.connect(_on_post_curr_text.bind(false));
+	menu_options.post_curr_text.connect(_on_post_curr_text);
 	
 	menu_options.clear_text.connect(_on_clear_text);
 	
@@ -108,8 +108,9 @@ func _on_error_button_pressed():
 	error_popup.hide();
 
 
-func _on_post_curr_text(edit: bool):
-	if (file_name.text == "" || post_title.text == "" || post_summary.text == "" || text_editor.text == ""):
+func _on_post_curr_text():
+	if (file_name.text == "" || post_title.text == "" || 
+		post_summary.text == "" || text_editor.text == ""):
 		set_error("You haven't completed all parts of your post yet!");
 		return;
 	
@@ -120,14 +121,11 @@ func _on_post_curr_text(edit: bool):
 		set_error("%d ERROR\nFailed to load config file." % error);
 		return;
 	
-	var base64_txt = Marshalls.utf8_to_base64(text_preview.text);
-	
-	var message_type = "Edited" if edit else "Posted";
-	var message = "%s devlog." % message_type;
+	var msg_type = "Edited" if edit_button_ref != null else "Posted";
 	
 	var body = {
-		"message": message,
-		"content": base64_txt,
+		"message": "%s devlog." % msg_type,
+		"content": Marshalls.utf8_to_base64(text_preview.text),
 		"committer": {
 			"name": config.get_value("user_info", "user_name"),
 			"email": config.get_value("user_info", "user_email"),
@@ -135,8 +133,8 @@ func _on_post_curr_text(edit: bool):
 		"branch": config.get_value("repo_info", "repo_branch_update")
 	};
 	
-	if (edit):
-		body["sha"] = text_editor.get_meta("sha");
+	if (edit_button_ref != null):
+		body["sha"] = edit_button_ref.get_meta("sha");
 	
 	body = JSON.stringify(body);
 	
@@ -220,10 +218,8 @@ func _on_edit_button_pressed(button):
 		set_error("%d ERROR\nFailed to load config file." % error);
 		return;
 	
-	edit_post_info = button;
-	
 	file_name.text = button.get_meta("name");
-	text_editor.set_meta("sha", button.get_meta("sha"));
+	edit_button_ref = button;
 	
 	var app_name = config.get_value("app_info", "app_name");
 	
@@ -243,7 +239,7 @@ func _on_edit_button_pressed(button):
 	
 	if (error != OK):
 		set_error("%d ERROR\nCouldn't perform HTTP request." % error);
-		edit_post_info = null;
+		edit_button_ref = null;
 
 
 func _on_delete_button_pressed(button):
@@ -308,7 +304,7 @@ func _on_serious_delete_button_pressed(button):
 	else:
 		button.get_parent().queue_free();
 		text_editor.text = "";
-		text_editor.remove_meta("sha");
+		edit_button_ref = null;
 
 
 func _on_delete_no_button_pressed():
@@ -339,18 +335,20 @@ func _on_http_post_completed(result, response_code, _headers, body):
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # update post
-			set_error("%d\nSuccess!" % response_code);
+			set_error("%d\nSuccessfully edited!" % response_code);
 			
 			var info = response["content"];
-			edit_post_info.set_meta("sha", info["sha"]);
-			edit_post_info = null;
+			if (edit_button_ref != null):
+				edit_button_ref.set_meta("sha", info["sha"]);
+				edit_button_ref = null;
+				_on_serious_clear_button_pressed();
 			
-			text_editor.remove_meta("sha");
 			
 		HTTPClient.RESPONSE_CREATED: # new post
 			set_error("%d\nSuccessfully created!" % response_code);
 			var info = response["content"];
-			create_post_info(info["name"], info["download_url"], info["sha"]); 
+			create_post_info(info["name"], info["download_url"], info["sha"]);
+			_on_serious_clear_button_pressed();
 		_:
 			set_error("%d\nNot implemented!" % response_code);
 			print(response);
@@ -466,13 +464,11 @@ func _on_add_file_name():
 
 
 func _on_enable_buttons():
-	menu_options.edit_post.disabled = false;
 	menu_options.post.disabled = false;
 	menu_options.get_posts.disabled = false;
 
 
 func _on_token_expired(refresh_token: bool):
-	menu_options.edit_post.disabled = true;
 	menu_options.post.disabled = true;
 	menu_options.get_posts.disabled = true;
 	
@@ -486,7 +482,7 @@ func _on_clear_text():
 	delete_yes_button.hide();
 	clear_yes_button.show();
 	
-	delete_msg.text = "Are you sure you want to clear this post? (Content, Title, Name, Summary)";
+	delete_msg.text = "Are you sure you want to clear EVERYTHING for this post?\n(Text, title, summary, post, file name, etc.)";
 	delete_popup.show();
 
 
@@ -504,8 +500,7 @@ func _on_serious_clear_button_pressed():
 	
 	creation_date = "";
 	
-	if (text_editor.has_meta("sha")):
-		text_editor.remove_meta("sha");
+	edit_button_ref = null;
 
 
 func _on_update_preview():
