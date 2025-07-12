@@ -201,7 +201,8 @@ func _on_get_devlogs():
 	h_client.request_completed.connect(_on_http_get_posts_completed);
 	
 	var url = config.get_value("urls", "base_repo");
-	url = url.rstrip("/") + "?"; # [/textfiles/ vs /textfiles] redirected to main branch
+	# TODO url stripping depending on type of content path
+	url = url.rstrip("/") + "?"; # [/text_files/ vs /text_files] redirected to main branch
 	url += queries;
 	
 	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
