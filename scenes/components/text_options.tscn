@@ -48,10 +48,6 @@ size_flags_stretch_ratio = 0.25
 layout_mode = 2
 text = "Get Posts"
 
-[node name="EditPost" type="Button" parent="."]
-layout_mode = 2
-text = "Edit Post"
-
 [node name="Post" type="Button" parent="."]
 layout_mode = 2
 text = "Post"
