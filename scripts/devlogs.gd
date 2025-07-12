@@ -76,7 +76,6 @@ func _ready():
 	post_title.text_changed.connect(_on_text_changed_preview);
 	text_editor.text_changed.connect(_on_update_preview);
 	post_summary.text_changed.connect(_on_update_preview);
-	file_name.text_changed.connect(_on_update_preview);
 	
 	
 	error_button.pressed.connect(_on_error_button_pressed);
