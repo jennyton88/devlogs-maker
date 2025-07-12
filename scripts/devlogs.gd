@@ -34,7 +34,7 @@ extends MarginContainer
 @onready var clear_yes_button = $HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer/ClearTextYes;
 
 # Post list
-@onready var post_list = $"HBoxContainer/VB2/MC1/Workspace/Devlogs List/VBoxContainer";
+@onready var post_list = $"HBoxContainer/VB2/MC1/Workspace/Devlogs List/ScrollContainer/VBoxContainer";
 
 
 
