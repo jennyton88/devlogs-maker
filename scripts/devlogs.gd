@@ -218,7 +218,6 @@ func _on_edit_button_pressed(button):
 		set_error("%d ERROR\nFailed to load config file." % error);
 		return;
 	
-	file_name.text = button.get_meta("name");
 	edit_button_ref = button;
 	
 	var app_name = config.get_value("app_info", "app_name");
@@ -375,22 +374,8 @@ func _on_http_download_text_completed(result, response_code, _headers, body):
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
-			var text = body.get_string_from_utf8();
-			var split_text = text.rsplit("\n");
-			if (split_text.size() > 3): # TODO Fix better checks please for formatted code
-				creation_date = split_text[1];
-				post_title.text = split_text[2];
-				post_summary.text = split_text[3];
-				
-				var str_len = 0;
-				for i in range(4):
-					str_len += split_text[i].length();
-			
-				text_editor.text = text.substr(str_len + 4, -1); # 4 is for the \n counted
-				
-				_on_update_preview();
-			else:
-				set_error("Not formatted correctly! Please edit a different file.");
+			var downloaded_text = body.get_string_from_utf8();
+			check_format_text(downloaded_text);
 		_:
 			set_error("%d\nNot implemented!" % response_code);
 			print(body.get_string_from_utf8());
@@ -620,3 +605,53 @@ func create_query_string_from_dict(fields: Dictionary) -> String:
 		field_counter += 1;
 	
 	return query_string;
+
+
+func check_format_text(text_blob) -> void:
+	if (edit_button_ref != null):
+		if (edit_button_ref.has_meta("name")):
+			var curr_file_name = edit_button_ref.get_meta("name");
+			var file_type = check_file_name(curr_file_name);
+
+			if (file_type != ""):
+				match file_type:
+					"devlog":
+						var split_text = text_blob.rsplit("\n");
+				
+						creation_date = split_text[1];
+						post_title.text = split_text[2];
+						post_summary.text = split_text[3];
+					
+						var str_len = 0;
+						for i in range(4):
+							str_len += split_text[i].length();
+					
+						text_editor.text = text_blob.substr(str_len + 4, -1); # 4 of \n
+						file_name.text = curr_file_name;
+					
+						_on_update_preview();
+					"directory":
+						print("directory")
+						pass;
+					"project":
+						print("project")
+						pass;
+					_:
+						set_error("Not a recognizable file name! Please edit a different file.");
+
+
+func check_file_name(curr_file_name: String) -> String:
+	var regex = RegEx.new();
+	regex.compile("^(\\d{4})_(\\d{2})_(\\d{2})");
+	var matches = regex.search(curr_file_name);
+
+	if (matches):
+		return "devlog";
+
+	if (curr_file_name == "directory.txt"):
+		return "directory";
+	
+	if (curr_file_name == "projects_info.txt"):
+		return "project";
+	
+	return "";
