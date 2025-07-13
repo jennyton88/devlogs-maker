@@ -63,8 +63,8 @@ func save_settings():
 	config.save("user://config.cfg");
 
 
-func _on_save_settings_pressed(save_settings: bool) -> void:
-	if (save_settings): # apply
+func _on_save_settings_pressed(apply_changes: bool) -> void:
+	if (apply_changes): # apply
 		save_settings();
 	else: # cancel
 		setup_settings();
