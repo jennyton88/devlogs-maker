@@ -48,6 +48,6 @@ func setup_popup(type: MsgType, button_info: Dictionary) -> void:
 	show();
 
 
-func clean_exit(button: Button, callable: Callable) -> void:
+func exit(button: Button, callable: Callable) -> void:
 	button.disconnect("pressed", callable);
 	hide();
