@@ -27,16 +27,6 @@ func setup_popup(type: MsgType, button_info: Dictionary) -> void:
 	var no_action = get_node('Space/VB/HB/No');
 	
 	match type:
-		MsgType.RequireAction:
-			send_buttons.emit(type, {'yes': yes_action, 'no': no_action});
-			
-			yes_action.text = button_info['yes'][0];
-			no_action.text = button_info['no'][0];
-			
-			yes_action.pressed.connect(button_info['yes'][1].bind(yes_action));
-			no_action.pressed.connect(button_info['no'][1].bind(no_action));
-			
-			no_action.show();
 		MsgType.Notification:
 			send_buttons.emit(type, {'yes': yes_action});
 			
@@ -44,6 +34,16 @@ func setup_popup(type: MsgType, button_info: Dictionary) -> void:
 			
 			yes_action.pressed.connect(button_info['yes'][1].bind(yes_action));
 			no_action.hide();
+		MsgType.RequireAction:
+			send_buttons.emit(type, {'yes': yes_action, 'no': no_action});
+			
+			yes_action.text = button_info['yes'][0];
+			no_action.text = button_info['no'][0];
+			
+			yes_action.pressed.connect(button_info['yes'][1].bind(yes_action, no_action));
+			no_action.pressed.connect(button_info['no'][1].bind(no_action));
+			
+			no_action.show();
 	
 	show();
 
