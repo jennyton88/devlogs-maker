@@ -14,10 +14,8 @@ signal enable_buttons;
 @onready var code_label = $HBC1/VBC1/Code;
 @onready var expire_label = $HBC1/VBC1/Expiration;
 
-# Error Label ==
-@onready var error_popup = $ErrorPopup;
-@onready var error_message = $ErrorPopup/S7/VBC2/Message;
-@onready var error_button = $ErrorPopup/S7/VBC2/Ok;
+# Popup Msg ==
+@onready var popup = $PopUpMsg;
 
 # Link ======
 @onready var verify_link = $HBC1/VBC1/SendToVerify;
@@ -47,7 +45,6 @@ func _ready():
 	
 	refresh_token.pressed.connect(_on_refresh_token_pressed);
 	refresh_app.pressed.connect(_on_refresh_app_pressed);
-	error_button.pressed.connect(_on_error_button_pressed);
 	
 	request_code.disabled = true;
 	request_code.pressed.connect(_on_request_code_pressed);
@@ -69,7 +66,7 @@ func setup_tokens():
 	
 	# allow user to restart setup_tokens
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	check_access.uri = "https://github.com/settings/connections/applications/%s" % config.get_value("app_info", "app_client_id");
@@ -106,7 +103,7 @@ func generate_user_code_request():
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var app_name = config.get_value("app_info", "app_name");
@@ -131,7 +128,7 @@ func generate_user_code_request():
 	error = h_client.request(url, headers, HTTPClient.METHOD_POST, queries);
 	
 	if (error != OK):
-		set_error("%d ERROR\nCouldn't perform HTTP request." % error);
+		create_error_popup(error, AppInfo.ErrorType.HTTPError);
 		request_code.disabled = false;
 
 
@@ -153,7 +150,7 @@ func poll_verification(refresh_code: bool):
 	var error = config.load('user://config.cfg');
 	
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	# client secret not needed since using device flow
@@ -189,17 +186,13 @@ func poll_verification(refresh_code: bool):
 	error = h_client.request(url, headers, HTTPClient.METHOD_POST, queries);
 	
 	if (error != OK):
-		set_error("%d ERROR\nCouldn't perform HTTP request." % error);
+		create_error_popup(error, AppInfo.ErrorType.HTTPError);
 		request_code.disabled = false;
 
 
 # ==========================
 # ===== Signal Methods =====
 # ==========================
-
-
-func _on_error_button_pressed():
-	error_popup.hide();
 
 
 func _on_request_code_pressed():
@@ -215,7 +208,7 @@ func _on_refresh_app_pressed():
 
 
 func _on_expire_timeout() -> void:
-	set_error("Code Expired!\nRequest User Code Again!");
+	create_notif_popup("Expired code\nRequest user code again");
 	request_code.disabled = false;
 
 
@@ -229,7 +222,7 @@ func _on_http_req_completed(result, response_code, _headers, body):
 		HTTPClient.RESPONSE_OK:
 			allow_user_to_verify(response);
 		_:
-			set_error("%d Error\n Result %d" % [response_code, result]);
+			create_notif_popup("%d Error\n Result %d" % [response_code, result]);
 
 
 func _on_http_poll_completed(result, response_code, _headers, body):
@@ -241,34 +234,34 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 	match response_code:
 		HTTPClient.RESPONSE_OK:
 			if (response.has("error")):
-				set_error("%d Error\n %d" % [response_code, response["error"]]);
+				var error_msg = "%d\n" % response_code;
 				match response["error"]:
 					"slow_down":
-						set_error("Don't spam, wait 5 extra seconds");
-						#curr_interval += response["interval"]; # not considering closing app reseting curr_interval
+						error_msg += "Slow down, wait 5 more seconds";
 					"authorization_pending":
-						set_error("You haven't entered the user code yet!");
+						error_msg += "User code not entered";
 					"expired_token":
-						set_error("Token expired! Request a new one!");
+						error_msg += "Expired token, request new one";
 					"unsupported_grant_type":
-						set_error("Wrong grant type!");
+						error_msg += "Wrong grant type";
 					"incorrect_client_credentials":
-						set_error("Check your client credentials again!");
+						error_msg += "Check your client credentials";
 					"access_denied":
-						set_error("You canceled the process! Request a new one");
+						error_msg += "Canceled process, request new one";
 					"device_flow_disabled":
-						set_error("Device flow was not set up!");
+						error_msg += "Device flow is not set up";
 					_:
-						set_error("Error!" + response["error"]);
+						error_msg += "Error!\n%s" % response["error"];
 				
-				#poll_timer.start(curr_interval);
+				create_notif_popup(error_msg);
+				
 				return;
 			
 			var config = ConfigFile.new();
 			var error = config.load('user://config.cfg');
 			
 			if error != OK:
-				set_error("%d ERROR\nFailed to load config file. Token: %s, Refresh: %s" % [error, response["access_token"], response["refresh_token"]]);
+				create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [error, response["access_token"], response["refresh_token"]]);
 				return;
 			
 			config.set_value("user_info", "user_token", response["access_token"]);
@@ -285,22 +278,41 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 			expire_label.text = Time.get_datetime_string_from_datetime_dict(config.get_value("user_info", "user_token_expiration"), false);
 			refresh_token.disabled = true;
 			
-			set_error("Completed Poll Verification!");
+			create_notif_popup("Completed Poll Verification!");
 			
 			enable_buttons.emit();
 		_:
-			set_error("%d Error\n Result %d" % [response_code, result]);
+			create_notif_popup("%d\n Result %d" % [response_code, result]);
 
 
 # ============================
 # ===== Helper Functions =====
 # ============================
 
+# Popup
 
-## For error popup
-func set_error(error_text: String) -> void:
-	error_message.text = error_text;
-	error_popup.show();
+func create_notif_popup(code_text: String):
+	get_node("PopUpMsg").create_popup(
+		code_text,
+		{'yes': ["Ok", _on_hide_popup]},
+		AppInfo.MsgType.Notification
+	);
+
+
+func _on_hide_popup(button: Button) -> void:
+	get_node("PopUpMsg").exit(button, _on_hide_popup);
+
+
+func create_error_popup(error_code: Error, error_type: AppInfo.ErrorType):
+	var error_msg = "%d\n" % error_code;
+	
+	match error_type:
+		AppInfo.ErrorType.ConfigError:
+			error_msg += "Failed to load config file.";
+		AppInfo.ErrorType.HTTPError:
+			error_msg += "Couldn't perform HTTP request.";
+	
+	create_notif_popup(error_msg);
 
 
 func check_expiration(deadline: Dictionary) -> bool:
@@ -470,8 +482,8 @@ func create_query_string_from_dict(fields: Dictionary) -> String:
 
 func failed_checks(result: int, response_code: int):
 	if (result != OK):
-		var error_result = "%d ERROR\nHTTP request response error.\nResult %d" % [response_code, result];
-		set_error(error_result);
+		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
+		create_notif_popup(error_result);
 		return true;
 
 

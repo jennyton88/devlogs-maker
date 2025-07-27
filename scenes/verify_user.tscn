@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://b7134j8afntpo"]
+[gd_scene load_steps=5 format=3 uid="uid://b7134j8afntpo"]
 
 [ext_resource type="Theme" uid="uid://bg45fa5ynd7fs" path="res://assets/themes/theme_mail.tres" id="1_oeo4h"]
 [ext_resource type="Script" path="res://scripts/verify_user.gd" id="1_wpyrc"]
+[ext_resource type="PackedScene" uid="uid://cg4nnfhi2bqyp" path="res://scenes/components/popup_msg.tscn" id="3_dgs37"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3pf87"]
 bg_color = Color(1, 1, 1, 1)
@@ -122,31 +123,6 @@ size_flags_stretch_ratio = 0.1
 
 [node name="ExpireTimer" type="Timer" parent="."]
 
-[node name="ErrorPopup" type="MarginContainer" parent="."]
+[node name="PopUpMsg" parent="." instance=ExtResource("3_dgs37")]
 visible = false
 layout_mode = 2
-
-[node name="Panel" type="Panel" parent="ErrorPopup"]
-layout_mode = 2
-
-[node name="S7" type="MarginContainer" parent="ErrorPopup"]
-layout_mode = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 20
-
-[node name="VBC2" type="VBoxContainer" parent="ErrorPopup/S7"]
-layout_mode = 2
-alignment = 1
-
-[node name="Message" type="Label" parent="ErrorPopup/S7/VBC2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "404 Error
-There has been an error."
-horizontal_alignment = 1
-
-[node name="Ok" type="Button" parent="ErrorPopup/S7/VBC2"]
-layout_mode = 2
-text = "Ok"
