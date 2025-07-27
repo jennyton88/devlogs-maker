@@ -21,17 +21,9 @@ extends MarginContainer
 @onready var file_dialog = $FileDialog;
 
 
-# Popups
-@onready var error_popup = $HBoxContainer/VB2/MC1/ErrorPopup;
-@onready var error_msg = $HBoxContainer/VB2/MC1/ErrorPopup/S7/VBC2/Message;
-@onready var error_button = $HBoxContainer/VB2/MC1/ErrorPopup/S7/VBC2/Ok;
+# Message Popup
+@onready var msg_popup = $HBoxContainer/VB2/MC1/MsgPopup;
 
-@onready var delete_msg = $HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/Message;
-@onready var delete_popup = $HBoxContainer/VB2/MC1/DeletePopup;
-@onready var delete_yes_button = $HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer/Yes;
-@onready var delete_no_button = $HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer/No;
-
-@onready var clear_yes_button = $HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer/ClearTextYes;
 
 # Post list
 @onready var post_list = $"HBoxContainer/VB2/MC1/Workspace/Devlogs List/ScrollContainer/VBoxContainer";
@@ -77,12 +69,6 @@ func _ready():
 	text_editor.text_changed.connect(_on_update_preview);
 	post_summary.text_changed.connect(_on_update_preview);
 	
-	
-	error_button.pressed.connect(_on_error_button_pressed);
-	
-	delete_no_button.pressed.connect(_on_delete_no_button_pressed);
-	clear_yes_button.pressed.connect(_on_serious_clear_button_pressed);
-	
 	file_dialog.add_filter("*.txt", "Text Files");
 	file_dialog.file_selected.connect(file_selected);
 	file_dialog.current_dir = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
@@ -101,11 +87,6 @@ func _ready():
 # ==========================
 # ===== Signal Methods =====
 # ==========================
-
-
-func _on_error_button_pressed():
-	error_popup.hide();
-
 
 func _on_post_curr_text():
 	if (file_name.text == "" || post_title.text == "" || 
@@ -304,10 +285,6 @@ func _on_serious_delete_button_pressed(button):
 		button.get_parent().queue_free();
 		text_editor.text = "";
 		edit_button_ref = null;
-
-
-func _on_delete_no_button_pressed():
-	delete_popup.hide();
 
 
 func _on_import_file():	
@@ -512,12 +489,6 @@ func _on_update_preview():
 # ============================
 
 
-## For error popup
-func set_error(error_text: String) -> void:
-	error_msg.text = error_text;
-	error_popup.show();
-
-
 func failed_checks(result: int, response_code: int):
 	if (result != OK):
 		var error_result = "%d ERROR\nHTTP request response error.\nResult %d" % [response_code, result];
@@ -655,3 +626,27 @@ func check_file_name(curr_file_name: String) -> String:
 		return "project";
 	
 	return "";
+
+
+func _on_hide_popup(button: Button):
+	msg_popup.exit(button, _on_hide_popup);
+
+
+func create_notif_popup(code_text: String):
+	msg_popup.create_popup(
+		code_text,
+		{'yes': ["Ok", _on_hide_popup]},
+		MsgType.Notification
+	);
+
+
+func create_error_popup(error_code: Error, error_type: ErrorType):
+	var error_msg = "%d\n" % error_code;
+	
+	match error_type:
+		ErrorType.ConfigError:
+			error_msg += "Failed to load config file.";
+		ErrorType.HTTPError:
+			error_msg += "Couldn't perform HTTP request.";
+	
+	create_notif_popup(error_msg);

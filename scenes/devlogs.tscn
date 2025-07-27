@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cg4hagqhec5ke"]
+[gd_scene load_steps=11 format=3 uid="uid://cg4hagqhec5ke"]
 
 [ext_resource type="Theme" uid="uid://bg45fa5ynd7fs" path="res://assets/themes/theme_mail.tres" id="1_i2wg7"]
 [ext_resource type="Script" path="res://scripts/devlogs.gd" id="2_00vko"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://dvjxapeupcitp" path="res://scenes/components/border.tscn" id="6_hcaqf"]
 [ext_resource type="PackedScene" uid="uid://b7134j8afntpo" path="res://scenes/verify_user.tscn" id="7_36a3x"]
 [ext_resource type="PackedScene" uid="uid://bc4tgg3t4a85l" path="res://scenes/settings.tscn" id="7_adelr"]
+[ext_resource type="PackedScene" uid="uid://cg4nnfhi2bqyp" path="res://scenes/components/popup_msg.tscn" id="9_4c6yf"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1bv88"]
 shader = ExtResource("3_oqjq2")
@@ -212,77 +213,9 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_top = 30
 
-[node name="ErrorPopup" type="MarginContainer" parent="HBoxContainer/VB2/MC1"]
+[node name="MsgPopup" parent="HBoxContainer/VB2/MC1" instance=ExtResource("9_4c6yf")]
 visible = false
 layout_mode = 2
-
-[node name="Panel" type="Panel" parent="HBoxContainer/VB2/MC1/ErrorPopup"]
-layout_mode = 2
-
-[node name="S7" type="MarginContainer" parent="HBoxContainer/VB2/MC1/ErrorPopup"]
-layout_mode = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 20
-
-[node name="VBC2" type="VBoxContainer" parent="HBoxContainer/VB2/MC1/ErrorPopup/S7"]
-layout_mode = 2
-alignment = 1
-
-[node name="Message" type="Label" parent="HBoxContainer/VB2/MC1/ErrorPopup/S7/VBC2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "404 Error
-There has been an error."
-horizontal_alignment = 1
-
-[node name="Ok" type="Button" parent="HBoxContainer/VB2/MC1/ErrorPopup/S7/VBC2"]
-layout_mode = 2
-text = "Ok"
-
-[node name="DeletePopup" type="MarginContainer" parent="HBoxContainer/VB2/MC1"]
-visible = false
-layout_mode = 2
-
-[node name="Panel" type="Panel" parent="HBoxContainer/VB2/MC1/DeletePopup"]
-layout_mode = 2
-
-[node name="S7" type="MarginContainer" parent="HBoxContainer/VB2/MC1/DeletePopup"]
-layout_mode = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 20
-
-[node name="VBC2" type="VBoxContainer" parent="HBoxContainer/VB2/MC1/DeletePopup/S7"]
-layout_mode = 2
-alignment = 1
-
-[node name="Message" type="Label" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "Are you sure you want to delete this post?"
-horizontal_alignment = 1
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2"]
-layout_mode = 2
-alignment = 1
-
-[node name="Yes" type="Button" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_hover_pressed_color = Color(0.756863, 0, 0, 1)
-text = "Yes"
-
-[node name="ClearTextYes" type="Button" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer"]
-visible = false
-layout_mode = 2
-theme_override_colors/font_hover_pressed_color = Color(0.756863, 0, 0, 1)
-text = "Yes"
-
-[node name="No" type="Button" parent="HBoxContainer/VB2/MC1/DeletePopup/S7/VBC2/HBoxContainer"]
-layout_mode = 2
-text = "No"
 
 [node name="S4" type="MarginContainer" parent="HBoxContainer/VB2"]
 layout_mode = 2
