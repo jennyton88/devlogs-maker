@@ -57,13 +57,10 @@ func _ready():
 	
 	add_file_name_button.pressed.connect(_on_add_file_name);
 	
-	settings.apply.pressed.connect(settings._on_save_settings_pressed.bind(true));
-	settings.cancel.pressed.connect(settings._on_save_settings_pressed.bind(false));
-	
 	get_curr_date();
 	
 	verify_user.setup_tokens();
-	settings.setup_settings();
+	settings.startup();
 
 
 # ==========================

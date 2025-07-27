@@ -11,9 +11,11 @@ extends MarginContainer
 @onready var email = $VB/Email;
 
 
-# Buttons
-@onready var apply = $VB/HB/Apply;
-@onready var cancel = $VB/HB/Cancel;
+func startup() -> void: 
+	get_node("VB/HB/Apply").pressed.connect(_on_save_settings_pressed.bind(true));
+	get_node("VB/HB/Cancel").pressed.connect(_on_save_settings_pressed.bind(false));
+	
+	setup_settings();
 
 
 func setup_settings() -> void:
@@ -57,16 +59,16 @@ func save_settings():
 	config.set_value("user_info", "user_email", email.text);
 	
 	config.save("user://config.cfg");
+	
+	create_notif_popup("Saved!");
 
 
 func _on_save_settings_pressed(apply_changes: bool) -> void:
-	if (apply_changes): # apply
+	if (apply_changes):
 		save_settings();
 	else: # cancel
 		setup_settings();
 
-
-# Helper Methods
 
 # Popup
 
