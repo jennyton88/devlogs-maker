@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://cg4hagqhec5ke"]
+[gd_scene load_steps=12 format=3 uid="uid://cg4hagqhec5ke"]
 
 [ext_resource type="Theme" uid="uid://bg45fa5ynd7fs" path="res://assets/themes/theme_mail.tres" id="1_i2wg7"]
 [ext_resource type="Script" path="res://scripts/devlogs.gd" id="2_00vko"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dfwpe1mowrb25" path="res://scenes/components/text_options.tscn" id="4_bwtfv"]
 [ext_resource type="Texture2D" uid="uid://c68nqgvrw67ro" path="res://assets/imgs/airplane.png" id="4_enp6g"]
 [ext_resource type="PackedScene" uid="uid://dvjxapeupcitp" path="res://scenes/components/border.tscn" id="6_hcaqf"]
+[ext_resource type="PackedScene" uid="uid://bd3yn3luhu540" path="res://scenes/finalize.tscn" id="6_kycab"]
 [ext_resource type="PackedScene" uid="uid://b7134j8afntpo" path="res://scenes/verify_user.tscn" id="7_36a3x"]
 [ext_resource type="PackedScene" uid="uid://bc4tgg3t4a85l" path="res://scenes/settings.tscn" id="7_adelr"]
 [ext_resource type="PackedScene" uid="uid://cg4nnfhi2bqyp" path="res://scenes/components/popup_msg.tscn" id="9_4c6yf"]
@@ -71,11 +72,10 @@ size_flags_vertical = 3
 
 [node name="Workspace" type="TabContainer" parent="HBoxContainer/VB2/MC1"]
 layout_mode = 2
-current_tab = 1
+current_tab = 0
 drag_to_rearrange_enabled = true
 
 [node name="Editor" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
-visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 14
@@ -91,73 +91,9 @@ caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
-[node name="Finalize" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
+[node name="Finalize" parent="HBoxContainer/VB2/MC1/Workspace" instance=ExtResource("6_kycab")]
+visible = false
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
-metadata/_tab_index = 1
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize"]
-layout_mode = 2
-alignment = 1
-
-[node name="Date" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-text = "Today is"
-
-[node name="MarginContainer7" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.15
-
-[node name="Header" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-text = "Title:"
-
-[node name="Title" type="LineEdit" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-caret_blink = true
-caret_blink_interval = 0.5
-caret_mid_grapheme = true
-
-[node name="MarginContainer4" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.15
-
-[node name="Header2" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-text = "Summary:"
-
-[node name="Summary" type="TextEdit" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-wrap_mode = 1
-autowrap_mode = 2
-caret_blink = true
-caret_blink_interval = 0.5
-caret_mid_grapheme = true
-
-[node name="MarginContainer5" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.15
-
-[node name="Header1" type="Label" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-text = "File Name:"
-
-[node name="FileName" type="LineEdit" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-caret_blink = true
-caret_blink_interval = 0.5
-caret_mid_grapheme = true
-
-[node name="AddFileName" type="Button" parent="HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer"]
-layout_mode = 2
-text = "Create file name from today's date"
 
 [node name="Preview" type="MarginContainer" parent="HBoxContainer/VB2/MC1/Workspace"]
 visible = false

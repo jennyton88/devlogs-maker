@@ -3,26 +3,18 @@ extends MarginContainer
 
 @onready var menu_options = $HBoxContainer/TextOptions;
 
-# Other Modules
+# Workspace Modules
 @onready var text_editor = $HBoxContainer/VB2/MC1/Workspace/Editor/EditText;
+@onready var finalize = $HBoxContainer/VB2/MC1/Workspace/Finalize;
 @onready var verify_user = $"HBoxContainer/VB2/MC1/Workspace/Verify User";
 @onready var text_preview = $HBoxContainer/VB2/MC1/Workspace/Preview/PostPreview;
 @onready var settings = $HBoxContainer/VB2/MC1/Workspace/Settings;
 
-# Finalize
-@onready var post_title = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/Title;
-@onready var post_summary = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/Summary;
-@onready var file_name = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/FileName;
-@onready var curr_date = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/Date;
-@onready var add_file_name_button = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/AddFileName;
-
 # Import / Export
 @onready var file_dialog = $FileDialog;
 
-
 # Message Popup
 @onready var msg_popup = $HBoxContainer/VB2/MC1/MsgPopup;
-
 
 # Post list
 @onready var post_list = $"HBoxContainer/VB2/MC1/Workspace/Devlogs List/ScrollContainer/VBoxContainer";
@@ -46,18 +38,16 @@ func _ready():
 	verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));
 	verify_user.user_token_expired.connect(_on_token_expired.bind(false));
 	
-	post_title.text_changed.connect(_on_text_changed_preview);
+	finalize.post_title.text_changed.connect(_on_text_changed_preview);
+	finalize.post_summary.text_changed.connect(_on_update_preview);
 	text_editor.text_changed.connect(_on_update_preview);
-	post_summary.text_changed.connect(_on_update_preview);
+	
 	
 	file_dialog.add_filter("*.txt", "Text Files");
 	file_dialog.file_selected.connect(file_selected);
 	file_dialog.current_dir = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
 	
-	add_file_name_button.pressed.connect(_on_add_file_name);
-	
-	get_curr_date();
-	
+	finalize.startup();
 	verify_user.setup_tokens();
 	settings.startup();
 
@@ -67,8 +57,7 @@ func _ready():
 # ==========================
 
 func _on_post_curr_text():
-	if (file_name.text == "" || post_title.text == "" || 
-		post_summary.text == "" || text_editor.text == ""):
+	if (finalize.text_is_empty() || text_editor.text == ""):
 		create_notif_popup("You haven't completed all parts of your post yet!");
 		return;
 	
@@ -114,7 +103,7 @@ func _on_post_curr_text():
 	h_client.request_completed.connect(_on_http_post_completed);
 	
 	var url = config.get_value("urls", "base_repo");
-	url += file_name.text;
+	url += finalize.get_filename();
 	
 	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
 	
@@ -273,7 +262,7 @@ func _on_import_file():
 
 func _on_export_file():
 	var download_path = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
-	file_dialog.current_path = download_path + "/" + file_name.text + ".txt";
+	file_dialog.current_path = download_path + "/" + finalize.get_filename() + ".txt";
 	file_dialog.file_mode = FileDialog.FileMode.FILE_MODE_SAVE_FILE;
 	file_dialog.show();
 
@@ -366,7 +355,7 @@ func file_selected(path: String):
 	if (FileAccess.file_exists(path) && file_dialog.file_mode != FileDialog.FileMode.FILE_MODE_SAVE_FILE):
 		clear_post();
 		
-		file_name.text = path.get_file();
+		finalize.set_filename(path.get_file());
 		
 		var txt_file = FileAccess.open(path, FileAccess.READ_WRITE);
 		txt_file.get_line(); # ignore first line, date edited
@@ -375,10 +364,10 @@ func file_selected(path: String):
 		creation_date = curr_str.substr(0, curr_str.length());
 		
 		curr_str = txt_file.get_line();
-		post_title.text = curr_str.substr(0, curr_str.length());
+		finalize.set_post_title(curr_str.substr(0, curr_str.length()));
 		
 		curr_str = txt_file.get_line();
-		post_summary.text = curr_str.substr(0, curr_str.length());
+		finalize.set_post_summary(curr_str.substr(0, curr_str.length()));
 		
 		var text = "";
 		while txt_file.get_position() < txt_file.get_length():
@@ -391,22 +380,6 @@ func file_selected(path: String):
 		var txt_file = FileAccess.open(path, FileAccess.WRITE);
 		txt_file.store_string(text_preview.text);
 
-
-func _on_add_file_name():
-	var curr_time = Time.get_datetime_dict_from_system();
-	
-	var named_file = "%d_" % curr_time["year"];
-	if (curr_time["month"] < 10):
-		named_file += "0";
-		
-	named_file += "%d_" % curr_time["month"];
-	
-	if (curr_time["day"] < 10):
-		named_file += "0";
-	
-	named_file += "%d_" % curr_time["day"];
-	
-	file_name.text = named_file + ".txt";
 
 
 func _on_enable_buttons():
@@ -441,9 +414,7 @@ func _on_serious_clear_button_pressed(yes_button: Button, no_button: Button):
 func clear_post():
 	text_editor.text = "";
 	
-	file_name.text = "";
-	post_title.text = "";
-	post_summary.text = "";
+	finalize.clear_text();
 	
 	text_preview.text = "";
 	
@@ -465,8 +436,8 @@ func _on_update_preview():
 	else:
 		text_preview.text += get_curr_formatted_date() + "\n";
 	
-	text_preview.text += post_title.text + "\n";
-	text_preview.text += post_summary.text + "\n";
+	text_preview.text += finalize.get_post_title() + "\n";
+	text_preview.text += finalize.get_post_summary() + "\n";
 	
 	text_preview.text += text_editor.text;
 
@@ -515,11 +486,6 @@ func create_post_info(new_file_name: String, url: String, sha: String):
 	delete_button.pressed.connect(_on_delete_button_pressed.bind(delete_button));
 	
 	post_list.add_child(container);
-
-
-func get_curr_date():
-	var curr_time = Time.get_datetime_dict_from_system();
-	curr_date.text = "Today is (%d) %s %d, %d" % [curr_time["month"], AppInfo.Month.keys()[(curr_time["month"] % 12) - 1], curr_time["day"], curr_time["year"]];
 
 
 func get_curr_formatted_date():
@@ -578,15 +544,15 @@ func check_format_text(text_blob) -> void:
 						var split_text = text_blob.rsplit("\n");
 				
 						creation_date = split_text[1];
-						post_title.text = split_text[2];
-						post_summary.text = split_text[3];
+						finalize.set_post_title(split_text[2]);
+						finalize.set_post_summary(split_text[3]);
 					
 						var str_len = 0;
 						for i in range(4):
 							str_len += split_text[i].length();
 					
 						text_editor.text = text_blob.substr(str_len + 4, -1); # 4 of \n
-						file_name.text = curr_file_name;
+						finalize.set_filename(curr_file_name);
 					
 						_on_update_preview();
 					"directory":
