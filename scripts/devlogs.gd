@@ -15,7 +15,6 @@ extends MarginContainer
 @onready var file_name = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/FileName;
 @onready var curr_date = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/Date;
 @onready var add_file_name_button = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/AddFileName;
-@onready var update_preview = $HBoxContainer/VB2/MC1/Workspace/Finalize/VBoxContainer/UpdatePreview;
 
 # Import / Export
 @onready var file_dialog = $FileDialog;
