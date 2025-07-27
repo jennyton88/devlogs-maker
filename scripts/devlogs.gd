@@ -232,21 +232,23 @@ func _on_edit_button_pressed(button):
 		edit_button_ref = null;
 
 
-func _on_delete_button_pressed(button):
-	delete_msg.text = "Are you sure you want to delete this post?";
-	
-	if (delete_yes_button.pressed.is_connected(_on_serious_delete_button_pressed)):
-		delete_yes_button.pressed.disconnect(_on_serious_delete_button_pressed);
-	
-	delete_yes_button.pressed.connect(_on_serious_delete_button_pressed.bind(button));
-	clear_yes_button.hide();
-	delete_yes_button.show();
-	delete_popup.show();
+func _on_delete_button_pressed(log_entry_delete_button: Button):
+	msg_popup.create_popup(
+		"Are you sure you want to delete this post?",
+		{'yes': ["Delete Post", _on_serious_delete_button_pressed.bind(log_entry_delete_button)], 'no': ["Cancel", _on_hide_popup]},
+		MsgType.RequireAction
+	);
 
 
-func _on_serious_delete_button_pressed(button):
-	delete_yes_button.hide();
-	delete_popup.hide();
+
+
+
+func _on_serious_delete_button_pressed(yes_button, no_button, log_entry_delete_button):
+	var button_ref = log_entry_delete_button;
+	
+	msg_popup.exit(yes_button, _on_serious_delete_button_pressed);
+	msg_popup.exit(no_button, _on_hide_popup);
+	return;
 	
 	var config = ConfigFile.new();
 	var error = config.load("user://config.cfg");
@@ -261,7 +263,7 @@ func _on_serious_delete_button_pressed(button):
 			"name": config.get_value("user_info", "user_name"),
 			"email": config.get_value("user_info", "user_email"),
 		},
-		"sha": button.get_meta("sha"),
+		"sha": button_ref.get_meta("sha"),
 		"branch": config.get_value("repo_info", "repo_branch_update")
 	};
 	
@@ -285,15 +287,15 @@ func _on_serious_delete_button_pressed(button):
 	h_client.request_completed.connect(_on_http_delete_post_completed);
 	
 	var url = config.get_value("urls", "base_repo");
-	url += button.get_meta("name");
+	url += button_ref.get_meta("name");
 	
 	error = h_client.request(url, headers, HTTPClient.METHOD_DELETE, body);
 	
 	if (error != OK):
 		create_error_popup(error, ErrorType.HTTPError);
 	else:
-		button.get_parent().queue_free();
-		text_editor.text = "";
+		button_ref.get_parent().queue_free(); # delete the log entry in the devlog list
+		text_editor.text = ""; # TODO Check this
 		edit_button_ref = null;
 
 
@@ -395,7 +397,7 @@ func _on_http_delete_post_completed(result, response_code, _headers, body):
 
 func file_selected(path: String):
 	if (FileAccess.file_exists(path) && file_dialog.file_mode != FileDialog.FileMode.FILE_MODE_SAVE_FILE):
-		_on_serious_clear_button_pressed();
+		clear_post();
 		
 		file_name.text = path.get_file();
 		
@@ -456,17 +458,20 @@ func _on_token_expired(refresh_token: bool):
 
 
 func _on_clear_text():
-	delete_yes_button.hide();
-	clear_yes_button.show();
-	
-	delete_msg.text = "Are you sure you want to clear EVERYTHING for this post?\n(Text, title, summary, post, file name, etc.)";
-	delete_popup.show();
+	msg_popup.create_popup(
+		"Are you sure you want to clear EVERYTHING for this post?\n(Text, title, summary, post, file name, etc.)",
+		{'yes': ["Clear All", _on_serious_clear_button_pressed], 'no': ["Cancel", _on_hide_popup]},
+		MsgType.RequireAction
+	);
 
 
-func _on_serious_clear_button_pressed():
-	clear_yes_button.hide();
-	delete_popup.hide();
-	
+func _on_serious_clear_button_pressed(yes_button: Button, no_button: Button):
+	clear_post();
+	msg_popup.exit(yes_button, _on_serious_clear_button_pressed);
+	msg_popup.exit(no_button, _on_hide_popup);
+
+
+func clear_post():
 	text_editor.text = "";
 	
 	file_name.text = "";
@@ -478,6 +483,7 @@ func _on_serious_clear_button_pressed():
 	creation_date = "";
 	
 	edit_button_ref = null;
+
 
 
 func _on_update_preview():
