@@ -29,6 +29,16 @@ extends MarginContainer
 @onready var post_list = $"HBoxContainer/VB2/MC1/Workspace/Devlogs List/ScrollContainer/VBoxContainer";
 
 
+enum MsgType {
+	RequireAction,
+	Notification,
+}
+
+enum ErrorType {
+	ConfigError,
+	HTTPError,
+}
+
 
 enum Month {
 	January = 1,
