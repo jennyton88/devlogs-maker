@@ -200,11 +200,10 @@ func _on_delete_button_pressed(log_entry_delete_button: Button):
 
 
 
-func _on_serious_delete_button_pressed(yes_button, no_button, log_entry_delete_button):
+func _on_serious_delete_button_pressed(log_entry_delete_button: Button):
 	var button_ref = log_entry_delete_button;
 	
-	msg_popup.exit(yes_button, _on_serious_delete_button_pressed);
-	msg_popup.exit(no_button, _on_hide_popup);
+	msg_popup.exit();
 	
 	var config = ConfigFile.new();
 	var error = config.load("user://config.cfg");
@@ -405,10 +404,9 @@ func _on_clear_text():
 	);
 
 
-func _on_serious_clear_button_pressed(yes_button: Button, no_button: Button):
+func _on_serious_clear_button_pressed():
+	msg_popup.exit();
 	clear_post();
-	msg_popup.exit(yes_button, _on_serious_clear_button_pressed);
-	msg_popup.exit(no_button, _on_hide_popup);
 
 
 func clear_post():
@@ -582,8 +580,8 @@ func check_file_name(curr_file_name: String) -> String:
 	return "";
 
 
-func _on_hide_popup(button: Button):
-	msg_popup.exit(button, _on_hide_popup);
+func _on_hide_popup():
+	msg_popup.exit();
 
 
 func create_notif_popup(code_text: String):

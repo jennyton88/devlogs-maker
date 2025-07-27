@@ -93,5 +93,5 @@ func create_notif_popup(code_text: String):
 	);
 
 
-func _on_hide_popup(button: Button) -> void:
-	get_node("PopUpMsg").exit(button, _on_hide_popup);
+func _on_hide_popup() -> void:
+	get_node("PopUpMsg").exit();
