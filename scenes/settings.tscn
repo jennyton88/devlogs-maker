@@ -17,26 +17,34 @@ metadata/_tab_index = 5
 layout_mode = 2
 alignment = 1
 
-[node name="OwnerTitle" type="Label" parent="VB"]
+[node name="HB1" type="HBoxContainer" parent="VB"]
+layout_mode = 2
+
+[node name="VB" type="VBoxContainer" parent="VB/HB1"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="OwnerTitle" type="Label" parent="VB/HB1/VB"]
 layout_mode = 2
 text = "Repo Owner"
 
-[node name="RepoOwner" type="LineEdit" parent="VB"]
+[node name="RepoOwner" type="LineEdit" parent="VB/HB1/VB"]
 layout_mode = 2
 caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
-[node name="S6" type="MarginContainer" parent="VB"]
+[node name="VB2" type="VBoxContainer" parent="VB/HB1"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.15
+size_flags_stretch_ratio = 0.5
 
-[node name="RepoTitle" type="Label" parent="VB"]
+[node name="RepoTitle" type="Label" parent="VB/HB1/VB2"]
 layout_mode = 2
-text = "Repo"
+text = "Repo Name"
 
-[node name="RepoName" type="LineEdit" parent="VB"]
+[node name="RepoName" type="LineEdit" parent="VB/HB1/VB2"]
 layout_mode = 2
 caret_blink = true
 caret_blink_interval = 0.5

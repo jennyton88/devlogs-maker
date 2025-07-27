@@ -6,8 +6,8 @@ func startup() -> void:
 	get_node("VB/HB/Cancel").pressed.connect(_on_save_settings_pressed.bind(false));
 	
 	var user_set = {
-		"repo_owner": get_node("VB/RepoOwner"),
-		"repo_name": get_node("VB/RepoName"),
+		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
+		"repo_name": get_node("VB/HB1/VB2/RepoName"),
 		"repo_branch": get_node("VB/RepoBranch"),
 		"content_path": get_node("VB/ContentPath"),
 		"author": get_node("VB/Author"),
@@ -69,8 +69,8 @@ func save_settings(user_set: Dictionary) -> void:
 
 func _on_save_settings_pressed(apply_changes: bool) -> void:
 	var user_set = {
-		"repo_owner": get_node("VB/RepoOwner"),
-		"repo_name": get_node("VB/RepoName"),
+		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
+		"repo_name": get_node("VB/HB1/VB2/RepoName"),
 		"repo_branch": get_node("VB/RepoBranch"),
 		"content_path": get_node("VB/ContentPath"),
 		"author": get_node("VB/Author"),
