@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bc4tgg3t4a85l"]
+[gd_scene load_steps=3 format=3 uid="uid://bc4tgg3t4a85l"]
 
 [ext_resource type="Script" path="res://scripts/settings.gd" id="1_bl41m"]
+[ext_resource type="PackedScene" uid="uid://cg4nnfhi2bqyp" path="res://scenes/components/popup_msg.tscn" id="2_x17pl"]
 
 [node name="Settings" type="MarginContainer"]
 offset_top = 427.0
@@ -126,31 +127,6 @@ layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="ErrorPopup" type="MarginContainer" parent="."]
+[node name="PopUpMsg" parent="." instance=ExtResource("2_x17pl")]
 visible = false
 layout_mode = 2
-
-[node name="Panel" type="Panel" parent="ErrorPopup"]
-layout_mode = 2
-
-[node name="S7" type="MarginContainer" parent="ErrorPopup"]
-layout_mode = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 20
-
-[node name="VBC2" type="VBoxContainer" parent="ErrorPopup/S7"]
-layout_mode = 2
-alignment = 1
-
-[node name="Message" type="Label" parent="ErrorPopup/S7/VBC2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "404 Error
-There has been an error."
-horizontal_alignment = 1
-
-[node name="Ok" type="Button" parent="ErrorPopup/S7/VBC2"]
-layout_mode = 2
-text = "Ok"

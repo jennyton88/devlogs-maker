@@ -15,10 +15,6 @@ extends MarginContainer
 @onready var apply = $VB/HB/Apply;
 @onready var cancel = $VB/HB/Cancel;
 
-# Error
-@onready var error_popup = $ErrorPopup;
-@onready var error_message = $ErrorPopup/S7/VBC2/Message;
-
 
 func setup_settings() -> void:
 	var config = ConfigFile.new();
@@ -26,7 +22,7 @@ func setup_settings() -> void:
 	
 	# allow user to restart setup_tokens
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_notif_popup("%d ERROR\nFailed to load config file." % error);
 		return;
 	
 	repo_owner.text = config.get_value("repo_info", "repo_owner");
@@ -45,7 +41,7 @@ func save_settings():
 		
 		# allow user to restart setup_tokens
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_notif_popup("%d ERROR\nFailed to load config file." % error);
 		return;
 	
 	config.set_value("repo_info", "repo_owner", repo_owner.text);
@@ -72,7 +68,15 @@ func _on_save_settings_pressed(apply_changes: bool) -> void:
 
 # Helper Methods
 
-## For error popup
-func set_error(error_text: String) -> void:
-	error_message.text = error_text;
-	error_popup.show();
+# Popup
+
+func create_notif_popup(code_text: String):
+	get_node("PopUpMsg").create_popup(
+		code_text,
+		{'yes': ["Ok", _on_hide_popup]},
+		AppInfo.MsgType.Notification
+	);
+
+
+func _on_hide_popup(button: Button) -> void:
+	get_node("PopUpMsg").exit(button, _on_hide_popup);
