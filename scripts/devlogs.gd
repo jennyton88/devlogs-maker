@@ -248,7 +248,6 @@ func _on_serious_delete_button_pressed(yes_button, no_button, log_entry_delete_b
 	
 	msg_popup.exit(yes_button, _on_serious_delete_button_pressed);
 	msg_popup.exit(no_button, _on_hide_popup);
-	return;
 	
 	var config = ConfigFile.new();
 	var error = config.load("user://config.cfg");
