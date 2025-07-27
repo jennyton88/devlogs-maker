@@ -28,34 +28,6 @@ extends MarginContainer
 # Post list
 @onready var post_list = $"HBoxContainer/VB2/MC1/Workspace/Devlogs List/ScrollContainer/VBoxContainer";
 
-
-enum MsgType {
-	RequireAction,
-	Notification,
-}
-
-enum ErrorType {
-	ConfigError,
-	HTTPError,
-}
-
-
-enum Month {
-	January = 1,
-	Feburary = 2,
-	March = 3,
-	April = 4,
-	May = 5,
-	June = 6,
-	July = 7,
-	August = 8,
-	September = 9,
-	October = 10,
-	November = 11,
-	December = 12,
-}
-
-
 # Temporary Variables
 var edit_button_ref = null;
 
@@ -108,7 +80,7 @@ func _on_post_curr_text():
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup(error, ErrorType.ConfigError);
+		create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var msg_type = "Edited" if edit_button_ref != null else "Posted";
@@ -151,7 +123,7 @@ func _on_post_curr_text():
 	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
 	
 	if (error != OK):
-		create_error_popup(error, ErrorType.HTTPError);
+		create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
 func _on_get_devlogs():
@@ -166,7 +138,7 @@ func _on_get_devlogs():
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup(error, ErrorType.ConfigError);
+		create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var app_name = config.get_value("app_info", "app_name");
@@ -198,7 +170,7 @@ func _on_get_devlogs():
 	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
 	
 	if (error != OK):
-		create_error_popup(error, ErrorType.HTTPError);
+		create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
 func _on_edit_button_pressed(button):
@@ -206,7 +178,7 @@ func _on_edit_button_pressed(button):
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup(error, ErrorType.ConfigError);
+		create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	edit_button_ref = button;
@@ -228,7 +200,7 @@ func _on_edit_button_pressed(button):
 	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
 	
 	if (error != OK):
-		create_error_popup(error, ErrorType.HTTPError);
+		create_error_popup(error, AppInfo.ErrorType.HTTPError);
 		edit_button_ref = null;
 
 
@@ -236,7 +208,7 @@ func _on_delete_button_pressed(log_entry_delete_button: Button):
 	msg_popup.create_popup(
 		"Are you sure you want to delete this post?",
 		{'yes': ["Delete Post", _on_serious_delete_button_pressed.bind(log_entry_delete_button)], 'no': ["Cancel", _on_hide_popup]},
-		MsgType.RequireAction
+		AppInfo.MsgType.RequireAction
 	);
 
 
@@ -253,7 +225,7 @@ func _on_serious_delete_button_pressed(yes_button, no_button, log_entry_delete_b
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup(error, ErrorType.ConfigError);
+		create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var body = {
@@ -291,7 +263,7 @@ func _on_serious_delete_button_pressed(yes_button, no_button, log_entry_delete_b
 	error = h_client.request(url, headers, HTTPClient.METHOD_DELETE, body);
 	
 	if (error != OK):
-		create_error_popup(error, ErrorType.HTTPError);
+		create_error_popup(error, AppInfo.ErrorType.HTTPError);
 	else:
 		button_ref.get_parent().queue_free(); # delete the log entry in the devlog list
 		text_editor.text = ""; # TODO Check this
@@ -460,7 +432,7 @@ func _on_clear_text():
 	msg_popup.create_popup(
 		"Are you sure you want to clear EVERYTHING for this post?\n(Text, title, summary, post, file name, etc.)",
 		{'yes': ["Clear All", _on_serious_clear_button_pressed], 'no': ["Cancel", _on_hide_popup]},
-		MsgType.RequireAction
+		AppInfo.MsgType.RequireAction
 	);
 
 
@@ -551,7 +523,7 @@ func create_post_info(new_file_name: String, url: String, sha: String):
 
 func get_curr_date():
 	var curr_time = Time.get_datetime_dict_from_system();
-	curr_date.text = "Today is (%d) %s %d, %d" % [curr_time["month"], Month.keys()[(curr_time["month"] % 12) - 1], curr_time["day"], curr_time["year"]];
+	curr_date.text = "Today is (%d) %s %d, %d" % [curr_time["month"], AppInfo.Month.keys()[(curr_time["month"] % 12) - 1], curr_time["day"], curr_time["year"]];
 
 
 func get_curr_formatted_date():
@@ -656,17 +628,17 @@ func create_notif_popup(code_text: String):
 	msg_popup.create_popup(
 		code_text,
 		{'yes': ["Ok", _on_hide_popup]},
-		MsgType.Notification
+		AppInfo.MsgType.Notification
 	);
 
 
-func create_error_popup(error_code: Error, error_type: ErrorType):
+func create_error_popup(error_code: Error, error_type: AppInfo.ErrorType):
 	var error_msg = "%d\n" % error_code;
 	
 	match error_type:
-		ErrorType.ConfigError:
+		AppInfo.ErrorType.ConfigError:
 			error_msg += "Failed to load config file.";
-		ErrorType.HTTPError:
+		AppInfo.ErrorType.HTTPError:
 			error_msg += "Couldn't perform HTTP request.";
 	
 	create_notif_popup(error_msg);
