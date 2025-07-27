@@ -101,14 +101,14 @@ func _ready():
 func _on_post_curr_text():
 	if (file_name.text == "" || post_title.text == "" || 
 		post_summary.text == "" || text_editor.text == ""):
-		set_error("You haven't completed all parts of your post yet!");
+		create_notif_popup("You haven't completed all parts of your post yet!");
 		return;
 	
 	var config = ConfigFile.new();
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_error_popup(error, ErrorType.ConfigError);
 		return;
 	
 	var msg_type = "Edited" if edit_button_ref != null else "Posted";
@@ -151,7 +151,7 @@ func _on_post_curr_text():
 	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
 	
 	if (error != OK):
-		set_error("%d ERROR\nCouldn't perform HTTP request." % error);
+		create_error_popup(error, ErrorType.HTTPError);
 
 
 func _on_get_devlogs():
@@ -166,7 +166,7 @@ func _on_get_devlogs():
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_error_popup(error, ErrorType.ConfigError);
 		return;
 	
 	var app_name = config.get_value("app_info", "app_name");
@@ -198,7 +198,7 @@ func _on_get_devlogs():
 	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
 	
 	if (error != OK):
-		set_error("%d ERROR\nCouldn't perform HTTP request." % error);
+		create_error_popup(error, ErrorType.HTTPError);
 
 
 func _on_edit_button_pressed(button):
@@ -206,7 +206,7 @@ func _on_edit_button_pressed(button):
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_error_popup(error, ErrorType.ConfigError);
 		return;
 	
 	edit_button_ref = button;
@@ -228,7 +228,7 @@ func _on_edit_button_pressed(button):
 	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
 	
 	if (error != OK):
-		set_error("%d ERROR\nCouldn't perform HTTP request." % error);
+		create_error_popup(error, ErrorType.HTTPError);
 		edit_button_ref = null;
 
 
@@ -252,7 +252,7 @@ func _on_serious_delete_button_pressed(button):
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_error_popup(error, ErrorType.ConfigError);
 		return;
 	
 	var body = {
@@ -290,7 +290,7 @@ func _on_serious_delete_button_pressed(button):
 	error = h_client.request(url, headers, HTTPClient.METHOD_DELETE, body);
 	
 	if (error != OK):
-		set_error("%d ERROR\nCouldn't perform HTTP request." % error);
+		create_error_popup(error, ErrorType.HTTPError);
 	else:
 		button.get_parent().queue_free();
 		text_editor.text = "";
@@ -319,25 +319,26 @@ func _on_http_post_completed(result, response_code, _headers, body):
 	
 	var response = convert_to_json(body);
 	
+	var r_msg = "%d\n" % response_code;
+	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # update post
-			set_error("%d\nSuccessfully edited!" % response_code);
-			
+			r_msg += "Successfully edited!";
 			var info = response["content"];
 			if (edit_button_ref != null):
 				edit_button_ref.set_meta("sha", info["sha"]);
 				edit_button_ref = null;
-				_on_serious_clear_button_pressed();
-			
-			
+				clear_post();
 		HTTPClient.RESPONSE_CREATED: # new post
-			set_error("%d\nSuccessfully created!" % response_code);
+			r_msg += "Successfully created!";
 			var info = response["content"];
 			create_post_info(info["name"], info["download_url"], info["sha"]);
-			_on_serious_clear_button_pressed();
+			clear_post();
 		_:
-			set_error("%d\nNot implemented!" % response_code);
+			r_msg += "Not implemented!";
 			print(response);
+	
+	create_notif_popup(r_msg);
 
 
 func _on_http_get_posts_completed(result, response_code, _headers, body):
@@ -351,7 +352,7 @@ func _on_http_get_posts_completed(result, response_code, _headers, body):
 			for post in response:
 				create_post_info(post["name"], post["download_url"], post["sha"]);
 		_:
-			set_error("%d\nNot implemented!" % response_code);
+			create_notif_popup("%d\nNot implemented!" % response_code);
 			print(response);
 
 
@@ -364,7 +365,8 @@ func _on_http_download_text_completed(result, response_code, _headers, body):
 			var downloaded_text = body.get_string_from_utf8();
 			check_format_text(downloaded_text);
 		_:
-			set_error("%d\nNot implemented!" % response_code);
+			create_notif_popup("%d\nNot implemented!" % response_code);
+			
 			print(body.get_string_from_utf8());
 
 
@@ -374,18 +376,21 @@ func _on_http_delete_post_completed(result, response_code, _headers, body):
 		
 	var response = convert_to_json(body);
 	
+	var r_msg = "%d\n" % response_code;
+	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
-			set_error("%d\nSuccessfully deleted!" % response_code);
+			r_msg += "Successfully deleted!";
 		HTTPClient.RESPONSE_NOT_FOUND:
-			set_error("%d\nNot found!" % response_code);
+			r_msg += "Not found!";
 		HTTPClient.RESPONSE_CONFLICT:
-			set_error("%d\nThere was a conflict!" % response_code);
+			r_msg += "There was a conflict!";
 		HTTPClient.RESPONSE_UNPROCESSABLE_ENTITY:
-			set_error("%d\n Validation failed: %s" % [response_code, response["message"]]);
+			r_msg += "Validation failed: %s" % [response_code, response["message"]];
 		_:
-			set_error("%d\nNot implemented!\n%s" % [response_code, response["message"]]);
-			print(response);
+			r_msg += "Not implemented!\n%s" % [response_code, response["message"]];
+	
+	create_notif_popup(r_msg);
 
 
 func file_selected(path: String):
@@ -445,9 +450,9 @@ func _on_token_expired(refresh_token: bool):
 	menu_options.get_posts.disabled = true;
 	
 	if (refresh_token):
-		set_error("Update your refresh token please! (Step 1,2,3)");
+		create_notif_popup("Update your refresh token please! (Steps 1,2,3)");
 	else:
-		set_error("Update your user token please! (Step 4)");
+		create_notif_popup("Update your user token please! (Step 4)");
 
 
 func _on_clear_text():
@@ -501,8 +506,8 @@ func _on_update_preview():
 
 func failed_checks(result: int, response_code: int):
 	if (result != OK):
-		var error_result = "%d ERROR\nHTTP request response error.\nResult %d" % [response_code, result];
-		set_error(error_result);
+		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
+		create_notif_popup(error_result);
 		return true;
 
 
@@ -618,7 +623,7 @@ func check_format_text(text_blob) -> void:
 						print("project")
 						pass;
 					_:
-						set_error("Not a recognizable file name! Please edit a different file.");
+						create_notif_popup("Not a recognizable file name!\nPlease edit a different file.");
 
 
 func check_file_name(curr_file_name: String) -> String:
