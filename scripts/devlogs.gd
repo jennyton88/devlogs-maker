@@ -37,10 +37,6 @@ func _ready():
 	verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));
 	verify_user.user_token_expired.connect(_on_token_expired.bind(false));
 	
-	finalize.post_title.text_changed.connect(_on_text_changed_preview);
-	finalize.post_summary.text_changed.connect(_on_update_preview);
-	text_editor.text_changed.connect(_on_update_preview);
-	
 	
 	file_dialog.add_filter("*.txt", "Text Files");
 	file_dialog.file_selected.connect(file_selected);
@@ -49,6 +45,8 @@ func _ready():
 	editor.startup(_on_update_preview);
 	finalize.startup(_on_text_changed_preview, _on_update_preview);
 	settings.startup();
+	
+	verify_user.setup_tokens();
 
 
 # ==========================

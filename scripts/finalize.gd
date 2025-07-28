@@ -11,7 +11,9 @@ extends MarginContainer
 # ====== Methods ======
 # =====================
 
-func startup():
+func startup(text_changed, update_preview):
+	post_title.text_changed.connect(text_changed);
+	post_summary.text_changed.connect(update_preview);
 	add_file_name_button.pressed.connect(_on_add_file_name);
 	
 	get_curr_date();
