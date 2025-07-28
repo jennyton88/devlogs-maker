@@ -33,11 +33,6 @@ func _ready():
 	menu_options.import_file.connect(_on_import_file);
 	menu_options.export_file.connect(_on_export_file);
 	
-	verify_user.enable_buttons.connect(_on_enable_buttons);
-	verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));
-	verify_user.user_token_expired.connect(_on_token_expired.bind(false));
-	
-	
 	file_dialog.add_filter("*.txt", "Text Files");
 	file_dialog.file_selected.connect(file_selected);
 	file_dialog.current_dir = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
@@ -46,7 +41,11 @@ func _ready():
 	finalize.startup(_on_text_changed_preview, _on_update_preview);
 	settings.startup();
 	
-	verify_user.setup_tokens();
+	verify_user.startup(
+		_on_enable_buttons, 
+		_on_token_expired.bind(true), 
+		_on_token_expired.bind(false)
+	);
 
 
 # ==========================

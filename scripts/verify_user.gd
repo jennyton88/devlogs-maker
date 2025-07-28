@@ -57,6 +57,14 @@ func _ready():
 # ===== Methods =====
 # ===================
 
+func startup(enable_btns, token_expired_true, token_expired_false):
+	enable_buttons.connect(enable_btns);
+	refresh_token_expired.connect(token_expired_true);
+	user_token_expired.connect(token_expired_false);
+	
+	setup_tokens();
+
+
 
 ## Check for tokens and confirm their validity. Otherwise, allow new requests.
 func setup_tokens():
