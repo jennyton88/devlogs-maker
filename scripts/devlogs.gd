@@ -246,9 +246,9 @@ func _on_serious_delete_button_pressed(log_entry_delete_button: Button):
 	if (error != OK):
 		create_error_popup(error, AppInfo.ErrorType.HTTPError);
 	else:
+		if (edit_button_ref != null && (button_ref.get_meta("sha") == edit_button_ref.get_meta("sha"))):
+			clear_post();
 		button_ref.get_parent().queue_free(); # delete the log entry in the devlog list
-		text_editor.text = ""; # TODO Check this
-		edit_button_ref = null;
 
 
 func _on_import_file():	
