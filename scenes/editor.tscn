@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://da0y0eeeu881k"]
+
+[ext_resource type="Script" path="res://scripts/editor.gd" id="1_r5ufh"]
+
+[node name="Editor" type="MarginContainer"]
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+script = ExtResource("1_r5ufh")
+metadata/_tab_index = 1
+
+[node name="EditText" type="TextEdit" parent="."]
+layout_mode = 2
+wrap_mode = 1
+autowrap_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
