@@ -1,27 +1,26 @@
 extends MarginContainer
 
 
-@onready var menu_options = $HBoxContainer/TextOptions;
+@onready var menu_options = $HB/TextOptions;
 
 # Workspace Modules
-@onready var text_editor = $HBoxContainer/VB2/MC1/Workspace/Editor/EditText;
-@onready var finalize = $HBoxContainer/VB2/MC1/Workspace/Finalize;
-@onready var verify_user = $"HBoxContainer/VB2/MC1/Workspace/Verify User";
-@onready var text_preview = $HBoxContainer/VB2/MC1/Workspace/Preview/PostPreview;
-@onready var settings = $HBoxContainer/VB2/MC1/Workspace/Settings;
+@onready var editor = $HB/VB/MC/Workspace/Editor;
+@onready var finalize = $HB/VB/MC/Workspace/Finalize;
+@onready var verify_user = $"HB/VB/MC/Workspace/Verify User";
+@onready var text_preview = $HB/VB/MC/Workspace/Preview/PostPreview;
+@onready var settings = $HB/VB/MC/Workspace/Settings;
 
 # Import / Export
 @onready var file_dialog = $FileDialog;
 
 # Message Popup
-@onready var msg_popup = $HBoxContainer/VB2/MC1/MsgPopup;
+@onready var msg_popup = $HB/VB/MC/MsgPopup;
 
 # Post list
-@onready var post_list = $"HBoxContainer/VB2/MC1/Workspace/Devlogs List/ScrollContainer/VBoxContainer";
+@onready var post_list = $"HB/VB/MC/Workspace/Devlogs List";
 
 # Temporary Variables
 var edit_button_ref = null;
-
 var creation_date = "";
 
 # Called when the node enters the scene tree for the first time.
@@ -47,8 +46,8 @@ func _ready():
 	file_dialog.file_selected.connect(file_selected);
 	file_dialog.current_dir = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
 	
-	finalize.startup();
-	verify_user.setup_tokens();
+	editor.startup(_on_update_preview);
+	finalize.startup(_on_text_changed_preview, _on_update_preview);
 	settings.startup();
 
 
@@ -57,7 +56,7 @@ func _ready():
 # ==========================
 
 func _on_post_curr_text():
-	if (finalize.text_is_empty() || text_editor.text == ""):
+	if (finalize.text_is_empty() || editor.text_is_empty()):
 		create_notif_popup("You haven't completed all parts of your post yet!");
 		return;
 	
@@ -372,7 +371,7 @@ func file_selected(path: String):
 		while txt_file.get_position() < txt_file.get_length():
 			text += txt_file.get_line() + "\n";
 		
-		text_editor.text = text;
+		editor.set_text(text);
 		
 		_on_update_preview();
 	else:
@@ -410,9 +409,8 @@ func _on_serious_clear_button_pressed():
 
 
 func clear_post():
-	text_editor.text = "";
-	
 	finalize.clear_text();
+	editor.clear_text();
 	
 	text_preview.text = "";
 	
@@ -437,7 +435,7 @@ func _on_update_preview():
 	text_preview.text += finalize.get_post_title() + "\n";
 	text_preview.text += finalize.get_post_summary() + "\n";
 	
-	text_preview.text += text_editor.text;
+	text_preview.text += editor.get_text();
 
 
 
@@ -549,7 +547,7 @@ func check_format_text(text_blob) -> void:
 						for i in range(4):
 							str_len += split_text[i].length();
 					
-						text_editor.text = text_blob.substr(str_len + 4, -1); # 4 of \n
+						editor.set_text(text_blob.substr(str_len + 4, -1)); # 4 of \n
 						finalize.set_filename(curr_file_name);
 					
 						_on_update_preview();
