@@ -28,17 +28,16 @@ func _ready():
 	
 	menu_options.clear_text.connect(_on_clear_text);
 	
+	file_dialog.startup(
+		fill_in_details, 
+		clear_post, 
+		create_notif_popup
+	);
 	menu_options.import_file.connect(_on_import_file);
 	menu_options.export_file.connect(_on_export_file);
 	
-	file_dialog.add_filter("*.txt", "Text Files");
-	file_dialog.file_selected.connect(file_selected);
-	file_dialog.current_dir = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
-	
 	editor.startup(_on_update_preview);
 	finalize.startup(_on_text_changed_preview, _on_update_preview);
-	settings.startup();
-	
 	post_list.startup([
 		create_error_popup,
 		create_notif_popup,
@@ -48,6 +47,7 @@ func _ready():
 		fill_in_details
 	]);
 	
+	settings.startup();
 	verify_user.startup(
 		_on_enable_buttons, 
 		_on_token_expired.bind(true), 
@@ -116,29 +116,6 @@ func _on_post_curr_text():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-func _on_import_file():	
-	file_dialog.file_mode = FileDialog.FileMode.FILE_MODE_OPEN_FILE;
-	file_dialog.show();
-
-
-func _on_export_file():
-	var download_path = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
-	file_dialog.current_path = download_path + "/" + finalize.get_filename() + ".txt";
-	file_dialog.file_mode = FileDialog.FileMode.FILE_MODE_SAVE_FILE;
-	file_dialog.show();
-
-
 func _on_text_changed_preview(_new_text: String) -> void:
 	_on_update_preview();
 
@@ -171,37 +148,6 @@ func _on_http_post_completed(result, response_code, _headers, body):
 	
 	create_notif_popup(r_msg);
 
-
-
-
-func file_selected(path: String):
-	if (FileAccess.file_exists(path) && file_dialog.file_mode != FileDialog.FileMode.FILE_MODE_SAVE_FILE):
-		clear_post();
-		
-		finalize.set_filename(path.get_file());
-		
-		var txt_file = FileAccess.open(path, FileAccess.READ_WRITE);
-		txt_file.get_line(); # ignore first line, date edited
-		
-		var curr_str = txt_file.get_line();
-		creation_date = curr_str.substr(0, curr_str.length());
-		
-		curr_str = txt_file.get_line();
-		finalize.set_post_title(curr_str.substr(0, curr_str.length()));
-		
-		curr_str = txt_file.get_line();
-		finalize.set_post_summary(curr_str.substr(0, curr_str.length()));
-		
-		var text = "";
-		while txt_file.get_position() < txt_file.get_length():
-			text += txt_file.get_line() + "\n";
-		
-		editor.set_text(text);
-		
-		_on_update_preview();
-	else:
-		var txt_file = FileAccess.open(path, FileAccess.WRITE);
-		txt_file.store_string(text_preview.text);
 
 
 
@@ -372,3 +318,12 @@ func fill_in_details(post_info: Dictionary):
 
 func disconnect_popup():
 	msg_popup.exit();
+
+
+
+func _on_export_file():
+	file_dialog.export_file(finalize.get_filename(), text_preview.text);
+
+
+func _on_import_file():
+	file_dialog.import_file();
