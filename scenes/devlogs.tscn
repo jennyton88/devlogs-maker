@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://cg4hagqhec5ke"]
+[gd_scene load_steps=16 format=3 uid="uid://cg4hagqhec5ke"]
 
 [ext_resource type="Theme" uid="uid://bg45fa5ynd7fs" path="res://assets/themes/theme_mail.tres" id="1_i2wg7"]
 [ext_resource type="Script" path="res://scripts/devlogs.gd" id="2_00vko"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://b7134j8afntpo" path="res://scenes/verify_user.tscn" id="7_36a3x"]
 [ext_resource type="PackedScene" uid="uid://bc4tgg3t4a85l" path="res://scenes/settings.tscn" id="7_adelr"]
 [ext_resource type="PackedScene" uid="uid://da0y0eeeu881k" path="res://scenes/editor.tscn" id="7_pu2kp"]
+[ext_resource type="PackedScene" uid="uid://dgwq3cnobx4ac" path="res://scenes/preview.tscn" id="8_ah82n"]
 [ext_resource type="PackedScene" uid="uid://dh4s812fafwvb" path="res://scenes/devlogs_list.tscn" id="8_kywa6"]
 [ext_resource type="PackedScene" uid="uid://cg4nnfhi2bqyp" path="res://scenes/components/popup_msg.tscn" id="9_4c6yf"]
 [ext_resource type="PackedScene" uid="uid://stqqmsajhpt6" path="res://scenes/working_file.tscn" id="13_h1vm4"]
@@ -86,23 +87,8 @@ metadata/_tab_index = 0
 visible = false
 layout_mode = 2
 
-[node name="Preview" type="MarginContainer" parent="HB/VB/MC/Workspace"]
-visible = false
+[node name="Preview" parent="HB/VB/MC/Workspace" instance=ExtResource("8_ah82n")]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
-metadata/_tab_index = 2
-
-[node name="PostPreview" type="TextEdit" parent="HB/VB/MC/Workspace/Preview"]
-layout_mode = 2
-editable = false
-wrap_mode = 1
-autowrap_mode = 2
-caret_blink = true
-caret_blink_interval = 0.5
-caret_mid_grapheme = true
 
 [node name="Devlogs List" parent="HB/VB/MC/Workspace" instance=ExtResource("8_kywa6")]
 visible = false
