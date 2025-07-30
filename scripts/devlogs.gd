@@ -36,8 +36,8 @@ func _ready():
 	menu_options.import_file.connect(_on_import_file);
 	menu_options.export_file.connect(_on_export_file);
 	
-	editor.startup(_on_update_preview);
-	finalize.startup(_on_text_changed_preview, _on_update_preview);
+	editor.startup(update_preview);
+	finalize.startup(_on_text_changed_preview, update_preview);
 	post_list.startup([
 		create_error_popup,
 		create_notif_popup,
@@ -117,7 +117,7 @@ func _on_post_curr_text():
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
-	_on_update_preview();
+	update_preview();
 
 
 func _on_http_post_completed(result, response_code, _headers, body):
@@ -190,7 +190,7 @@ func clear_post():
 
 
 
-func _on_update_preview():
+func update_preview():
 	text_preview.update_preview({
 		"edit_date": get_curr_formatted_date(),
 		"creation_date": creation_date if creation_date != "" else get_curr_formatted_date(),
@@ -305,7 +305,7 @@ func fill_in_details(post_info: Dictionary):
 	editor.set_text(post_info["post_body"]);
 	finalize.set_filename(post_info["filename"]);
 	
-	_on_update_preview();
+	update_preview();
 
 
 func disconnect_popup():
