@@ -6,7 +6,7 @@ extends MarginContainer
 # Workspace Modules
 @onready var finalize = $HB/VB/MC/Workspace/Finalize;
 @onready var editor = $HB/VB/MC/Workspace/Editor;
-@onready var text_preview = $HB/VB/MC/Workspace/Preview/PostPreview;
+@onready var text_preview = $HB/VB/MC/Workspace/Preview;
 @onready var verify_user = $"HB/VB/MC/Workspace/Verify User";
 @onready var post_list = $"HB/VB/MC/Workspace/Devlogs List";
 @onready var settings = $HB/VB/MC/Workspace/Settings;
@@ -75,7 +75,7 @@ func _on_post_curr_text():
 	
 	var body = {
 		"message": "%s devlog." % msg_type,
-		"content": Marshalls.utf8_to_base64(text_preview.text),
+		"content": Marshalls.utf8_to_base64(text_preview.get_text()),
 		"committer": {
 			"name": config.get_value("user_info", "user_name"),
 			"email": config.get_value("user_info", "user_email"),
@@ -182,8 +182,8 @@ func _on_serious_clear_button_pressed():
 func clear_post():
 	finalize.clear_text();
 	editor.clear_text();
+	text_preview.clear_text();
 	
-	text_preview.text = "";
 	creation_date = "";
 	
 	post_list.set_edit_ref(null);
@@ -191,21 +191,13 @@ func clear_post():
 
 
 func _on_update_preview():
-	text_preview.text = "";
-	
-	# edit date
-	text_preview.text += get_curr_formatted_date() + "\n";
-	
-	# first created
-	if (creation_date != ""):
-		text_preview.text += creation_date + "\n"; 
-	else:
-		text_preview.text += get_curr_formatted_date() + "\n";
-	
-	text_preview.text += finalize.get_post_title() + "\n";
-	text_preview.text += finalize.get_post_summary() + "\n";
-	
-	text_preview.text += editor.get_text();
+	text_preview.update_preview({
+		"edit_date": get_curr_formatted_date(),
+		"creation_date": creation_date if creation_date != "" else get_curr_formatted_date(),
+		"post_title": finalize.get_post_title(),
+		"post_summary": finalize.get_post_summary(),
+		"post_body": editor.get_text()
+	});
 
 
 
@@ -322,7 +314,7 @@ func disconnect_popup():
 
 
 func _on_export_file():
-	file_dialog.export_file(finalize.get_filename(), text_preview.text);
+	file_dialog.export_file(finalize.get_filename(), text_preview.get_text());
 
 
 func _on_import_file():
