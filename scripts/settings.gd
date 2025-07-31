@@ -1,78 +1,97 @@
 extends MarginContainer
 
-# Text fields
-@onready var repo_owner = $VB/RepoOwner;
-@onready var repo_name = $VB/Repo;
-@onready var repo_branch = $VB/RepoBranch;
 
-@onready var content_path = $VB/ContentPath;
-
-@onready var author = $VB/Author;
-@onready var email = $VB/Email;
-
-
-# Buttons
-@onready var apply = $VB/HB/Apply;
-@onready var cancel = $VB/HB/Cancel;
-
-# Error
-@onready var error_popup = $ErrorPopup;
-@onready var error_message = $ErrorPopup/S7/VBC2/Message;
+func startup() -> void: 
+	get_node("VB/HB/Apply").pressed.connect(_on_save_settings_pressed.bind(true));
+	get_node("VB/HB/Cancel").pressed.connect(_on_save_settings_pressed.bind(false));
+	
+	var user_set = {
+		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
+		"repo_name": get_node("VB/HB1/VB2/RepoName"),
+		"repo_branch": get_node("VB/RepoBranch"),
+		"content_path": get_node("VB/ContentPath"),
+		"author": get_node("VB/Author"),
+		"email": get_node("VB/Email"),
+	};
+	
+	setup_settings(user_set);
 
 
-func setup_settings() -> void:
+func setup_settings(user_set: Dictionary) -> void:
 	var config = ConfigFile.new();
 	var error = config.load("user://config.cfg");
 	
 	# allow user to restart setup_tokens
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_notif_popup("%d ERROR\nFailed to load config file." % error);
 		return;
 	
-	repo_owner.text = config.get_value("repo_info", "repo_owner");
-	repo_name.text = config.get_value("repo_info", "repo_name");
-	repo_branch.text = config.get_value("repo_info", "repo_branch_update");
+	user_set.repo_owner.text = config.get_value("repo_info", "repo_owner");
+	user_set.repo_name.text = config.get_value("repo_info", "repo_name");
+	user_set.repo_branch.text = config.get_value("repo_info", "repo_branch_update");
 	
-	content_path.text = config.get_value("repo_info", "content_path");
+	user_set.content_path.text = config.get_value("repo_info", "content_path");
 	
-	author.text = config.get_value("user_info", "user_name");
-	email.text = config.get_value("user_info", "user_email");
+	user_set.author.text = config.get_value("user_info", "user_name");
+	user_set.email.text = config.get_value("user_info", "user_email");
 
 
-func save_settings():
+func save_settings(user_set: Dictionary) -> void:
 	var config = ConfigFile.new();
 	var error = config.load("user://config.cfg");
 		
 		# allow user to restart setup_tokens
 	if error != OK:
-		set_error("%d ERROR\nFailed to load config file." % error);
+		create_notif_popup("%d ERROR\nFailed to load config file." % error);
 		return;
 	
-	config.set_value("repo_info", "repo_owner", repo_owner.text);
-	config.set_value("repo_info", "repo_name", repo_name.text);
-	config.set_value("repo_info", "repo_branch_update", repo_branch.text);
+	config.set_value("repo_info", "repo_owner", user_set.repo_owner.text);
+	config.set_value("repo_info", "repo_name", user_set.repo_name.text);
+	config.set_value("repo_info", "repo_branch_update", user_set.repo_branch.text);
 	
-	config.set_value("repo_info", "content_path", content_path.text);
+	config.set_value("repo_info", "content_path", user_set.content_path.text);
 	
-	var build_url = "https://api.github.com/repos/%s/%s/contents/%s" % [repo_owner.text, repo_name.text, content_path.text];
+	var build_url = "https://api.github.com/repos/%s/%s/contents/%s" % [
+		user_set.repo_owner.text, 
+		user_set.repo_name.text, 
+		user_set.content_path.text
+	];
+	
 	config.set_value("urls", "base_repo", build_url);
 	
-	config.set_value("user_info", "user_name", author.text);
-	config.set_value("user_info", "user_email", email.text);
+	config.set_value("user_info", "user_name", get_node("VB/Author").text);
+	config.set_value("user_info", "user_email", get_node("VB/Email").text);
 	
 	config.save("user://config.cfg");
+	
+	create_notif_popup("Saved!");
 
 
 func _on_save_settings_pressed(apply_changes: bool) -> void:
-	if (apply_changes): # apply
-		save_settings();
+	var user_set = {
+		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
+		"repo_name": get_node("VB/HB1/VB2/RepoName"),
+		"repo_branch": get_node("VB/RepoBranch"),
+		"content_path": get_node("VB/ContentPath"),
+		"author": get_node("VB/Author"),
+		"email": get_node("VB/Email"),
+	};
+	
+	if (apply_changes):
+		save_settings(user_set);
 	else: # cancel
-		setup_settings();
+		setup_settings(user_set);
 
 
-# Helper Methods
+# Popup
 
-## For error popup
-func set_error(error_text: String) -> void:
-	error_message.text = error_text;
-	error_popup.show();
+func create_notif_popup(code_text: String):
+	get_node("PopUpMsg").create_popup(
+		code_text,
+		{'yes': ["Ok", _on_hide_popup]},
+		AppInfo.MsgType.Notification
+	);
+
+
+func _on_hide_popup() -> void:
+	get_node("PopUpMsg").exit();

@@ -1,0 +1,71 @@
+[gd_scene load_steps=2 format=3 uid="uid://bd3yn3luhu540"]
+
+[ext_resource type="Script" path="res://scripts/finalize.gd" id="1_ej4bi"]
+
+[node name="Finalize" type="MarginContainer"]
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+script = ExtResource("1_ej4bi")
+metadata/_tab_index = 1
+
+[node name="VB" type="VBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="Date" type="Label" parent="VB"]
+layout_mode = 2
+text = "Today is"
+
+[node name="MC7" type="MarginContainer" parent="VB"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="Header" type="Label" parent="VB"]
+layout_mode = 2
+text = "Title:"
+
+[node name="Title" type="LineEdit" parent="VB"]
+layout_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="MC4" type="MarginContainer" parent="VB"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="Header2" type="Label" parent="VB"]
+layout_mode = 2
+text = "Summary:"
+
+[node name="Summary" type="TextEdit" parent="VB"]
+layout_mode = 2
+size_flags_vertical = 3
+wrap_mode = 1
+autowrap_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="MC5" type="MarginContainer" parent="VB"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+
+[node name="Header1" type="Label" parent="VB"]
+layout_mode = 2
+text = "File Name:"
+
+[node name="FileName" type="LineEdit" parent="VB"]
+layout_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="AddFileName" type="Button" parent="VB"]
+layout_mode = 2
+text = "Create file name from today's date"

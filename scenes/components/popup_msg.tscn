@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3 uid="uid://cg4nnfhi2bqyp"]
+
+[ext_resource type="Script" path="res://scripts/components/popup_msg.gd" id="1_5vs66"]
+
+[node name="PopUpMsg" type="MarginContainer"]
+script = ExtResource("1_5vs66")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 2
+
+[node name="Space" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 20
+
+[node name="VB" type="VBoxContainer" parent="Space"]
+layout_mode = 2
+alignment = 1
+
+[node name="Message" type="Label" parent="Space/VB"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+
+[node name="HB" type="HBoxContainer" parent="Space/VB"]
+layout_mode = 2
+alignment = 1
+
+[node name="Yes" type="Button" parent="Space/VB/HB"]
+layout_mode = 2
+theme_override_colors/font_hover_pressed_color = Color(0.756863, 0, 0, 1)
+text = "Yes"
+
+[node name="No" type="Button" parent="Space/VB/HB"]
+layout_mode = 2
+text = "No"

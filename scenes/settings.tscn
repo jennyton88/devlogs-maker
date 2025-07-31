@@ -1,11 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://bc4tgg3t4a85l"]
+[gd_scene load_steps=3 format=3 uid="uid://bc4tgg3t4a85l"]
 
 [ext_resource type="Script" path="res://scripts/settings.gd" id="1_bl41m"]
+[ext_resource type="PackedScene" uid="uid://cg4nnfhi2bqyp" path="res://scenes/components/popup_msg.tscn" id="2_x17pl"]
 
 [node name="Settings" type="MarginContainer"]
-offset_top = 427.0
-offset_right = 140.0
-offset_bottom = 455.0
+offset_right = 156.0
+offset_bottom = 471.0
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
@@ -17,26 +17,34 @@ metadata/_tab_index = 5
 layout_mode = 2
 alignment = 1
 
-[node name="OwnerTitle" type="Label" parent="VB"]
+[node name="HB1" type="HBoxContainer" parent="VB"]
+layout_mode = 2
+
+[node name="VB" type="VBoxContainer" parent="VB/HB1"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="OwnerTitle" type="Label" parent="VB/HB1/VB"]
 layout_mode = 2
 text = "Repo Owner"
 
-[node name="RepoOwner" type="LineEdit" parent="VB"]
+[node name="RepoOwner" type="LineEdit" parent="VB/HB1/VB"]
 layout_mode = 2
 caret_blink = true
 caret_blink_interval = 0.5
 caret_mid_grapheme = true
 
-[node name="S6" type="MarginContainer" parent="VB"]
+[node name="VB2" type="VBoxContainer" parent="VB/HB1"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.15
+size_flags_stretch_ratio = 0.5
 
-[node name="RepoTitle" type="Label" parent="VB"]
+[node name="RepoTitle" type="Label" parent="VB/HB1/VB2"]
 layout_mode = 2
-text = "Repo"
+text = "Repo Name"
 
-[node name="Repo" type="LineEdit" parent="VB"]
+[node name="RepoName" type="LineEdit" parent="VB/HB1/VB2"]
 layout_mode = 2
 caret_blink = true
 caret_blink_interval = 0.5
@@ -126,31 +134,6 @@ layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="ErrorPopup" type="MarginContainer" parent="."]
+[node name="PopUpMsg" parent="." instance=ExtResource("2_x17pl")]
 visible = false
 layout_mode = 2
-
-[node name="Panel" type="Panel" parent="ErrorPopup"]
-layout_mode = 2
-
-[node name="S7" type="MarginContainer" parent="ErrorPopup"]
-layout_mode = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 20
-
-[node name="VBC2" type="VBoxContainer" parent="ErrorPopup/S7"]
-layout_mode = 2
-alignment = 1
-
-[node name="Message" type="Label" parent="ErrorPopup/S7/VBC2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "404 Error
-There has been an error."
-horizontal_alignment = 1
-
-[node name="Ok" type="Button" parent="ErrorPopup/S7/VBC2"]
-layout_mode = 2
-text = "Ok"

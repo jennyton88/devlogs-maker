@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dfwpe1mowrb25"]
 
-[ext_resource type="Script" path="res://scripts/button_manager.gd" id="1_cqf7y"]
+[ext_resource type="Script" path="res://scripts/components/button_manager.gd" id="1_cqf7y"]
 
 [node name="TextOptions" type="VBoxContainer"]
 size_flags_horizontal = 3
