@@ -1,11 +1,17 @@
 extends MarginContainer
 
+## Description: This module is for displaying what the post will be sent/exported as.
+
+# =====================
+# ======= Nodes =======
+# =====================
+
 @onready var post_preview = $PostPreview;
 
 
-func get_text():
-	return post_preview.text;
-
+# =====================
+# ====== Methods ======
+# =====================
 
 func update_preview(post_data: Dictionary):
 	clear_text();
@@ -22,3 +28,11 @@ func update_preview(post_data: Dictionary):
 
 func clear_text():
 	post_preview.text = "";
+
+
+# =====================
+# ====== Getters ======
+# =====================
+
+func get_text():
+	return post_preview.text;
