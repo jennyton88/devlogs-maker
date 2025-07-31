@@ -115,7 +115,7 @@ func generate_user_code_request():
 		return;
 	
 	var app_name = config.get_value("app_info", "app_name");
-	var queries = create_query_string_from_dict({ 
+	var queries = HTTPClient.new().query_string_from_dict({ 
 		"client_id": config.get_value("app_info", "app_client_id") 
 	});
 	
@@ -173,7 +173,7 @@ func poll_verification(refresh_code: bool):
 		fields["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code";
 		fields["device_code"] = device_code;
 	
-	var queries = create_query_string_from_dict(fields);
+	var queries = HTTPClient.new().query_string_from_dict(fields);
 	
 	var app_name = config.get_value("app_info", "app_name");
 	
@@ -459,33 +459,6 @@ func create_expiration_time(start_time: String, deadline_time: int) -> Dictionar
 	deadline["year"] = curr_year;
 	
 	return deadline;
-
-
-## Creating query strings is provided in HTTPClient, not HTTPRequest, so implemented here!
-## Simplistic version
-func create_query_string_from_dict(fields: Dictionary) -> String:
-	var query_string = "";
-	var field_counter = 0;
-	for key in fields:
-		var value = fields[key];
-		
-		if (value == null):
-			query_string += str(key);
-		elif (typeof(value) == TYPE_ARRAY):
-			var counter = 0;
-			for item in value:
-				query_string += str(key) + "=" + str(item);
-				if (counter != value.size() - 1):
-					query_string += "&";
-				counter += 1;
-		else:
-			query_string += str(key) + "=" + str(value);
-		
-		if (field_counter != fields.size() - 1):
-			query_string += "&";
-		field_counter += 1;
-	
-	return query_string;
 
 
 func failed_checks(result: int, response_code: int):
