@@ -1,5 +1,7 @@
 extends MarginContainer
 
+## Description: This module is for writing the main body text of the post.
+
 # =====================
 # ======= Nodes =======
 # =====================
@@ -34,7 +36,6 @@ func get_text():
 # =====================
 # ====== Setters ======
 # =====================
-
 
 func set_text(new_text: String):
 	text_edit.text = new_text;
