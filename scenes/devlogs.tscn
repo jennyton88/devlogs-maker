@@ -3,7 +3,7 @@
 [ext_resource type="Theme" uid="uid://bg45fa5ynd7fs" path="res://assets/themes/theme_mail.tres" id="1_i2wg7"]
 [ext_resource type="Script" path="res://scripts/devlogs.gd" id="2_00vko"]
 [ext_resource type="Shader" path="res://assets/shaders/scrolling_bg.gdshader" id="3_oqjq2"]
-[ext_resource type="PackedScene" uid="uid://dfwpe1mowrb25" path="res://scenes/components/text_options.tscn" id="4_bwtfv"]
+[ext_resource type="PackedScene" uid="uid://dfwpe1mowrb25" path="res://scenes/components/menu_options.tscn" id="4_bwtfv"]
 [ext_resource type="Texture2D" uid="uid://c68nqgvrw67ro" path="res://assets/imgs/airplane.png" id="4_enp6g"]
 [ext_resource type="PackedScene" uid="uid://dvjxapeupcitp" path="res://scenes/components/border.tscn" id="6_hcaqf"]
 [ext_resource type="PackedScene" uid="uid://bd3yn3luhu540" path="res://scenes/finalize.tscn" id="6_kycab"]
@@ -51,7 +51,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="TextOptions" parent="HB" instance=ExtResource("4_bwtfv")]
+[node name="MenuOptions" parent="HB" instance=ExtResource("4_bwtfv")]
 layout_mode = 2
 
 [node name="S2" type="MarginContainer" parent="HB"]

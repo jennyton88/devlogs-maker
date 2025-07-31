@@ -1,7 +1,7 @@
 extends MarginContainer
 
 
-@onready var menu_options = $HB/TextOptions;
+@onready var menu_options = $HB/MenuOptions;
 
 # Workspace Modules
 @onready var finalize = $HB/VB/MC/Workspace/Finalize;
