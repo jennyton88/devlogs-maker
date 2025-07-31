@@ -1,5 +1,11 @@
 extends MarginContainer
 
+## Description: This module is for creating the title, summary, and filename for the post.
+
+# =====================
+# ======= Nodes =======
+# =====================
+
 @onready var filename = $VB/FileName;
 @onready var post_title = $VB/Title;
 @onready var post_summary = $VB/Summary;
@@ -32,6 +38,7 @@ func clear_text():
 
 func text_is_empty():
 	return (filename.text == "" || post_title.text == "" || post_summary.text == "");
+
 
 # =====================
 # ====== Signals ======
