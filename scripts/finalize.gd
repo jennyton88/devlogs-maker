@@ -27,7 +27,11 @@ func startup(text_changed, update_preview):
 
 func get_curr_date():
 	var curr_time = Time.get_datetime_dict_from_system();
-	curr_date.text = "Today is (%d) %s %d, %d" % [curr_time["month"], AppInfo.Month.keys()[(curr_time["month"] % 12) - 1], curr_time["day"], curr_time["year"]];
+	curr_date.text = "Today is (%d) %s %d, %d" % [
+		curr_time["month"], 
+		AppInfo.Month.keys()[(curr_time["month"] % 12) - 1], 
+		curr_time["day"], curr_time["year"]
+	];
 
 
 func clear_text():
@@ -37,7 +41,11 @@ func clear_text():
 
 
 func text_is_empty():
-	return (filename.text == "" || post_title.text == "" || post_summary.text == "");
+	return (
+		filename.text == "" || 
+		post_title.text == "" || 
+		post_summary.text == ""
+	);
 
 
 # =====================
