@@ -47,7 +47,7 @@ func _ready():
 		fill_in_details
 	]);
 	
-	settings.startup();
+	settings.startup(create_error_popup, create_notif_popup);
 	verify_user.startup(
 		_on_enable_buttons, 
 		_on_token_expired.bind(true), 
@@ -281,7 +281,6 @@ func fill_in_details(post_info: Dictionary):
 
 func disconnect_popup():
 	msg_popup.exit();
-
 
 
 func _on_export_file():
