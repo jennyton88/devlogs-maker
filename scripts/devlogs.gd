@@ -1,7 +1,7 @@
 extends MarginContainer
 
 
-@onready var menu_options = $HB/TextOptions;
+@onready var menu_options = $HB/MenuOptions;
 
 # Workspace Modules
 @onready var finalize = $HB/VB/MC/Workspace/Finalize;
@@ -47,7 +47,7 @@ func _ready():
 		fill_in_details
 	]);
 	
-	settings.startup();
+	settings.startup(create_error_popup, create_notif_popup);
 	verify_user.startup(
 		_on_enable_buttons, 
 		_on_token_expired.bind(true), 
@@ -237,35 +237,6 @@ func get_curr_formatted_date():
 	return formatted_date;
 
 
-## Creating query strings is provided in HTTPClient, not HTTPRequest, so implemented here!
-## Simplistic version
-func create_query_string_from_dict(fields: Dictionary) -> String:
-	var query_string = "";
-	var field_counter = 0;
-	for key in fields:
-		var value = fields[key];
-		
-		if (value == null):
-			query_string += str(key);
-		elif (typeof(value) == TYPE_ARRAY):
-			var counter = 0;
-			for item in value:
-				query_string += str(key) + "=" + str(item);
-				if (counter != value.size() - 1):
-					query_string += "&";
-				counter += 1;
-		else:
-			query_string += str(key) + "=" + str(value);
-		
-		if (field_counter != fields.size() - 1):
-			query_string += "&";
-		field_counter += 1;
-	
-	return query_string;
-
-
-
-
 func _on_hide_popup():
 	msg_popup.exit();
 
@@ -310,7 +281,6 @@ func fill_in_details(post_info: Dictionary):
 
 func disconnect_popup():
 	msg_popup.exit();
-
 
 
 func _on_export_file():

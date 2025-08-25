@@ -1,9 +1,27 @@
 extends MarginContainer
 
+## Description: This module is for modifying general settings, specifically
+## the owner, repo name, branch, and path where the text files are stored.
+## Also what name and email you will commit as.
 
-func startup() -> void: 
+# =====================
+# ====== Signals ======
+# =====================
+
+signal create_error_popup(msg: String, err_type: AppInfo.ErrorType);
+signal create_notif_popup(msg: String);
+
+
+# =====================
+# ====== Methods ======
+# =====================
+
+func startup(error_popup: Callable, notif_popup: Callable) -> void: 
 	get_node("VB/HB/Apply").pressed.connect(_on_save_settings_pressed.bind(true));
 	get_node("VB/HB/Cancel").pressed.connect(_on_save_settings_pressed.bind(false));
+	
+	create_error_popup.connect(error_popup);
+	create_notif_popup.connect(notif_popup);
 	
 	var user_set = {
 		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
@@ -18,37 +36,27 @@ func startup() -> void:
 
 
 func setup_settings(user_set: Dictionary) -> void:
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var config = load_config_file();
 	
-	# allow user to restart setup_tokens
-	if error != OK:
-		create_notif_popup("%d ERROR\nFailed to load config file." % error);
-		return;
+	if (config == null): return;
+	 
+	user_set.author.text = config.get_value("user_info", "user_name");
+	user_set.email.text = config.get_value("user_info", "user_email");
 	
 	user_set.repo_owner.text = config.get_value("repo_info", "repo_owner");
 	user_set.repo_name.text = config.get_value("repo_info", "repo_name");
 	user_set.repo_branch.text = config.get_value("repo_info", "repo_branch_update");
-	
 	user_set.content_path.text = config.get_value("repo_info", "content_path");
-	
-	user_set.author.text = config.get_value("user_info", "user_name");
-	user_set.email.text = config.get_value("user_info", "user_email");
 
 
 func save_settings(user_set: Dictionary) -> void:
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
-		
-		# allow user to restart setup_tokens
-	if error != OK:
-		create_notif_popup("%d ERROR\nFailed to load config file." % error);
-		return;
+	var config = load_config_file();
+	
+	if (config == null): return;
 	
 	config.set_value("repo_info", "repo_owner", user_set.repo_owner.text);
 	config.set_value("repo_info", "repo_name", user_set.repo_name.text);
 	config.set_value("repo_info", "repo_branch_update", user_set.repo_branch.text);
-	
 	config.set_value("repo_info", "content_path", user_set.content_path.text);
 	
 	var build_url = "https://api.github.com/repos/%s/%s/contents/%s" % [
@@ -64,8 +72,12 @@ func save_settings(user_set: Dictionary) -> void:
 	
 	config.save("user://config.cfg");
 	
-	create_notif_popup("Saved!");
+	create_notif_popup.emit("Saved!");
 
+
+# ============================
+# ====== Signal Methods ======
+# ============================
 
 func _on_save_settings_pressed(apply_changes: bool) -> void:
 	var user_set = {
@@ -83,15 +95,16 @@ func _on_save_settings_pressed(apply_changes: bool) -> void:
 		setup_settings(user_set);
 
 
-# Popup
+# =====================
+# ====== Helpers ======
+# =====================
 
-func create_notif_popup(code_text: String):
-	get_node("PopUpMsg").create_popup(
-		code_text,
-		{'yes': ["Ok", _on_hide_popup]},
-		AppInfo.MsgType.Notification
-	);
-
-
-func _on_hide_popup() -> void:
-	get_node("PopUpMsg").exit();
+func load_config_file() -> ConfigFile:
+	var config = ConfigFile.new();
+	var error = config.load("user://config.cfg");
+	
+	if error != OK:
+		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		return null;
+	
+	return config;
