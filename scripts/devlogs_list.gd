@@ -20,6 +20,7 @@ var directory = {
 	"data": "",
 	"filename_to_edit": "",
 	"action": "",
+	"updated_data": ""
 };
 
 
@@ -171,21 +172,23 @@ func check_format_text(text_blob) -> void:
 		directory.data = text_blob;
 		update_dir = false;
 		
-		var dir_data = directory.data;
+		var dir_data = directory.updated_data if directory.updated_data != "" else directory.data;
+		
 		var dir_filename = directory.filename_to_edit;
 		if (dir_filename.get_extension() != ""):
 			dir_filename = dir_filename.rstrip(".txt");
 		
 		match directory.action:
 			"delete":
-				if (dir_data != ""):
-					var index = dir_data.find(dir_filename);
-					if (index != -1):
-						directory.data = dir_data.erase(index, dir_filename.length() + 1);
-						edit_directory_file();
+				var index = dir_data.find(dir_filename);
+				if (index != -1):
+					directory.data = dir_data.erase(index, dir_filename.length() + 1);
+				
+				directory.updated_data = directory.data;
+				edit_directory_file();
 			"add":
-				dir_data = dir_filename + "\n" + dir_data;
-				directory.data = dir_data;
+				directory.data = dir_filename + "\n" + dir_data;
+				directory.updated_data = directory.data;
 				edit_directory_file();
 			_:
 				pass;
