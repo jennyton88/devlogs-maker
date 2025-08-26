@@ -141,6 +141,7 @@ func _on_http_post_completed(result, response_code, _headers, body):
 			r_msg += "Successfully created!";
 			var info = response["content"];
 			post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
+			post_list.update_directory_file(info["name"], "add");
 			clear_post();
 		_:
 			r_msg += "Not implemented!";

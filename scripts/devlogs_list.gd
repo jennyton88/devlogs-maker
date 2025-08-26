@@ -372,7 +372,8 @@ func update_directory_ref(filename: String, download_url: String, sha: String):
 func update_directory_file(filename: String, action: String):
 	directory.filename_to_edit = filename;
 	directory.action = action;
-	get_directory_file();
+		
+	fetch_directory_file();
 
 
 func edit_directory_file():
@@ -462,11 +463,64 @@ func _on_http_edit_directory_completed(result, response_code, _headers, body):
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # update post
-			r_msg += "Edited directory!";
 			var info = response["content"];
 			update_directory_ref(info["name"], info["download_url"], info["sha"]);
+			clean_directory_edit();
 		_:
 			r_msg += "Not implemented! Failed to edit directory";
+			clean_directory_edit();
 			print(response);
+			create_notif_popup.emit(r_msg);
+
+
+func clean_directory_edit():
+	directory.filename_to_edit = "";
+	directory.action = "";
+
+
+func fetch_directory_file():
+	var config = ConfigFile.new();
+	var error = config.load("user://config.cfg");
 	
-	create_notif_popup.emit(r_msg);
+	if error != OK:
+		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		return;
+	
+	var app_name = config.get_value("app_info", "app_name");
+	
+	var headers = [
+		"User-Agent: " + app_name,
+		"Accept: application/vnd.github+json",
+		"Accept-Encoding: gzip, deflate",
+	];
+	
+	var h_client = HTTPRequest.new();
+	add_child(h_client);
+	h_client.request_completed.connect(_on_http_download_json_completed);
+	
+	var url = config.get_value("urls", "base_repo");
+	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
+	
+	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
+	
+	if (error != OK):
+		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+
+
+func _on_http_download_json_completed(result, response_code, _headers, body):
+	if (failed_checks(result, response_code)):
+		return;
+	
+	var response = convert_to_json(body);
+	
+	var r_msg = "%d\n" % response_code;
+	
+	match response_code:
+		HTTPClient.RESPONSE_OK:
+			var info = response;
+			update_directory_ref(info["name"], info["download_url"], info["sha"]);
+			get_directory_file();
+		_:
+			r_msg += "Not implemented!";
+			print(response);
+			create_notif_popup.emit(r_msg);
