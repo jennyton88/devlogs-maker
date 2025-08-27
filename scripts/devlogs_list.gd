@@ -388,7 +388,7 @@ func edit_directory_file():
 		return;
 	
 	var body = {
-		"message": "Edited directory",
+		"message": "Edited directory.",
 		"content": Marshalls.utf8_to_base64(directory.data),
 		"committer": {
 			"name": config.get_value("user_info", "user_name"),
