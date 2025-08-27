@@ -11,6 +11,17 @@ signal fill_in_details(post_info: Dictionary);
 
 
 var edit_button_ref = null;
+var update_dir = false;
+
+var directory = {
+	"name": "directory.txt",
+	"download_url": "",
+	"sha": "",
+	"data": "",
+	"filename_to_edit": "",
+	"action": "",
+	"updated_data": ""
+};
 
 
 func startup(connections: Array):
@@ -103,10 +114,12 @@ func _on_http_get_posts_completed(result, response_code, _headers, body):
 	match response_code:
 		HTTPClient.RESPONSE_OK:
 			for post in response:
-				create_post_info(post["name"], post["download_url"], post["sha"]);
+				if (post["name"] != "directory.txt"):
+					create_post_info(post["name"], post["download_url"], post["sha"]);
+				else:
+					update_directory_ref(post["name"], post["download_url"], post["sha"]);
 		_:
 			create_notif_popup.emit("%d\nNot implemented!" % response_code);
-			print(response);
 
 
 func _on_edit_button_pressed(button: Button):
@@ -155,11 +168,34 @@ func _on_http_download_text_completed(result, response_code, _headers, body):
 
 
 func check_format_text(text_blob) -> void:
-	if (edit_button_ref != null):
+	if (update_dir):
+		directory.data = text_blob;
+		update_dir = false;
+		
+		var dir_data = directory.updated_data if directory.updated_data != "" else directory.data;
+		
+		var dir_filename = directory.filename_to_edit;
+		if (dir_filename.get_extension() != ""):
+			dir_filename = dir_filename.rstrip(".txt");
+		
+		match directory.action:
+			"delete":
+				var index = dir_data.find(dir_filename);
+				if (index != -1):
+					directory.data = dir_data.erase(index, dir_filename.length() + 1);
+				
+				directory.updated_data = directory.data;
+				edit_directory_file();
+			"add":
+				directory.data = dir_filename + "\n" + dir_data;
+				directory.updated_data = directory.data;
+				edit_directory_file();
+			_:
+				pass;
+	elif (edit_button_ref != null):
 		if (edit_button_ref.has_meta("name")):
 			var curr_filename = edit_button_ref.get_meta("name");
 			var file_type = check_file_name(curr_filename);
-
 			if (file_type != ""):
 				match file_type:
 					"devlog":
@@ -180,10 +216,8 @@ func check_format_text(text_blob) -> void:
 					
 						fill_in_details.emit(post_data);
 					"directory":
-						print("directory")
 						pass;
 					"project":
-						print("project")
 						pass;
 					_:
 						create_notif_popup.emit("Not a recognizable file name!\nPlease edit a different file.");
@@ -248,7 +282,9 @@ func _on_serious_delete_button_pressed(log_entry_delete_button: Button):
 	else:
 		if (edit_button_ref != null && (button_ref.get_meta("sha") == edit_button_ref.get_meta("sha"))):
 			clear_post.emit();
+		var deleted_filename = button_ref.get_parent().get_child(0).text; # post name is first in line
 		button_ref.get_parent().queue_free(); # delete the log entry in the devlog list
+		update_directory_file(deleted_filename, "delete");
 
 
 
@@ -328,3 +364,166 @@ func get_edit_ref():
 
 func set_edit_ref(updated):
 	edit_button_ref = updated;
+
+
+func update_directory_ref(filename: String, download_url: String, sha: String):
+	directory.name = filename;
+	directory.download_url = download_url;
+	directory.sha = sha;
+
+
+func update_directory_file(filename: String, action: String):
+	directory.filename_to_edit = filename;
+	directory.action = action;
+		
+	fetch_directory_file();
+
+
+func edit_directory_file():
+	var config = ConfigFile.new();
+	var error = config.load("user://config.cfg");
+	
+	if error != OK:
+		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		return;
+	
+	var body = {
+		"message": "Edited directory.",
+		"content": Marshalls.utf8_to_base64(directory.data),
+		"committer": {
+			"name": config.get_value("user_info", "user_name"),
+			"email": config.get_value("user_info", "user_email"),
+		},
+		"branch": config.get_value("repo_info", "repo_branch_update")
+	};
+	
+	body["sha"] = directory.sha;
+	body = JSON.stringify(body);
+	
+	var app_name = config.get_value("app_info", "app_name");
+	var auth_type = config.get_value("user_info", "user_token_type");
+	var user_token = config.get_value("user_info", "user_token");
+	
+	var headers = [
+		"User-Agent: " + app_name,
+		"Accept: application/vnd.github+json",
+		"Accept-Encoding: gzip, deflate",
+		"Authorization: " + auth_type + " " + user_token,
+		"Content-Type: application/json", 
+		"Content-Length: " + str(body.length()),
+	];
+	
+	var h_client = HTTPRequest.new();
+	add_child(h_client);
+	h_client.request_completed.connect(_on_http_edit_directory_completed);
+	
+	var url = config.get_value("urls", "base_repo");
+	url += directory.name;
+	
+	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
+	
+	if (error != OK):
+		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+
+
+
+func get_directory_file():
+	var config = ConfigFile.new();
+	var error = config.load("user://config.cfg");
+	
+	if error != OK:
+		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		return;
+	
+	update_dir = true;
+	
+	var app_name = config.get_value("app_info", "app_name");
+	
+	var headers = [
+		"User-Agent: " + app_name,
+		"Accept: text/plain",
+		"Accept-Encoding: gzip, deflate",
+	];
+	
+	var h_client = HTTPRequest.new();
+	add_child(h_client);
+	h_client.request_completed.connect(_on_http_download_text_completed);
+	
+	var url = directory.download_url;
+	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
+	
+	if (error != OK):
+		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+
+
+func _on_http_edit_directory_completed(result, response_code, _headers, body):
+	if (failed_checks(result, response_code)):
+		return;
+	
+	var response = convert_to_json(body);
+	
+	var r_msg = "%d\n" % response_code;
+	
+	match response_code:
+		HTTPClient.RESPONSE_OK: # update post
+			var info = response["content"];
+			update_directory_ref(info["name"], info["download_url"], info["sha"]);
+			clean_directory_edit();
+		_:
+			r_msg += "Not implemented! Failed to edit directory";
+			clean_directory_edit();
+			print(response);
+			create_notif_popup.emit(r_msg);
+
+
+func clean_directory_edit():
+	directory.filename_to_edit = "";
+	directory.action = "";
+
+
+func fetch_directory_file():
+	var config = ConfigFile.new();
+	var error = config.load("user://config.cfg");
+	
+	if error != OK:
+		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		return;
+	
+	var app_name = config.get_value("app_info", "app_name");
+	
+	var headers = [
+		"User-Agent: " + app_name,
+		"Accept: application/vnd.github+json",
+		"Accept-Encoding: gzip, deflate",
+	];
+	
+	var h_client = HTTPRequest.new();
+	add_child(h_client);
+	h_client.request_completed.connect(_on_http_download_json_completed);
+	
+	var url = config.get_value("urls", "base_repo");
+	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
+	
+	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
+	
+	if (error != OK):
+		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+
+
+func _on_http_download_json_completed(result, response_code, _headers, body):
+	if (failed_checks(result, response_code)):
+		return;
+	
+	var response = convert_to_json(body);
+	
+	var r_msg = "%d\n" % response_code;
+	
+	match response_code:
+		HTTPClient.RESPONSE_OK:
+			var info = response;
+			update_directory_ref(info["name"], info["download_url"], info["sha"]);
+			get_directory_file();
+		_:
+			r_msg += "Not implemented!";
+			print(response);
+			create_notif_popup.emit(r_msg);
