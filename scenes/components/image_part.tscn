@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://qktia7fc28pd"]
+
+[ext_resource type="Texture2D" uid="uid://c68nqgvrw67ro" path="res://assets/imgs/airplane.png" id="1_ofr6b"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hd67f"]
+bg_color = Color(1, 1, 1, 1)
+
+[node name="ImagePart" type="PanelContainer"]
+offset_right = 199.0
+offset_bottom = 128.0
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_hd67f")
+metadata/img_path = ""
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+texture = ExtResource("1_ofr6b")
+expand_mode = 3
+stretch_mode = 4
+
+[node name="LineEdit" type="LineEdit" parent="HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Name is here"
