@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3 uid="uid://cijs2jun0ywe3"]
+
+[ext_resource type="Script" path="res://scenes/images.gd" id="1_wvvlt"]
+[ext_resource type="PackedScene" uid="uid://qktia7fc28pd" path="res://scenes/components/image_part.tscn" id="2_upx28"]
+
+[node name="Images" type="MarginContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+script = ExtResource("1_wvvlt")
+metadata/_tab_index = 6
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ImagePart" parent="Scroll/VBox" instance=ExtResource("2_upx28")]
+layout_mode = 2
+
+[node name="ImagePart2" parent="Scroll/VBox" instance=ExtResource("2_upx28")]
+layout_mode = 2
