@@ -1,33 +1,26 @@
 [gd_scene load_steps=3 format=3 uid="uid://qktia7fc28pd"]
 
-[ext_resource type="Texture2D" uid="uid://c68nqgvrw67ro" path="res://assets/imgs/airplane.png" id="1_ofr6b"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hd67f"]
-bg_color = Color(1, 1, 1, 1)
+[ext_resource type="Script" path="res://scripts/components/image_part.gd" id="1_4lbjt"]
+[ext_resource type="StyleBox" uid="uid://b4lln4fbs8r84" path="res://assets/materials/image_part.tres" id="1_5ggrm"]
 
 [node name="ImagePart" type="PanelContainer"]
 offset_right = 199.0
 offset_bottom = 128.0
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_hd67f")
+theme_override_styles/panel = ExtResource("1_5ggrm")
+script = ExtResource("1_4lbjt")
 metadata/img_path = ""
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBox" type="HBoxContainer" parent="."]
 layout_mode = 2
-size_flags_vertical = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer"]
+[node name="Thumb" type="TextureRect" parent="HBox"]
 custom_minimum_size = Vector2(128, 128)
 layout_mode = 2
-texture = ExtResource("1_ofr6b")
-expand_mode = 3
-stretch_mode = 4
+expand_mode = 2
+stretch_mode = 5
 
-[node name="LineEdit" type="LineEdit" parent="HBoxContainer/HBoxContainer"]
+[node name="Filename" type="RichTextLabel" parent="HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Name is here"
