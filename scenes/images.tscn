@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cijs2jun0ywe3"]
+[gd_scene load_steps=2 format=3 uid="uid://cijs2jun0ywe3"]
 
-[ext_resource type="Script" path="res://scenes/images.gd" id="1_wvvlt"]
-[ext_resource type="PackedScene" uid="uid://qktia7fc28pd" path="res://scenes/components/image_part.tscn" id="2_upx28"]
+[ext_resource type="Script" path="res://scripts/images.gd" id="1_wvvlt"]
 
 [node name="Images" type="MarginContainer"]
 size_flags_horizontal = 3
@@ -21,8 +20,6 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ImagePart" parent="Scroll/VBox" instance=ExtResource("2_upx28")]
+[node name="Title" type="Label" parent="Scroll/VBox"]
 layout_mode = 2
-
-[node name="ImagePart2" parent="Scroll/VBox" instance=ExtResource("2_upx28")]
-layout_mode = 2
+text = "Images"
