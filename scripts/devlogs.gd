@@ -201,7 +201,8 @@ func update_preview():
 		"creation_date": creation_date if creation_date != "" else get_curr_formatted_date(),
 		"post_title": finalize.get_post_title(),
 		"post_summary": finalize.get_post_summary(),
-		"post_body": editor.get_text()
+		"post_body": editor.get_text(),
+		"post_images": images.img_list
 	});
 
 
