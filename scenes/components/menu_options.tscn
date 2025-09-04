@@ -25,6 +25,15 @@ visible = false
 layout_mode = 2
 text = "Add Template"
 
+[node name="MarginContainer6" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ImportImage" type="Button" parent="."]
+layout_mode = 2
+text = "Import Image
+"
+
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3

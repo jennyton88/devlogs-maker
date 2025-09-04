@@ -6,6 +6,7 @@ extends VBoxContainer;
 signal get_devlogs;
 signal post_curr_text;
 
+signal import_image_file;
 signal import_file;
 signal export_file;
 
@@ -21,6 +22,7 @@ signal clear_text;
 
 ## Functional ======
 
+@onready var import_image = $ImportImage;
 @onready var import_text = $ImportText;
 @onready var export_text = $ExportText;
 
@@ -39,6 +41,8 @@ func _ready():
 	
 	import_text.pressed.connect(_on_import_pressed);
 	export_text.pressed.connect(_on_export_pressed);
+	
+	import_image.pressed.connect(_on_import_image_pressed);
 
 
 func _on_get_posts_pressed():
@@ -48,6 +52,10 @@ func _on_get_posts_pressed():
 func _on_post_pressed():
 	post_curr_text.emit();
 
+
+func _on_import_image_pressed():
+	import_image_file.emit();
+	
 
 func _on_import_pressed():
 	import_file.emit();

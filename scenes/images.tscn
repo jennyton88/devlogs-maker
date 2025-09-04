@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://cijs2jun0ywe3"]
+
+[ext_resource type="Script" path="res://scripts/images.gd" id="1_wvvlt"]
+
+[node name="Images" type="MarginContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+script = ExtResource("1_wvvlt")
+metadata/_tab_index = 6
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Scroll/VBox"]
+layout_mode = 2
+text = "Images"

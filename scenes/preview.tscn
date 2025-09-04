@@ -3,7 +3,6 @@
 [ext_resource type="Script" path="res://scripts/preview.gd" id="1_ljlpc"]
 
 [node name="Preview" type="MarginContainer"]
-visible = false
 theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 14
@@ -11,11 +10,10 @@ theme_override_constants/margin_bottom = 14
 script = ExtResource("1_ljlpc")
 metadata/_tab_index = 2
 
-[node name="PostPreview" type="TextEdit" parent="."]
+[node name="PostPreview" type="RichTextLabel" parent="."]
 layout_mode = 2
-editable = false
-wrap_mode = 1
+focus_mode = 2
+bbcode_enabled = true
 autowrap_mode = 2
-caret_blink = true
-caret_blink_interval = 0.5
-caret_mid_grapheme = true
+selection_enabled = true
+drag_and_drop_selection_enabled = false

@@ -10,6 +10,7 @@ extends MarginContainer
 @onready var verify_user = $"HB/VB/MC/Workspace/Verify User";
 @onready var post_list = $"HB/VB/MC/Workspace/Devlogs List";
 @onready var settings = $HB/VB/MC/Workspace/Settings;
+@onready var images = $HB/VB/MC/Workspace/Images;
 
 # Import / Export
 @onready var file_dialog = $FileDialog;
@@ -25,14 +26,17 @@ var creation_date = "";
 func _ready():
 	menu_options.get_devlogs.connect(post_list._on_get_devlogs);
 	menu_options.post_curr_text.connect(_on_post_curr_text);
-	
 	menu_options.clear_text.connect(_on_clear_text);
+	menu_options.import_image_file.connect(_on_import_image);
 	
 	file_dialog.startup(
 		fill_in_details, 
 		clear_post, 
 		create_notif_popup
 	);
+	
+	file_dialog.collected_img.connect(_on_collected_img);
+	
 	menu_options.import_file.connect(_on_import_file);
 	menu_options.export_file.connect(_on_export_file);
 	
@@ -197,7 +201,8 @@ func update_preview():
 		"creation_date": creation_date if creation_date != "" else get_curr_formatted_date(),
 		"post_title": finalize.get_post_title(),
 		"post_summary": finalize.get_post_summary(),
-		"post_body": editor.get_text()
+		"post_body": editor.get_text(),
+		"post_images": images.img_list
 	});
 
 
@@ -290,3 +295,11 @@ func _on_export_file():
 
 func _on_import_file():
 	file_dialog.import_file();
+
+
+func _on_import_image():
+	file_dialog.import_image();
+
+
+func _on_collected_img(img_data, img_name: String):
+	images.save_img(img_data, img_name);
