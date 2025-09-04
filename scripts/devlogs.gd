@@ -24,16 +24,11 @@ var creation_date = "";
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	menu_options.get_devlogs.connect(post_list._on_get_devlogs);
-	menu_options.post_curr_text.connect(_on_post_curr_text);
-	menu_options.clear_text.connect(_on_clear_text);
-	menu_options.import_image_file.connect(_on_import_image);
+	menu_options.connect_startup.connect(_on_connect_startup);
+	menu_options.startup();
 	
 	file_dialog.connect_startup.connect(_on_connect_startup);
 	file_dialog.startup();
-	
-	menu_options.import_file.connect(_on_import_file);
-	menu_options.export_file.connect(_on_export_file);
 	
 	editor.startup(update_preview);
 	finalize.startup(_on_text_changed_preview, update_preview);
@@ -304,6 +299,13 @@ func _on_collected_img(img_data, img_name: String):
 
 func _on_connect_startup(component: String):
 	match component:
+		"menu_options":
+			menu_options.get_devlogs.connect(post_list._on_get_devlogs);
+			menu_options.post_curr_text.connect(_on_post_curr_text);
+			menu_options.clear_text.connect(_on_clear_text);
+			menu_options.import_image_file.connect(_on_import_image);
+			menu_options.import_file.connect(_on_import_file);
+			menu_options.export_file.connect(_on_export_file);
 		"file_dialog":
 			file_dialog.clear_post.connect(clear_post);
 			file_dialog.fill_in_details.connect(fill_in_details);

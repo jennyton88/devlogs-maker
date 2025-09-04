@@ -3,6 +3,7 @@ extends VBoxContainer;
 
 ## Signals =====
 
+signal connect_startup(component: String);
 signal get_devlogs;
 signal post_curr_text;
 
@@ -32,8 +33,7 @@ signal clear_text;
 @onready var post = $Post;
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
+func startup():
 	clear_post.pressed.connect(_on_clear_text_pressed);
 	
 	get_posts.pressed.connect(_on_get_posts_pressed);
@@ -43,6 +43,8 @@ func _ready():
 	export_text.pressed.connect(_on_export_pressed);
 	
 	import_image.pressed.connect(_on_import_image_pressed);
+	
+	connect_startup.emit("menu_options");
 
 
 func _on_get_posts_pressed():
