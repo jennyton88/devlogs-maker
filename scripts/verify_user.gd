@@ -1,5 +1,6 @@
 extends MarginContainer;
 
+signal connect_startup(component: String);
 signal user_token_expired;
 signal refresh_token_expired;
 signal enable_buttons;
@@ -39,28 +40,21 @@ var device_code = -1;
 # ===================
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	# ===== Button signals =====
-	
+
+# ===================
+# ===== Methods =====
+# ===================
+
+func startup():
 	refresh_token.pressed.connect(_on_refresh_token_pressed);
 	refresh_app.pressed.connect(_on_refresh_app_pressed);
 	
 	request_code.disabled = true;
 	request_code.pressed.connect(_on_request_code_pressed);
 	
-	# ===== Timer signals =====
 	expire_timer.timeout.connect(_on_expire_timeout);
-
-
-# ===================
-# ===== Methods =====
-# ===================
-
-func startup(enable_btns, token_expired_true, token_expired_false):
-	enable_buttons.connect(enable_btns);
-	refresh_token_expired.connect(token_expired_true);
-	user_token_expired.connect(token_expired_false);
+	
+	connect_startup.emit("verify_user");
 	
 	setup_tokens();
 
