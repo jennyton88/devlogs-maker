@@ -29,13 +29,8 @@ func _ready():
 	menu_options.clear_text.connect(_on_clear_text);
 	menu_options.import_image_file.connect(_on_import_image);
 	
-	file_dialog.startup(
-		fill_in_details, 
-		clear_post, 
-		create_notif_popup
-	);
-	
-	file_dialog.collected_img.connect(_on_collected_img);
+	file_dialog.connect_startup.connect(_on_connect_startup);
+	file_dialog.startup();
 	
 	menu_options.import_file.connect(_on_import_file);
 	menu_options.export_file.connect(_on_export_file);
@@ -152,8 +147,6 @@ func _on_http_post_completed(result, response_code, _headers, body):
 			print(response);
 	
 	create_notif_popup(r_msg);
-
-
 
 
 func _on_enable_buttons():
@@ -303,3 +296,17 @@ func _on_import_image():
 
 func _on_collected_img(img_data, img_name: String):
 	images.save_img(img_data, img_name);
+
+
+
+
+
+
+func _on_connect_startup(component: String):
+	match component:
+		"file_dialog":
+			file_dialog.clear_post.connect(clear_post);
+			file_dialog.fill_in_details.connect(fill_in_details);
+			file_dialog.create_notif_popup.connect(create_notif_popup);
+			file_dialog.collected_img.connect(_on_collected_img);
+			
