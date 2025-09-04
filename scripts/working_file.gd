@@ -84,6 +84,11 @@ func _on_file_selected(path: String):
 				if (ext == file_ext):
 					var img = Image.new();
 					img.load(path);
+					match ext:
+						"jpg":
+							img.save_jpg("res://assets/imported_imgs/%s" % filename);
+						"png":
+							img.save_png("res://assets/imported_imgs/%s" % filename);
 					var tex = ImageTexture.new();
 					tex.set_image(img);
 					collected_img.emit(tex, path.get_file());
