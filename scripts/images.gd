@@ -35,20 +35,30 @@ func build_img_part(img_data, img_name):
 	filename.size_flags_horizontal = Control.SIZE_EXPAND_FILL;
 	filename.text = img_name;
 	
+	var copy_button = Button.new();
+	copy_button.text = "Copy";
+	copy_button.pressed.connect(_on_copy_button_pressed.bind(copy_button));
+	
 	var delete_button = Button.new();
 	delete_button.text = "Delete";
 	delete_button.pressed.connect(_on_delete_button_pressed.bind(delete_button));
 	
-	panel_cont.add_child(hbox);
-	hbox.add_child(num_label);
-	hbox.add_child(check);
-	hbox.add_child(thumb);
-	hbox.add_child(filename);
-	hbox.add_child(delete_button);
-	hbox.add_child(MarginContainer.new());
+	panel_cont.add_child(hbox);  # TODO ENUM for each feature
+	hbox.add_child(num_label); # 0
+	hbox.add_child(check); # 1
+	hbox.add_child(thumb); # 2
+	hbox.add_child(filename); # 3
+	hbox.add_child(copy_button); # 4
+	hbox.add_child(delete_button); # 5
+	hbox.add_child(MarginContainer.new()); # 6
 	
 	return panel_cont;
 
 
 func _on_delete_button_pressed(delete_button):
 	delete_button.get_parent().queue_free();
+
+
+func _on_copy_button_pressed(copy_button):
+	DisplayServer.clipboard_set(copy_button.get_parent().get_child(3).text);
+	
