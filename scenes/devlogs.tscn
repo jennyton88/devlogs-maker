@@ -77,11 +77,10 @@ size_flags_vertical = 3
 
 [node name="Workspace" type="TabContainer" parent="HB/VB/MC"]
 layout_mode = 2
-current_tab = 6
+current_tab = 0
 drag_to_rearrange_enabled = true
 
 [node name="Finalize" parent="HB/VB/MC/Workspace" instance=ExtResource("6_kycab")]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -90,23 +89,27 @@ visible = false
 layout_mode = 2
 
 [node name="Preview" parent="HB/VB/MC/Workspace" instance=ExtResource("8_ah82n")]
+visible = false
 layout_mode = 2
 
 [node name="Devlogs List" parent="HB/VB/MC/Workspace" instance=ExtResource("8_kywa6")]
 visible = false
 layout_mode = 2
 
-[node name="Verify User" parent="HB/VB/MC/Workspace" instance=ExtResource("7_36a3x")]
+[node name="Images" parent="HB/VB/MC/Workspace" instance=ExtResource("12_hsrji")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 4
 
+[node name="Verify User" parent="HB/VB/MC/Workspace" instance=ExtResource("7_36a3x")]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 5
+
 [node name="Settings" parent="HB/VB/MC/Workspace" instance=ExtResource("7_adelr")]
 visible = false
 layout_mode = 2
-
-[node name="Images" parent="HB/VB/MC/Workspace" instance=ExtResource("12_hsrji")]
-layout_mode = 2
+metadata/_tab_index = 6
 
 [node name="Border" parent="HB/VB/MC" instance=ExtResource("6_hcaqf")]
 layout_mode = 2
