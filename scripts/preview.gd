@@ -57,7 +57,7 @@ func attach_img(img_line: String, img_list):
 	
 	var imgs = img_list.get_children();
 	for x in range(1, imgs.size(), 1):
-		var img_name = imgs[x].get_child(0).get_child(3).text; # panel > hbox > img # TODO make this better
+		var img_name = imgs[x].get_child(0).get_child(2).text; # panel > hbox > img # TODO make this better
 		if (img_name == img_path):
 			img_path = "res://assets/imported_imgs/%s" % img_name;
 			

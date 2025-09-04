@@ -2,12 +2,8 @@ extends MarginContainer
 
 @onready var img_list = $Scroll/VBox;
 
-var curr_img_num = 0;
-
 func save_img(img_data, img_name):
 	img_list.add_child(build_img_part(img_data, img_name));
-	
-	curr_img_num += 1;
 
 
 func build_img_part(img_data, img_name):
@@ -17,9 +13,6 @@ func build_img_part(img_data, img_name):
 	panel_cont.add_theme_stylebox_override("panel", bg_mat);
 	
 	var hbox = HBoxContainer.new();
-	
-	var num_label = Label.new();
-	num_label.text = "%d" % curr_img_num;
 	
 	var check = CheckBox.new();
 	check.size_flags_vertical = Control.SIZE_SHRINK_CENTER;
@@ -44,13 +37,12 @@ func build_img_part(img_data, img_name):
 	delete_button.pressed.connect(_on_delete_button_pressed.bind(delete_button));
 	
 	panel_cont.add_child(hbox);  # TODO ENUM for each feature
-	hbox.add_child(num_label); # 0
-	hbox.add_child(check); # 1
-	hbox.add_child(thumb); # 2
-	hbox.add_child(filename); # 3
-	hbox.add_child(copy_button); # 4
-	hbox.add_child(delete_button); # 5
-	hbox.add_child(MarginContainer.new()); # 6
+	hbox.add_child(check); # 0
+	hbox.add_child(thumb); # 1
+	hbox.add_child(filename); # 2
+	hbox.add_child(copy_button); # 3
+	hbox.add_child(delete_button); # 4
+	hbox.add_child(MarginContainer.new()); # 5
 	
 	return panel_cont;
 
@@ -60,5 +52,5 @@ func _on_delete_button_pressed(delete_button):
 
 
 func _on_copy_button_pressed(copy_button):
-	DisplayServer.clipboard_set(copy_button.get_parent().get_child(3).text);
+	DisplayServer.clipboard_set(copy_button.get_parent().get_child(2).text);
 	
