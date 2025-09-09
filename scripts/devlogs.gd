@@ -32,14 +32,9 @@ func _ready():
 	
 	editor.startup(update_preview);
 	finalize.startup(_on_text_changed_preview, update_preview);
-	post_list.startup([
-		create_error_popup,
-		create_notif_popup,
-		create_popup,
-		disconnect_popup,
-		clear_post,
-		fill_in_details
-	]);
+	
+	post_list.connect_startup.connect(_on_connect_startup);
+	post_list.startup();
 	
 	settings.connect_startup.connect(_on_connect_startup);
 	settings.startup();
@@ -317,3 +312,10 @@ func _on_connect_startup(component: String):
 		"settings":
 			settings.create_error_popup.connect(create_error_popup);
 			settings.create_notif_popup.connect(create_notif_popup);
+		"devlogs_list":
+			post_list.create_error_popup.connect(create_error_popup);
+			post_list.create_notif_popup.connect(create_notif_popup);
+			post_list.create_popup.connect(create_popup);
+			post_list.disconnect_popup.connect(disconnect_popup);
+			post_list.clear_post.connect(clear_post);
+			post_list.fill_in_details.connect(fill_in_details);
