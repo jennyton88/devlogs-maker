@@ -1,5 +1,6 @@
 extends FileDialog
 
+signal connect_startup(component: String);
 signal create_notif_popup(msg_text: String);
 signal fill_in_details(post_info: Dictionary);
 signal clear_post;
@@ -8,14 +9,13 @@ signal collected_img(img_data, img_name: String);
 var text_to_save = "";
 var curr_file_mode = "";
 
-func startup(fill_details: Callable, clear: Callable, notif_popup: Callable):
-	clear_post.connect(clear);
-	fill_in_details.connect(fill_details);
-	create_notif_popup.connect(notif_popup);
+func startup():
 	
 	file_selected.connect(_on_file_selected);
 	
 	current_dir = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
+	
+	connect_startup.emit("file_dialog");
 
 
 func import_file():

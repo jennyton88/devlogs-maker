@@ -24,39 +24,23 @@ var creation_date = "";
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	menu_options.get_devlogs.connect(post_list._on_get_devlogs);
-	menu_options.post_curr_text.connect(_on_post_curr_text);
-	menu_options.clear_text.connect(_on_clear_text);
-	menu_options.import_image_file.connect(_on_import_image);
+	menu_options.connect_startup.connect(_on_connect_startup);
+	menu_options.startup();
 	
-	file_dialog.startup(
-		fill_in_details, 
-		clear_post, 
-		create_notif_popup
-	);
-	
-	file_dialog.collected_img.connect(_on_collected_img);
-	
-	menu_options.import_file.connect(_on_import_file);
-	menu_options.export_file.connect(_on_export_file);
+	file_dialog.connect_startup.connect(_on_connect_startup);
+	file_dialog.startup();
 	
 	editor.startup(update_preview);
 	finalize.startup(_on_text_changed_preview, update_preview);
-	post_list.startup([
-		create_error_popup,
-		create_notif_popup,
-		create_popup,
-		disconnect_popup,
-		clear_post,
-		fill_in_details
-	]);
 	
-	settings.startup(create_error_popup, create_notif_popup);
-	verify_user.startup(
-		_on_enable_buttons, 
-		_on_token_expired.bind(true), 
-		_on_token_expired.bind(false)
-	);
+	post_list.connect_startup.connect(_on_connect_startup);
+	post_list.startup();
+	
+	settings.connect_startup.connect(_on_connect_startup);
+	settings.startup();
+	
+	verify_user.connect_startup.connect(_on_connect_startup);
+	verify_user.startup();
 
 
 # ==========================
@@ -152,8 +136,6 @@ func _on_http_post_completed(result, response_code, _headers, body):
 			print(response);
 	
 	create_notif_popup(r_msg);
-
-
 
 
 func _on_enable_buttons():
@@ -303,3 +285,37 @@ func _on_import_image():
 
 func _on_collected_img(img_data, img_name: String):
 	images.save_img(img_data, img_name);
+
+
+
+
+
+
+func _on_connect_startup(component: String):
+	match component:
+		"menu_options":
+			menu_options.get_devlogs.connect(post_list._on_get_devlogs);
+			menu_options.post_curr_text.connect(_on_post_curr_text);
+			menu_options.clear_text.connect(_on_clear_text);
+			menu_options.import_image_file.connect(_on_import_image);
+			menu_options.import_file.connect(_on_import_file);
+			menu_options.export_file.connect(_on_export_file);
+		"file_dialog":
+			file_dialog.clear_post.connect(clear_post);
+			file_dialog.fill_in_details.connect(fill_in_details);
+			file_dialog.create_notif_popup.connect(create_notif_popup);
+			file_dialog.collected_img.connect(_on_collected_img);
+		"verify_user":
+			verify_user.enable_buttons.connect(_on_enable_buttons);
+			verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));
+			verify_user.user_token_expired.connect(_on_token_expired.bind(false));
+		"settings":
+			settings.create_error_popup.connect(create_error_popup);
+			settings.create_notif_popup.connect(create_notif_popup);
+		"devlogs_list":
+			post_list.create_error_popup.connect(create_error_popup);
+			post_list.create_notif_popup.connect(create_notif_popup);
+			post_list.create_popup.connect(create_popup);
+			post_list.disconnect_popup.connect(disconnect_popup);
+			post_list.clear_post.connect(clear_post);
+			post_list.fill_in_details.connect(fill_in_details);

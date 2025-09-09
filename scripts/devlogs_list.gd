@@ -1,5 +1,6 @@
 extends MarginContainer
 
+signal connect_startup(component: String);
 signal create_error_popup(msg_text: String, err_type: AppInfo.ErrorType);
 signal create_notif_popup(msg_text: String);
 signal create_popup(msg_text: String, button_info: Dictionary, msg_type: AppInfo.MsgType);
@@ -24,14 +25,8 @@ var directory = {
 };
 
 
-func startup(connections: Array):
-	create_error_popup.connect(connections[0]);
-	create_notif_popup.connect(connections[1]);
-	create_popup.connect(connections[2])
-	disconnect_popup.connect(connections[3]);
-	clear_post.connect(connections[4]);
-	fill_in_details.connect(connections[5]);
-
+func startup():
+	connect_startup.emit("devlogs_list");
 
 
 func create_post_info(new_file_name: String, url: String, sha: String):
