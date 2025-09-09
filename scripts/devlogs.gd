@@ -52,56 +52,15 @@ func _on_post_curr_text():
 		create_notif_popup("You haven't completed all parts of your post yet!");
 		return;
 	
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
-	
-	if error != OK:
-		create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	var msg_type = "Edited" if post_list.get_edit_ref() != null else "Posted";
-	
-	var body = {
-		"message": "%s devlog." % msg_type,
-		"content": Marshalls.utf8_to_base64(text_preview.get_text()),
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"branch": config.get_value("repo_info", "repo_branch_update")
-	};
-	
-	var edit_ref = post_list.get_edit_ref();
-	if (edit_ref != null):
-		body["sha"] = edit_ref.get_meta("sha");
-	
-	body = JSON.stringify(body);
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-		"Content-Type: application/json", 
-		"Content-Length: " + str(body.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_post_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += finalize.get_filename();
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
-	
-	if (error != OK):
-		create_error_popup(error, AppInfo.ErrorType.HTTPError);
-
+	var post_request = Requests.new();
+	if (!post_request.create_error_popup.is_connected()):
+		post_request.create_error_popup.connect(create_error_popup);
+	post_request.create_post_request(
+		self, 
+		post_list.get_edit_ref(), 
+		text_preview.get_text(),
+		finalize.get_filename()
+	);
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
@@ -109,16 +68,18 @@ func _on_text_changed_preview(_new_text: String) -> void:
 
 
 func _on_http_post_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+	var request = Requests.new();
+	if (!request.create_notif_popup.is_connected()):
+		request.create_notif_popup.connect(create_notif_popup);
+	
+	if (!request.passed_checks(result, response_code)):
 		return;
 	
-	var response = convert_to_json(body);
-	
-	var r_msg = "%d\n" % response_code;
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # update post
-			r_msg += "Successfully edited!";
 			var info = response["content"];
 			var edit_ref = post_list.get_edit_ref();
 			if (edit_ref != null):
@@ -126,16 +87,14 @@ func _on_http_post_completed(result, response_code, _headers, body):
 				post_list.set_edit_ref(null);
 				clear_post();
 		HTTPClient.RESPONSE_CREATED: # new post
-			r_msg += "Successfully created!";
 			var info = response["content"];
 			post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
 			post_list.update_directory_file(info["name"], "add");
 			clear_post();
-		_:
-			r_msg += "Not implemented!";
-			print(response);
 	
-	create_notif_popup(r_msg);
+	var msg = request.create_notif_msg("post", response_code, body_str);
+	create_notif_popup(msg);
+	request.create_notif_popup.disconnect(create_notif_popup);
 
 
 func _on_enable_buttons():
@@ -193,19 +152,6 @@ func update_preview():
 # ===== Helper Functions =====
 # ============================
 
-
-func failed_checks(result: int, response_code: int):
-	if (result != OK):
-		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		create_notif_popup(error_result);
-		return true;
-
-
-func convert_to_json(body):
-	var json = JSON.new();
-	json.parse(body.get_string_from_utf8());
-	
-	return json.get_data();
 
 
 func get_curr_formatted_date():
