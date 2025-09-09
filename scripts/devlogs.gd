@@ -41,7 +41,8 @@ func _ready():
 		fill_in_details
 	]);
 	
-	settings.startup(create_error_popup, create_notif_popup);
+	settings.connect_startup.connect(_on_connect_startup);
+	settings.startup();
 	
 	verify_user.connect_startup.connect(_on_connect_startup);
 	verify_user.startup();
@@ -313,3 +314,6 @@ func _on_connect_startup(component: String):
 			verify_user.enable_buttons.connect(_on_enable_buttons);
 			verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));
 			verify_user.user_token_expired.connect(_on_token_expired.bind(false));
+		"settings":
+			settings.create_error_popup.connect(create_error_popup);
+			settings.create_notif_popup.connect(create_notif_popup);

@@ -8,20 +8,19 @@ extends MarginContainer
 # ====== Signals ======
 # =====================
 
+signal connect_startup(component: String);
 signal create_error_popup(msg: String, err_type: AppInfo.ErrorType);
 signal create_notif_popup(msg: String);
-
 
 # =====================
 # ====== Methods ======
 # =====================
 
-func startup(error_popup: Callable, notif_popup: Callable) -> void: 
+func startup() -> void: 
 	get_node("VB/HB/Apply").pressed.connect(_on_save_settings_pressed.bind(true));
 	get_node("VB/HB/Cancel").pressed.connect(_on_save_settings_pressed.bind(false));
 	
-	create_error_popup.connect(error_popup);
-	create_notif_popup.connect(notif_popup);
+	connect_startup.emit("settings");
 	
 	var user_set = {
 		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
