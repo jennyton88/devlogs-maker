@@ -3,6 +3,9 @@ extends MarginContainer
 
 @onready var menu_options = $HB/MenuOptions;
 
+# Locations
+@onready var workspace_container = $HB/VB/MC;
+
 # Workspace Modules
 @onready var finalize = $HB/VB/MC/Workspace/Finalize;
 @onready var editor = $HB/VB/MC/Workspace/Editor;
@@ -154,16 +157,17 @@ func _on_token_expired(refresh_token: bool):
 
 
 func _on_clear_text():
-	msg_popup.create_popup(
-		"Are you sure you want to clear EVERYTHING for this post?\n(Text, title, summary, post, file name, etc.)",
-		{'yes': ["Clear All", _on_serious_clear_button_pressed], 'no': ["Cancel", _on_hide_popup]},
+	var popup = load(popup_ref).instantiate();
+	workspace_container.add_child(popup);
+	
+	popup.create_popup(
+		"Are you sure you want to clear EVERYTHING in this post?\n(Text, title, summary, post, file name, etc.)",
+		{
+			'yes': { "text": "Clear All", "action": clear_post },
+			'no': { "text": "Cancel" }
+		},
 		AppInfo.MsgType.RequireAction
 	);
-
-
-func _on_serious_clear_button_pressed():
-	msg_popup.exit();
-	clear_post();
 
 
 func clear_post():
@@ -174,7 +178,6 @@ func clear_post():
 	creation_date = "";
 	
 	post_list.set_edit_ref(null);
-
 
 
 func update_preview():
@@ -223,10 +226,6 @@ func get_curr_formatted_date():
 	formatted_date += "%d" % curr_time["day"];
 	
 	return formatted_date;
-
-
-func _on_hide_popup():
-	msg_popup.exit();
 
 
 func create_notif_popup(code_text: String):
