@@ -18,8 +18,8 @@ extends MarginContainer
 # Import / Export
 @onready var file_dialog = $FileDialog;
 
-# Message Popup
-@onready var msg_popup = $HB/VB/MC/MsgPopup;
+# Msg Popup
+var popup_ref = "res://scenes/components/popup_msg.tscn";
 
 
 # Temporary Variables
