@@ -19,7 +19,8 @@ func setup_popup(type: AppInfo.MsgType, button_info: Dictionary) -> void:
 	match type:
 		AppInfo.MsgType.Notification:
 			yes_action.text = button_info['yes']['text'];
-			yes_action.pressed.connect(_on_yes_action.bind(button_info['yes']['action']));
+			yes_action.pressed.connect(exit);
+			#yes_action.pressed.connect(_on_yes_action.bind(button_info['yes']['action']));
 			
 			no_action.hide();
 		AppInfo.MsgType.RequireAction:
