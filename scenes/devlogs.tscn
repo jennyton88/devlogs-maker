@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://cg4hagqhec5ke"]
+[gd_scene load_steps=16 format=3 uid="uid://cg4hagqhec5ke"]
 
 [ext_resource type="Theme" uid="uid://bg45fa5ynd7fs" path="res://assets/themes/theme_mail.tres" id="1_i2wg7"]
 [ext_resource type="Script" path="res://scripts/devlogs.gd" id="2_00vko"]
@@ -12,7 +12,6 @@
 [ext_resource type="PackedScene" uid="uid://da0y0eeeu881k" path="res://scenes/editor.tscn" id="7_pu2kp"]
 [ext_resource type="PackedScene" uid="uid://dgwq3cnobx4ac" path="res://scenes/preview.tscn" id="8_ah82n"]
 [ext_resource type="PackedScene" uid="uid://dh4s812fafwvb" path="res://scenes/devlogs_list.tscn" id="8_kywa6"]
-[ext_resource type="PackedScene" uid="uid://cg4nnfhi2bqyp" path="res://scenes/components/popup_msg.tscn" id="9_4c6yf"]
 [ext_resource type="PackedScene" uid="uid://cijs2jun0ywe3" path="res://scenes/images.tscn" id="12_hsrji"]
 [ext_resource type="PackedScene" uid="uid://stqqmsajhpt6" path="res://scenes/working_file.tscn" id="13_h1vm4"]
 
@@ -115,10 +114,6 @@ metadata/_tab_index = 6
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_top = 30
-
-[node name="MsgPopup" parent="HB/VB/MC" instance=ExtResource("9_4c6yf")]
-visible = false
-layout_mode = 2
 
 [node name="S4" type="MarginContainer" parent="HB/VB"]
 layout_mode = 2
