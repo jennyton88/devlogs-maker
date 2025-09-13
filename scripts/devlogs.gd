@@ -157,14 +157,21 @@ func _on_token_expired(refresh_token: bool):
 
 
 func _on_clear_text():
+	create_action_popup(
+		"Are you sure you want to clear EVERYTHING in this post?\n(Text, title, summary, post, file name, etc.)",
+		{ 'yes': "Clear All", 'no': 'Cancel' },
+		clear_post,
+	);
+
+func create_action_popup(msg: String, button_txt: Dictionary, action: Callable):
 	var popup = load(popup_ref).instantiate();
 	workspace_container.add_child(popup);
 	
 	popup.create_popup(
-		"Are you sure you want to clear EVERYTHING in this post?\n(Text, title, summary, post, file name, etc.)",
+		msg,
 		{
-			'yes': { "text": "Clear All", "action": clear_post },
-			'no': { "text": "Cancel" }
+			'yes': { "text": button_txt.yes, "action":  action },
+			'no': { "text": button_txt.no }
 		},
 		AppInfo.MsgType.RequireAction
 	);
@@ -228,12 +235,16 @@ func get_curr_formatted_date():
 	return formatted_date;
 
 
-func create_notif_popup(code_text: String):
-	msg_popup.create_popup(
-		code_text,
-		{'yes': ["Ok", _on_hide_popup]},
+func create_notif_popup(msg: String):
+	var popup = load(popup_ref).instantiate();
+	workspace_container.add_child(popup);
+	
+	popup.create_popup(
+		msg,
+		{ 'yes': { "text": "Ok" } },
 		AppInfo.MsgType.Notification
 	);
+
 
 
 func create_error_popup(error_code: Error, error_type: AppInfo.ErrorType):
@@ -248,9 +259,12 @@ func create_error_popup(error_code: Error, error_type: AppInfo.ErrorType):
 	create_notif_popup(error_msg);
 
 
-func create_popup(msg_text: String, button_info: Dictionary, msg_type: AppInfo.MsgType):
-	msg_popup.create_popup(
-		msg_text,
+func create_popup(msg: String, button_info: Dictionary, msg_type: AppInfo.MsgType):
+	var popup = load(popup_ref).instantiate();
+	workspace_container.add_child(popup);
+	
+	popup.create_popup(
+		msg,
 		button_info,
 		msg_type
 	);
@@ -267,7 +281,8 @@ func fill_in_details(post_info: Dictionary):
 
 
 func disconnect_popup():
-	msg_popup.exit();
+	#msg_popup.exit();
+	pass
 
 
 func _on_export_file():
