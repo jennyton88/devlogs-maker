@@ -50,14 +50,14 @@ func _ready():
 
 func _on_post_curr_text():
 	if (finalize.text_is_empty() || editor.text_is_empty()):
-		create_notif_popup("You haven't completed all parts of your post yet!");
+		workspace_container.create_notif_popup("You haven't completed all parts of your post yet!");
 		return;
 	
 	var config = ConfigFile.new();
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup(error, AppInfo.ErrorType.ConfigError);
+		workspace_container.create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var msg_type = "Edited" if post_list.get_edit_ref() != null else "Posted";
@@ -101,7 +101,7 @@ func _on_post_curr_text():
 	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
 	
 	if (error != OK):
-		create_error_popup(error, AppInfo.ErrorType.HTTPError);
+		workspace_container.create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
 
@@ -136,7 +136,7 @@ func _on_http_post_completed(result, response_code, _headers, body):
 			r_msg += "Not implemented!";
 			print(response);
 	
-	create_notif_popup(r_msg);
+	workspace_container.create_notif_popup(r_msg);
 
 
 func _on_enable_buttons():
@@ -149,13 +149,13 @@ func _on_token_expired(refresh_token: bool):
 	menu_options.get_posts.disabled = true;
 	
 	if (refresh_token):
-		create_notif_popup("Update your refresh token please! (Steps 1,2,3)");
+		workspace_container.create_notif_popup("Update your refresh token please! (Steps 1,2,3)");
 	else:
-		create_notif_popup("Update your user token please! (Step 4)");
+		workspace_container.create_notif_popup("Update your user token please! (Step 4)");
 
 
 func _on_clear_text():
-	create_action_popup(
+	workspace_container.create_action_popup(
 		"Are you sure you want to clear EVERYTHING in this post?\n(Text, title, summary, post, file name, etc.)",
 		{ 'yes': "Clear All", 'no': 'Cancel' },
 		clear_post,
@@ -193,7 +193,7 @@ func update_preview():
 func failed_checks(result: int, response_code: int):
 	if (result != OK):
 		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		create_notif_popup(error_result);
+		workspace_container.create_notif_popup(error_result);
 		return true;
 
 
