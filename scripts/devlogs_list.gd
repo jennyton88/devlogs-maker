@@ -215,16 +215,10 @@ func check_format_text(text_blob) -> void:
 
 
 func _on_delete_button_pressed(log_entry_delete_button: Button):
-	get_parent().create_popup(
+	get_parent().create_action_popup(
 		"Are you sure you want to delete this post?",
-		{
-			'yes': { 
-				'text': "Delete Post", 
-				'action': _on_serious_delete_button_pressed.bind(log_entry_delete_button) 
-			}, 
-			'no': { 'text': "Cancel" } 
-		},
-		AppInfo.MsgType.RequireAction
+		{ 'yes': "Delete Post", 'no': "Cancel" },
+		_on_serious_delete_button_pressed.bind(log_entry_delete_button) 
 	);
 
 

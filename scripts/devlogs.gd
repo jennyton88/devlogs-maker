@@ -19,7 +19,6 @@ extends MarginContainer
 @onready var file_dialog = $HB/VB/Workspace/FileDialog;
 
 
-
 # Temporary Variables
 var creation_date = "";
 
@@ -104,7 +103,6 @@ func _on_post_curr_text():
 		workspace_container.create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
-
 func _on_text_changed_preview(_new_text: String) -> void:
 	update_preview();
 
@@ -160,7 +158,6 @@ func _on_clear_text():
 		{ 'yes': "Clear All", 'no': 'Cancel' },
 		clear_post,
 	);
-
 
 
 func clear_post():
@@ -221,7 +218,6 @@ func get_curr_formatted_date():
 	return formatted_date;
 
 
-
 func fill_in_details(post_info: Dictionary):
 	creation_date = post_info["creation_date"];
 	finalize.set_post_title(post_info["post_title"]);
@@ -246,10 +242,6 @@ func _on_import_image():
 
 func _on_collected_img(img_data, img_name: String):
 	images.save_img(img_data, img_name);
-
-
-
-
 
 
 func _on_connect_startup(component: String):
