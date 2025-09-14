@@ -1,4 +1,4 @@
-extends MarginContainer
+extends Control
 
 # Msg Popup
 var popup_ref = "res://scenes/components/popup_msg.tscn";
