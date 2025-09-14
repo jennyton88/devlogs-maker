@@ -71,51 +71,53 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.05
 
-[node name="MC" type="MarginContainer" parent="HB/VB"]
+[node name="Workspace" type="MarginContainer" parent="HB/VB"]
 layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("6_n2wff")
 
-[node name="Workspace" type="TabContainer" parent="HB/VB/MC"]
+[node name="Modules" type="TabContainer" parent="HB/VB/Workspace"]
 layout_mode = 2
 current_tab = 0
 drag_to_rearrange_enabled = true
 
-[node name="Finalize" parent="HB/VB/MC/Workspace" instance=ExtResource("6_kycab")]
+[node name="Finalize" parent="HB/VB/Workspace/Modules" instance=ExtResource("6_kycab")]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="Editor" parent="HB/VB/MC/Workspace" instance=ExtResource("7_pu2kp")]
+[node name="Editor" parent="HB/VB/Workspace/Modules" instance=ExtResource("7_pu2kp")]
 visible = false
 layout_mode = 2
 
-[node name="Preview" parent="HB/VB/MC/Workspace" instance=ExtResource("8_ah82n")]
+[node name="Preview" parent="HB/VB/Workspace/Modules" instance=ExtResource("8_ah82n")]
 visible = false
 layout_mode = 2
 
-[node name="Devlogs List" parent="HB/VB/MC/Workspace" instance=ExtResource("8_kywa6")]
+[node name="Devlogs List" parent="HB/VB/Workspace/Modules" instance=ExtResource("8_kywa6")]
 visible = false
 layout_mode = 2
 
-[node name="Images" parent="HB/VB/MC/Workspace" instance=ExtResource("12_hsrji")]
+[node name="Images" parent="HB/VB/Workspace/Modules" instance=ExtResource("12_hsrji")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 4
 
-[node name="Verify User" parent="HB/VB/MC/Workspace" instance=ExtResource("7_36a3x")]
+[node name="Verify User" parent="HB/VB/Workspace/Modules" instance=ExtResource("7_36a3x")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 5
 
-[node name="Settings" parent="HB/VB/MC/Workspace" instance=ExtResource("7_adelr")]
+[node name="Settings" parent="HB/VB/Workspace/Modules" instance=ExtResource("7_adelr")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 6
 
-[node name="Border" parent="HB/VB/MC" instance=ExtResource("6_hcaqf")]
+[node name="Border" parent="HB/VB/Workspace" instance=ExtResource("6_hcaqf")]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_top = 30
+
+[node name="FileDialog" parent="HB/VB/Workspace" instance=ExtResource("13_h1vm4")]
 
 [node name="S4" type="MarginContainer" parent="HB/VB"]
 layout_mode = 2
@@ -127,5 +129,3 @@ size_flags_stretch_ratio = 0.05
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
-
-[node name="FileDialog" parent="." instance=ExtResource("13_h1vm4")]

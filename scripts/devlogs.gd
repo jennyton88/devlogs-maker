@@ -4,19 +4,19 @@ extends MarginContainer
 @onready var menu_options = $HB/MenuOptions;
 
 # Locations
-@onready var workspace_container = $HB/VB/MC;
+@onready var workspace_container = $HB/VB/Workspace;
 
 # Workspace Modules
-@onready var finalize = $HB/VB/MC/Workspace/Finalize;
-@onready var editor = $HB/VB/MC/Workspace/Editor;
-@onready var text_preview = $HB/VB/MC/Workspace/Preview;
-@onready var verify_user = $"HB/VB/MC/Workspace/Verify User";
-@onready var post_list = $"HB/VB/MC/Workspace/Devlogs List";
-@onready var settings = $HB/VB/MC/Workspace/Settings;
-@onready var images = $HB/VB/MC/Workspace/Images;
+@onready var finalize = $HB/VB/Workspace/Modules/Finalize;
+@onready var editor = $HB/VB/Workspace/Modules/Editor;
+@onready var text_preview = $HB/VB/Workspace/Modules/Preview;
+@onready var verify_user = $"HB/VB/Workspace/Modules/Verify User";
+@onready var post_list = $"HB/VB/Workspace/Modules/Devlogs List";
+@onready var settings = $HB/VB/Workspace/Modules/Settings;
+@onready var images = $HB/VB/Workspace/Modules/Images;
 
 # Import / Export
-@onready var file_dialog = $FileDialog;
+@onready var file_dialog = $HB/VB/Workspace/FileDialog;
 
 
 
