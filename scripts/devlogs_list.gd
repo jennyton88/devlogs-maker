@@ -1,10 +1,6 @@
 extends MarginContainer
 
 signal connect_startup(component: String);
-signal create_error_popup(msg_text: String, err_type: AppInfo.ErrorType);
-signal create_notif_popup(msg_text: String);
-signal create_popup(msg_text: String, button_info: Dictionary, msg_type: AppInfo.MsgType);
-signal disconnect_popup;
 signal clear_post;
 signal fill_in_details(post_info: Dictionary);
 
@@ -97,7 +93,7 @@ func _on_get_devlogs():
 	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
 	
 	if (error != OK):
-		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
 func _on_http_get_posts_completed(result, response_code, _headers, body):
@@ -114,7 +110,7 @@ func _on_http_get_posts_completed(result, response_code, _headers, body):
 				else:
 					update_directory_ref(post["name"], post["download_url"], post["sha"]);
 		_:
-			create_notif_popup.emit("%d\nNot implemented!" % response_code);
+			get_parent().create_notif_popup("%d\nNot implemented!" % response_code);
 
 
 func _on_edit_button_pressed(button: Button):
@@ -122,7 +118,7 @@ func _on_edit_button_pressed(button: Button):
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	edit_button_ref = button;
@@ -144,7 +140,7 @@ func _on_edit_button_pressed(button: Button):
 	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
 	
 	if (error != OK):
-		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 		edit_button_ref = null;
 
 
@@ -157,7 +153,7 @@ func _on_http_download_text_completed(result, response_code, _headers, body):
 			var downloaded_text = body.get_string_from_utf8();
 			check_format_text(downloaded_text);
 		_:
-			create_notif_popup.emit("%d\nNot implemented!" % response_code);
+			get_parent().create_notif_popup("%d\nNot implemented!" % response_code);
 			
 			print(body.get_string_from_utf8());
 
@@ -215,27 +211,25 @@ func check_format_text(text_blob) -> void:
 					"project":
 						pass;
 					_:
-						create_notif_popup.emit("Not a recognizable file name!\nPlease edit a different file.");
+						get_parent().create_notif_popup("Not a recognizable file name!\nPlease edit a different file.");
 
 
 func _on_delete_button_pressed(log_entry_delete_button: Button):
-	create_popup.emit(
+	get_parent().create_action_popup(
 		"Are you sure you want to delete this post?",
-		{'yes': ["Delete Post", _on_serious_delete_button_pressed.bind(log_entry_delete_button)], 'no': ["Cancel", _on_hide_popup]},
-		AppInfo.MsgType.RequireAction
+		{ 'yes': "Delete Post", 'no': "Cancel" },
+		_on_serious_delete_button_pressed.bind(log_entry_delete_button) 
 	);
 
 
 func _on_serious_delete_button_pressed(log_entry_delete_button: Button):
 	var button_ref = log_entry_delete_button;
 	
-	disconnect_popup.emit();
-	
 	var config = ConfigFile.new();
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var body = {
@@ -273,7 +267,7 @@ func _on_serious_delete_button_pressed(log_entry_delete_button: Button):
 	error = h_client.request(url, headers, HTTPClient.METHOD_DELETE, body);
 	
 	if (error != OK):
-		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 	else:
 		if (edit_button_ref != null && (button_ref.get_meta("sha") == edit_button_ref.get_meta("sha"))):
 			clear_post.emit();
@@ -288,7 +282,7 @@ func load_config_file() -> ConfigFile:
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return null;
 	
 	return config;
@@ -298,7 +292,7 @@ func load_config_file() -> ConfigFile:
 func failed_checks(result: int, response_code: int):
 	if (result != OK):
 		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		create_notif_popup.emit(error_result);
+		get_parent().create_notif_popup(error_result);
 		return true;
 
 
@@ -326,10 +320,6 @@ func check_file_name(curr_file_name: String) -> String:
 	return "";
 
 
-func _on_hide_popup():
-	disconnect_popup.emit();
-
-
 func _on_http_delete_post_completed(result, response_code, _headers, body):
 	if (failed_checks(result, response_code)):
 		return;
@@ -350,7 +340,7 @@ func _on_http_delete_post_completed(result, response_code, _headers, body):
 		_:
 			r_msg += "Not implemented!\n%s" % [response_code, response["message"]];
 	
-	create_notif_popup.emit(r_msg);
+	get_parent().create_notif_popup(r_msg);
 
 
 func get_edit_ref():
@@ -379,7 +369,7 @@ func edit_directory_file():
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var body = {
@@ -418,7 +408,7 @@ func edit_directory_file():
 	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
 	
 	if (error != OK):
-		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
 
@@ -427,7 +417,7 @@ func get_directory_file():
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	update_dir = true;
@@ -448,7 +438,7 @@ func get_directory_file():
 	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
 	
 	if (error != OK):
-		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
 func _on_http_edit_directory_completed(result, response_code, _headers, body):
@@ -468,7 +458,7 @@ func _on_http_edit_directory_completed(result, response_code, _headers, body):
 			r_msg += "Not implemented! Failed to edit directory";
 			clean_directory_edit();
 			print(response);
-			create_notif_popup.emit(r_msg);
+			get_parent().create_notif_popup(r_msg);
 
 
 func clean_directory_edit():
@@ -481,7 +471,7 @@ func fetch_directory_file():
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var app_name = config.get_value("app_info", "app_name");
@@ -502,7 +492,7 @@ func fetch_directory_file():
 	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
 	
 	if (error != OK):
-		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
 func _on_http_download_json_completed(result, response_code, _headers, body):
@@ -521,4 +511,4 @@ func _on_http_download_json_completed(result, response_code, _headers, body):
 		_:
 			r_msg += "Not implemented!";
 			print(response);
-			create_notif_popup.emit(r_msg);
+			get_parent().create_notif_popup(r_msg);
