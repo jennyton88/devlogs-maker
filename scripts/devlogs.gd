@@ -275,8 +275,7 @@ func _on_connect_startup(component: String):
 			verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));
 			verify_user.user_token_expired.connect(_on_token_expired.bind(false));
 		"settings":
-			settings.create_error_popup.connect(create_error_popup);
-			settings.create_notif_popup.connect(create_notif_popup);
+			pass
 		"devlogs_list":
 			post_list.create_error_popup.connect(create_error_popup);
 			post_list.create_notif_popup.connect(create_notif_popup);

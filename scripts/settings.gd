@@ -9,8 +9,6 @@ extends MarginContainer
 # =====================
 
 signal connect_startup(component: String);
-signal create_error_popup(msg: String, err_type: AppInfo.ErrorType);
-signal create_notif_popup(msg: String);
 
 # =====================
 # ====== Methods ======
@@ -71,7 +69,7 @@ func save_settings(user_set: Dictionary) -> void:
 	
 	config.save("user://config.cfg");
 	
-	create_notif_popup.emit("Saved!");
+	get_parent().create_notif_popup("Saved!");
 
 
 # ============================
@@ -103,7 +101,7 @@ func load_config_file() -> ConfigFile:
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return null;
 	
 	return config;
