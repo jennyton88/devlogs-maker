@@ -269,7 +269,6 @@ func _on_connect_startup(component: String):
 		"file_dialog":
 			file_dialog.clear_post.connect(clear_post);
 			file_dialog.fill_in_details.connect(fill_in_details);
-			file_dialog.create_notif_popup.connect(create_notif_popup);
 			file_dialog.collected_img.connect(_on_collected_img);
 		"verify_user":
 			verify_user.enable_buttons.connect(_on_enable_buttons);
