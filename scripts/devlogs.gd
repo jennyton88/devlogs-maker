@@ -232,11 +232,6 @@ func fill_in_details(post_info: Dictionary):
 	update_preview();
 
 
-func disconnect_popup():
-	#msg_popup.exit();
-	pass
-
-
 func _on_export_file():
 	file_dialog.export_file(finalize.get_filename(), text_preview.get_text());
 
@@ -277,9 +272,5 @@ func _on_connect_startup(component: String):
 		"settings":
 			pass
 		"devlogs_list":
-			post_list.create_error_popup.connect(create_error_popup);
-			post_list.create_notif_popup.connect(create_notif_popup);
-			post_list.create_popup.connect(create_popup);
-			post_list.disconnect_popup.connect(disconnect_popup);
 			post_list.clear_post.connect(clear_post);
 			post_list.fill_in_details.connect(fill_in_details);
