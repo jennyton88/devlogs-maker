@@ -3,20 +3,20 @@ extends MarginContainer
 
 @onready var menu_options = $HB/MenuOptions;
 
+# Locations
+@onready var workspace_container = $HB/VB/Workspace;
+
 # Workspace Modules
-@onready var finalize = $HB/VB/MC/Workspace/Finalize;
-@onready var editor = $HB/VB/MC/Workspace/Editor;
-@onready var text_preview = $HB/VB/MC/Workspace/Preview;
-@onready var verify_user = $"HB/VB/MC/Workspace/Verify User";
-@onready var post_list = $"HB/VB/MC/Workspace/Devlogs List";
-@onready var settings = $HB/VB/MC/Workspace/Settings;
-@onready var images = $HB/VB/MC/Workspace/Images;
+@onready var finalize = $HB/VB/Workspace/Modules/Finalize;
+@onready var editor = $HB/VB/Workspace/Modules/Editor;
+@onready var text_preview = $HB/VB/Workspace/Modules/Preview;
+@onready var verify_user = $"HB/VB/Workspace/Modules/Verify User";
+@onready var post_list = $"HB/VB/Workspace/Modules/Devlogs List";
+@onready var settings = $HB/VB/Workspace/Modules/Settings;
+@onready var images = $HB/VB/Workspace/Modules/Images;
 
 # Import / Export
-@onready var file_dialog = $FileDialog;
-
-# Message Popup
-@onready var msg_popup = $HB/VB/MC/MsgPopup;
+@onready var file_dialog = $HB/VB/Workspace/FileDialog;
 
 
 # Temporary Variables
@@ -49,7 +49,7 @@ func _ready():
 
 func _on_post_curr_text():
 	if (finalize.text_is_empty() || editor.text_is_empty()):
-		create_notif_popup("You haven't completed all parts of your post yet!");
+		workspace_container.create_notif_popup("You haven't completed all parts of your post yet!");
 		return;
 	
 	var post_request = Requests.new();
@@ -94,7 +94,7 @@ func _on_http_post_completed(result, response_code, _headers, body):
 			clear_post();
 	
 	var msg = request.create_notif_msg("post", response_code, body_str);
-	create_notif_popup(msg);
+	workspace_container.create_notif_popup(msg);
 	request.create_notif_popup.disconnect(create_notif_popup);
 
 
@@ -108,22 +108,17 @@ func _on_token_expired(refresh_token: bool):
 	menu_options.get_posts.disabled = true;
 	
 	if (refresh_token):
-		create_notif_popup("Update your refresh token please! (Steps 1,2,3)");
+		workspace_container.create_notif_popup("Update your refresh token please! (Steps 1,2,3)");
 	else:
-		create_notif_popup("Update your user token please! (Step 4)");
+		workspace_container.create_notif_popup("Update your user token please! (Step 4)");
 
 
 func _on_clear_text():
-	msg_popup.create_popup(
-		"Are you sure you want to clear EVERYTHING for this post?\n(Text, title, summary, post, file name, etc.)",
-		{'yes': ["Clear All", _on_serious_clear_button_pressed], 'no': ["Cancel", _on_hide_popup]},
-		AppInfo.MsgType.RequireAction
+	workspace_container.create_action_popup(
+		"Are you sure you want to clear EVERYTHING in this post?\n(Text, title, summary, post, file name, etc.)",
+		{ 'yes': "Clear All", 'no': 'Cancel' },
+		clear_post,
 	);
-
-
-func _on_serious_clear_button_pressed():
-	msg_popup.exit();
-	clear_post();
 
 
 func clear_post():
@@ -134,7 +129,6 @@ func clear_post():
 	creation_date = "";
 	
 	post_list.set_edit_ref(null);
-
 
 
 func update_preview():
@@ -172,38 +166,6 @@ func get_curr_formatted_date():
 	return formatted_date;
 
 
-func _on_hide_popup():
-	msg_popup.exit();
-
-
-func create_notif_popup(code_text: String):
-	msg_popup.create_popup(
-		code_text,
-		{'yes': ["Ok", _on_hide_popup]},
-		AppInfo.MsgType.Notification
-	);
-
-
-func create_error_popup(error_code: Error, error_type: AppInfo.ErrorType):
-	var error_msg = "%d\n" % error_code;
-	
-	match error_type:
-		AppInfo.ErrorType.ConfigError:
-			error_msg += "Failed to load config file.";
-		AppInfo.ErrorType.HTTPError:
-			error_msg += "Couldn't perform HTTP request.";
-	
-	create_notif_popup(error_msg);
-
-
-func create_popup(msg_text: String, button_info: Dictionary, msg_type: AppInfo.MsgType):
-	msg_popup.create_popup(
-		msg_text,
-		button_info,
-		msg_type
-	);
-
-
 func fill_in_details(post_info: Dictionary):
 	creation_date = post_info["creation_date"];
 	finalize.set_post_title(post_info["post_title"]);
@@ -212,10 +174,6 @@ func fill_in_details(post_info: Dictionary):
 	finalize.set_filename(post_info["filename"]);
 	
 	update_preview();
-
-
-func disconnect_popup():
-	msg_popup.exit();
 
 
 func _on_export_file():
@@ -234,10 +192,6 @@ func _on_collected_img(img_data, img_name: String):
 	images.save_img(img_data, img_name);
 
 
-
-
-
-
 func _on_connect_startup(component: String):
 	match component:
 		"menu_options":
@@ -250,19 +204,13 @@ func _on_connect_startup(component: String):
 		"file_dialog":
 			file_dialog.clear_post.connect(clear_post);
 			file_dialog.fill_in_details.connect(fill_in_details);
-			file_dialog.create_notif_popup.connect(create_notif_popup);
 			file_dialog.collected_img.connect(_on_collected_img);
 		"verify_user":
 			verify_user.enable_buttons.connect(_on_enable_buttons);
 			verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));
 			verify_user.user_token_expired.connect(_on_token_expired.bind(false));
 		"settings":
-			settings.create_error_popup.connect(create_error_popup);
-			settings.create_notif_popup.connect(create_notif_popup);
+			pass
 		"devlogs_list":
-			post_list.create_error_popup.connect(create_error_popup);
-			post_list.create_notif_popup.connect(create_notif_popup);
-			post_list.create_popup.connect(create_popup);
-			post_list.disconnect_popup.connect(disconnect_popup);
 			post_list.clear_post.connect(clear_post);
 			post_list.fill_in_details.connect(fill_in_details);

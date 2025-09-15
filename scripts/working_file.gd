@@ -1,7 +1,6 @@
 extends FileDialog
 
 signal connect_startup(component: String);
-signal create_notif_popup(msg_text: String);
 signal fill_in_details(post_info: Dictionary);
 signal clear_post;
 signal collected_img(img_data, img_name: String);
@@ -52,7 +51,7 @@ func _on_file_selected(path: String):
 			var filename = path.get_file();
 			
 			if (check_file_name(filename) == ""):
-				create_notif_popup.emit("Not a recognizable file name!\nPlease edit a different file.");
+				get_parent().create_notif_popup("Not a recognizable file name!\nPlease edit a different file.");
 				return;
 			
 			clear_post.emit();

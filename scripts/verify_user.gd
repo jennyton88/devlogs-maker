@@ -15,9 +15,6 @@ signal enable_buttons;
 @onready var code_label = $HBC1/VBC1/Code;
 @onready var expire_label = $HBC1/VBC1/Expiration;
 
-# Popup Msg ==
-@onready var popup = $PopUpMsg;
-
 # Link ======
 @onready var verify_link = $HBC1/VBC1/SendToVerify;
 @onready var check_access = $HBC1/VBC1/CheckAccess;
@@ -68,7 +65,7 @@ func setup_tokens():
 	
 	# allow user to restart setup_tokens
 	if error != OK:
-		create_error_popup(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	check_access.uri = "https://github.com/settings/connections/applications/%s" % config.get_value("app_info", "app_client_id");
@@ -105,7 +102,7 @@ func generate_user_code_request():
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		create_error_popup(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	var app_name = config.get_value("app_info", "app_name");
@@ -130,7 +127,7 @@ func generate_user_code_request():
 	error = h_client.request(url, headers, HTTPClient.METHOD_POST, queries);
 	
 	if (error != OK):
-		create_error_popup(error, AppInfo.ErrorType.HTTPError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 		request_code.disabled = false;
 
 
@@ -152,7 +149,7 @@ func poll_verification(refresh_code: bool):
 	var error = config.load('user://config.cfg');
 	
 	if error != OK:
-		create_error_popup(error, AppInfo.ErrorType.ConfigError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	# client secret not needed since using device flow
@@ -188,7 +185,7 @@ func poll_verification(refresh_code: bool):
 	error = h_client.request(url, headers, HTTPClient.METHOD_POST, queries);
 	
 	if (error != OK):
-		create_error_popup(error, AppInfo.ErrorType.HTTPError);
+		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 		request_code.disabled = false;
 
 
@@ -210,7 +207,7 @@ func _on_refresh_app_pressed():
 
 
 func _on_expire_timeout() -> void:
-	create_notif_popup("Expired code\nRequest user code again");
+	get_parent().create_notif_popup("Expired code\nRequest user code again");
 	request_code.disabled = false;
 
 
@@ -224,7 +221,7 @@ func _on_http_req_completed(result, response_code, _headers, body):
 		HTTPClient.RESPONSE_OK:
 			allow_user_to_verify(response);
 		_:
-			create_notif_popup("%d Error\n Result %d" % [response_code, result]);
+			get_parent().create_notif_popup("%d Error\n Result %d" % [response_code, result]);
 
 
 func _on_http_poll_completed(result, response_code, _headers, body):
@@ -255,7 +252,7 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 					_:
 						error_msg += "Error!\n%s" % response["error"];
 				
-				create_notif_popup(error_msg);
+				get_parent().create_notif_popup(error_msg);
 				
 				return;
 			
@@ -263,7 +260,7 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 			var error = config.load('user://config.cfg');
 			
 			if error != OK:
-				create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [error, response["access_token"], response["refresh_token"]]);
+				get_parent().create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [error, response["access_token"], response["refresh_token"]]);
 				return;
 			
 			config.set_value("user_info", "user_token", response["access_token"]);
@@ -280,41 +277,16 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 			expire_label.text = Time.get_datetime_string_from_datetime_dict(config.get_value("user_info", "user_token_expiration"), false);
 			refresh_token.disabled = true;
 			
-			create_notif_popup("Completed Poll Verification!");
+			get_parent().create_notif_popup("Completed Poll Verification!");
 			
 			enable_buttons.emit();
 		_:
-			create_notif_popup("%d\n Result %d" % [response_code, result]);
+			get_parent().create_notif_popup("%d\n Result %d" % [response_code, result]);
 
 
 # ============================
 # ===== Helper Functions =====
 # ============================
-
-# Popup
-
-func create_notif_popup(code_text: String):
-	get_node("PopUpMsg").create_popup(
-		code_text,
-		{'yes': ["Ok", _on_hide_popup]},
-		AppInfo.MsgType.Notification
-	);
-
-
-func _on_hide_popup() -> void:
-	get_node("PopUpMsg").exit();
-
-
-func create_error_popup(error_code: Error, error_type: AppInfo.ErrorType):
-	var error_msg = "%d\n" % error_code;
-	
-	match error_type:
-		AppInfo.ErrorType.ConfigError:
-			error_msg += "Failed to load config file.";
-		AppInfo.ErrorType.HTTPError:
-			error_msg += "Couldn't perform HTTP request.";
-	
-	create_notif_popup(error_msg);
 
 
 func check_expiration(deadline: Dictionary) -> bool:
@@ -458,7 +430,7 @@ func create_expiration_time(start_time: String, deadline_time: int) -> Dictionar
 func failed_checks(result: int, response_code: int):
 	if (result != OK):
 		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		create_notif_popup(error_result);
+		get_parent().create_notif_popup(error_result);
 		return true;
 
 
