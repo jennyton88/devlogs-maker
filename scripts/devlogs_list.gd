@@ -72,10 +72,15 @@ func _on_get_devlogs():
 
 
 func _on_http_get_posts_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+	var request = Requests.new();
+	
+	var error = request.process_results(result, response_code);
+	if (error.has("error")):
+		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
 	
-	var response = convert_to_json(body);
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
@@ -85,7 +90,11 @@ func _on_http_get_posts_completed(result, response_code, _headers, body):
 				else:
 					update_directory_ref(post["name"], post["download_url"], post["sha"]);
 		_:
-			get_parent().create_notif_popup("%d\nNot implemented!" % response_code);
+			pass;
+	
+	var msg = request.build_notif_msg("get_devlogs", response_code, body_str);
+	if (msg != ""):
+		get_parent().create_notif_popup(msg);
 
 
 func _on_edit_button_pressed(button: Button):
