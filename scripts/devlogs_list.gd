@@ -337,50 +337,12 @@ func update_directory_file(filename: String, action: String):
 
 
 func edit_directory_file():
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var request = Requests.new();
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	var body = {
-		"message": "Edited directory.",
-		"content": Marshalls.utf8_to_base64(directory.data),
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"branch": config.get_value("repo_info", "repo_branch_update")
-	};
-	
-	body["sha"] = directory.sha;
-	body = JSON.stringify(body);
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-		"Content-Type: application/json", 
-		"Content-Length: " + str(body.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_edit_directory_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += directory.name;
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	var error = request.create_edit_directory_file_request(self, directory);
+
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 
 
 

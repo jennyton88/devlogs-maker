@@ -207,3 +207,61 @@ func create_edit_download_request(scene: Node, button: Button):
 	var url = button.get_meta("url");
 	
 	return make_download_file_request(scene, headers, url);
+
+
+func create_edit_directory_body(config: ConfigFile, directory):
+	var body = {
+		"message": "Edited directory.",
+		"content": Marshalls.utf8_to_base64(directory.data),
+		"committer": {
+			"name": config.get_value("user_info", "user_name"),
+			"email": config.get_value("user_info", "user_email"),
+		},
+		"branch": config.get_value("repo_info", "repo_branch_update"),
+		"sha": directory.sha
+	};
+	
+	return JSON.stringify(body);
+
+
+func create_edit_directory_headers(config: ConfigFile, body_length: String):
+	var app_name = config.get_value("app_info", "app_name");
+	var auth_type = config.get_value("user_info", "user_token_type");
+	var user_token = config.get_value("user_info", "user_token");
+	
+	return [
+		"User-Agent: " + app_name,
+		"Accept: application/vnd.github+json",
+		"Accept-Encoding: gzip, deflate",
+		"Authorization: " + auth_type + " " + user_token,
+		"Content-Type: application/json", 
+		"Content-Length: " + body_length,
+	];
+
+
+func make_edit_directory_file_request(scene: Node, headers: Array, body: String, url: String):
+	var h_client = HTTPRequest.new();
+	scene.add_child(h_client);
+	h_client.request_completed.connect(scene._on_http_edit_directory_completed);
+	
+	var error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
+
+	if (error != OK):
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
+	
+	return {};
+
+
+func create_edit_directory_file_request(scene: Node, directory):
+	var config = load_config();
+	
+	if (!config.has("config")):
+		return config;
+	
+	var body_str = create_edit_directory_body(config, directory);
+	var headers = create_edit_directory_headers(config, str(body_str.length()));
+	
+	var url = config.get_value("urls", "base_repo");
+	url += directory.name;
+	
+	return make_edit_directory_file_request(scene, headers, body_str, url);
