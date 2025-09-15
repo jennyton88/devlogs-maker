@@ -75,6 +75,8 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 				msg += "Successfully edited devlog!";
 			if (msg_type == "get_devlogs"):
 				msg = "";
+			if (msg_type == "get_file"):
+				msg = "Successfully downloaded file!";
 		HTTPClient.RESPONSE_CREATED:
 			if (msg_type == "post"):
 				msg += "Successfully created devlog!";

@@ -110,17 +110,24 @@ func _on_edit_button_pressed(button: Button):
 
 
 func _on_http_download_text_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+	var request = Requests.new();
+	
+	var error = request.process_results(result, response_code);
+	if (error.has("error")):
+		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
+	
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
-			var downloaded_text = body.get_string_from_utf8();
-			check_format_text(downloaded_text);
+			check_format_text(body_str);
 		_:
-			get_parent().create_notif_popup("%d\nNot implemented!" % response_code);
-			
-			print(body.get_string_from_utf8());
+			pass;
+	
+	var msg = request.build_notif_msg("get_file", response_code, body_str);
+	get_parent().create_notif_popup(msg);
 
 
 func check_format_text(text_blob) -> void:
