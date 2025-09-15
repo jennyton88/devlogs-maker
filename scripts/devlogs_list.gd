@@ -376,23 +376,26 @@ func get_directory_file():
 
 
 func _on_http_edit_directory_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+	var request = Requests.new();
+	
+	var error = request.process_results(result, response_code);
+	if (error.has("error")):
+		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
 	
-	var response = convert_to_json(body);
-	
-	var r_msg = "%d\n" % response_code;
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # update post
 			var info = response["content"];
 			update_directory_ref(info["name"], info["download_url"], info["sha"]);
-			clean_directory_edit();
-		_:
-			r_msg += "Not implemented! Failed to edit directory";
-			clean_directory_edit();
-			print(response);
-			get_parent().create_notif_popup(r_msg);
+	
+	clean_directory_edit();
+	
+	var msg = request.build_notif_msg("edit_dir", response_code, body_str);
+	if (msg != ""):
+		get_parent().create_notif_popup(msg);
 
 
 func clean_directory_edit():

@@ -71,12 +71,15 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # 200
-			if (msg_type == "post"):
-				msg += "Successfully edited devlog!";
-			if (msg_type == "get_devlogs"):
-				msg = "";
-			if (msg_type == "get_file"):
-				msg = "Successfully downloaded file!";
+			match msg_type:
+				"post":
+					msg += "Successfully edited devlog!";
+				"get_devlogs":
+					msg = "";
+				"get_file":
+					msg = "Successfully downloaded file!";
+				"edit_dir":
+					msg = "";
 		HTTPClient.RESPONSE_CREATED: # 201
 			if (msg_type == "post"):
 				msg += "Successfully created devlog!";
@@ -93,7 +96,10 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 		HTTPClient.RESPONSE_UNPROCESSABLE_ENTITY: # 422
 			msg += "Validation failed / Spam\n%s" % body;
 		_:
-			msg += "Not implemented!\n%s" % body;
+			if (msg_type == "edit_dir"):
+				msg += "Not implemented, failed to edit directory!\n%s" % body;
+			else:
+				msg += "Not implemented!\n%s" % body;
 	
 	return msg;
 
