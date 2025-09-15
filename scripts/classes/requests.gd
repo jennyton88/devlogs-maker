@@ -1,15 +1,11 @@
 class_name Requests
 
-signal create_error_popup(error, error_type);
-signal create_notif_popup(result: String);
 
 func create_post_request(scene: Node, edit_ref: Node, content: String, filename: String):
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var config = load_config();
 	
-	if error != OK:
-		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
-		return;
+	if (!config.has("config")):
+		return config;
 	
 	var body = create_post_body(config, edit_ref, content);
 	body = JSON.stringify(body);
@@ -19,7 +15,7 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	var url = config.get_value("urls", "base_repo");
 	url += filename;
 	
-	make_post_request(scene, headers, body, url);
+	return make_post_request(scene, headers, body, url);
 
 
 func create_post_body(config: ConfigFile, edit_ref: Node, content: String):
@@ -64,8 +60,9 @@ func make_post_request(scene: Node, headers: Array, body: String, url: String):
 	var error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
 	
 	if (error != OK):
-		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
-
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
+	
+	return {};
 
 # Helpers
 
@@ -91,13 +88,11 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 	return msg;
 
 
-func passed_checks(result: int, response_code: int):
+func process_results(result: int, response_code: int):
 	if (result != OK):
-		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		create_notif_popup.emit(error_result);
-		return false;
+		return { "error": "%d\nHTTP request response error.\nResult %d" % [response_code, result] };
 	
-	return true;
+	return {};
 
 
 func convert_to_json(body: String):
@@ -105,3 +100,13 @@ func convert_to_json(body: String):
 	json.parse(body);
 	
 	return json.data;
+
+
+func load_config():
+	var config = ConfigFile.new();
+	var error = config.load("user://config.cfg");
+	
+	if error != OK:
+		return { "error": error, "error_type": AppInfo.ErrorType.ConfigError };
+	
+	return { "config": config };
