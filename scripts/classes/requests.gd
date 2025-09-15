@@ -11,6 +11,7 @@ enum AcceptType {
 	GitJSON
 }
 
+
 func create_post_request(scene: Node, edit_ref: Node, content: String, filename: String):
 	var config = load_config();
 	
@@ -20,7 +21,10 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	var body = create_post_body(config, edit_ref, content);
 	body = JSON.stringify(body);
 	
-	var headers = create_post_headers(config, str(body.length()));
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData, 
+		{ "body_length": str(body.length()) }
+	);
 	
 	var url = config.get_value("urls", "base_repo");
 	url += filename;
@@ -45,21 +49,6 @@ func create_post_body(config: ConfigFile, edit_ref: Node, content: String):
 		body["sha"] = edit_ref.get_meta("sha");
 	
 	return body;
-
-
-func create_post_headers(config: ConfigFile, content_length: String):
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	return [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-		"Content-Type: application/json", 
-		"Content-Length: " + content_length,
-	];
 
 
 func make_post_request(scene: Node, headers: Array, body: String, url: String):
@@ -138,19 +127,6 @@ func load_config():
 	return { "config": config };
 
 
-func create_get_devlogs_headers(config: ConfigFile):
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	return [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-	];
-
-
 func create_get_devlogs_queries(config: ConfigFile):
 	return HTTPClient.new().query_string_from_dict({ 
 		"ref": config.get_value("repo_info", "repo_branch_update"),
@@ -176,7 +152,9 @@ func create_get_devlogs_request(scene: Node):
 	if (!config.has("config")):
 		return config;
 	
-	var headers = create_get_devlogs_headers(config);
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.GetData, {}
+	);
 	var queries = create_get_devlogs_queries(config);
 	
 	var url = config.get_value("urls", "base_repo");
@@ -185,19 +163,6 @@ func create_get_devlogs_request(scene: Node):
 	url += queries;
 	
 	return make_get_devlogs_request(scene, headers, url);
-
-
-func create_get_file_headers(config: ConfigFile):
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	return [
-		"User-Agent: " + app_name,
-		"Accept: text/plain",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-	];
 
 
 func make_download_file_request(scene: Node, headers: Array, url: String):
@@ -219,7 +184,9 @@ func create_edit_download_request(scene: Node, button: Button):
 	if (!config.has("config")):
 		return config;
 	
-	var headers = create_get_file_headers(config);
+	var headers = create_headers(
+		config, AcceptType.Text, RequestType.GetData, {}
+	);
 	var url = button.get_meta("url");
 	
 	return make_download_file_request(scene, headers, url);
@@ -238,21 +205,6 @@ func create_edit_directory_body(config: ConfigFile, directory):
 	};
 	
 	return JSON.stringify(body);
-
-
-func create_edit_directory_headers(config: ConfigFile, body_length: String):
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	return [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-		"Content-Type: application/json", 
-		"Content-Length: " + body_length,
-	];
 
 
 func make_edit_directory_file_request(scene: Node, headers: Array, body: String, url: String):
@@ -275,25 +227,15 @@ func create_edit_directory_file_request(scene: Node, directory):
 		return config;
 	
 	var body_str = create_edit_directory_body(config, directory);
-	var headers = create_edit_directory_headers(config, str(body_str.length()));
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData,
+		{ "body_length": str(body_str.length()) }
+	);
 	
 	var url = config.get_value("urls", "base_repo");
 	url += directory.name;
 	
 	return make_edit_directory_file_request(scene, headers, body_str, url);
-
-
-func create_fetch_directory_file_headers(config: ConfigFile):
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	return [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-	];
 
 
 func make_fetch_directory_file_request(scene: Node, headers: Array, url: String):
@@ -315,7 +257,9 @@ func create_fetch_directory_file_request(scene: Node, directory):
 	if (!config.has("config")):
 		return config;
 	
-	var headers = create_fetch_directory_file_headers(config);
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.GetData, {}
+	);
 	
 	var url = config.get_value("urls", "base_repo");
 	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
