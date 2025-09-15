@@ -98,34 +98,15 @@ func _on_http_get_posts_completed(result, response_code, _headers, body):
 
 
 func _on_edit_button_pressed(button: Button):
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var request = Requests.new();
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
+	var error = request.create_edit_download_request(self, button);
 	
-	edit_button_ref = button;
-	
-	var app_name = config.get_value("app_info", "app_name");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: text/plain",
-		"Accept-Encoding: gzip, deflate",
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_download_text_completed);
-	
-	var url = button.get_meta("url");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 		edit_button_ref = null;
+	else:
+		edit_button_ref = button;
 
 
 func _on_http_download_text_completed(result, response_code, _headers, body):

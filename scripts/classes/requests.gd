@@ -167,3 +167,41 @@ func create_get_devlogs_request(scene: Node):
 	url += queries;
 	
 	return make_get_devlogs_request(scene, headers, url);
+
+
+func create_get_file_headers(config: ConfigFile):
+	var app_name = config.get_value("app_info", "app_name");
+	var auth_type = config.get_value("user_info", "user_token_type");
+	var user_token = config.get_value("user_info", "user_token");
+	
+	return [
+		"User-Agent: " + app_name,
+		"Accept: text/plain",
+		"Accept-Encoding: gzip, deflate",
+		"Authorization: " + auth_type + " " + user_token,
+	];
+
+
+func make_download_file_request(scene: Node, headers: Array, url: String):
+	var h_client = HTTPRequest.new();
+	scene.add_child(h_client);
+	h_client.request_completed.connect(scene._on_http_download_text_completed);
+	
+	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
+	
+	if (error != OK):
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
+	
+	return {};
+
+
+func create_edit_download_request(scene: Node, button: Button):
+	var config = load_config();
+	
+	if (!config.has("config")):
+		return config;
+	
+	var headers = create_get_file_headers(config);
+	var url = button.get_meta("url");
+	
+	make_download_file_request(scene, headers, url);
