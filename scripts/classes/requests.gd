@@ -70,27 +70,27 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 	var msg = "%d\n" % response_code;
 	
 	match response_code:
-		HTTPClient.RESPONSE_OK:
+		HTTPClient.RESPONSE_OK: # 200
 			if (msg_type == "post"):
 				msg += "Successfully edited devlog!";
 			if (msg_type == "get_devlogs"):
 				msg = "";
 			if (msg_type == "get_file"):
 				msg = "Successfully downloaded file!";
-		HTTPClient.RESPONSE_CREATED:
+		HTTPClient.RESPONSE_CREATED: # 201
 			if (msg_type == "post"):
 				msg += "Successfully created devlog!";
-		HTTPClient.RESPONSE_FOUND:
+		HTTPClient.RESPONSE_FOUND: # 302
 			msg += "Found, but temporarily redirected\n%s" % body;
 		HTTPClient.RESPONSE_NOT_MODIFIED:
 			msg += "Nothing changed\n%s" % body;
-		HTTPClient.RESPONSE_NOT_FOUND:
+		HTTPClient.RESPONSE_NOT_FOUND: # 404
 			msg += "Not Found!\n%s" % body;
-		HTTPClient.RESPONSE_CONFLICT:
+		HTTPClient.RESPONSE_CONFLICT: # 409
 			msg += "Conflict!\n%s" % body;
-		HTTPClient.RESPONSE_FORBIDDEN:
+		HTTPClient.RESPONSE_FORBIDDEN: # 403
 			msg += "You don't have access to that!\n%s" % body;
-		HTTPClient.RESPONSE_UNPROCESSABLE_ENTITY:
+		HTTPClient.RESPONSE_UNPROCESSABLE_ENTITY: # 422
 			msg += "Validation failed / Spam\n%s" % body;
 		_:
 			msg += "Not implemented!\n%s" % body;
