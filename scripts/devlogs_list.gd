@@ -404,32 +404,12 @@ func clean_directory_edit():
 
 
 func fetch_directory_file():
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var request = Requests.new();
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	var app_name = config.get_value("app_info", "app_name");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_download_json_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	var error = request.create_fetch_directory_file_request(self, directory);
+
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 
 
 func _on_http_download_json_completed(result, response_code, _headers, body):

@@ -271,3 +271,43 @@ func create_edit_directory_file_request(scene: Node, directory):
 	url += directory.name;
 	
 	return make_edit_directory_file_request(scene, headers, body_str, url);
+
+
+func create_fetch_directory_file_headers(config: ConfigFile):
+	var app_name = config.get_value("app_info", "app_name");
+	var auth_type = config.get_value("user_info", "user_token_type");
+	var user_token = config.get_value("user_info", "user_token");
+	
+	return [
+		"User-Agent: " + app_name,
+		"Accept: application/vnd.github+json",
+		"Accept-Encoding: gzip, deflate",
+		"Authorization: " + auth_type + " " + user_token,
+	];
+
+
+func make_fetch_directory_file_request(scene: Node, headers: Array, url: String):
+	var h_client = HTTPRequest.new();
+	scene.add_child(h_client);
+	h_client.request_completed.connect(scene._on_http_download_json_completed);
+	
+	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
+	
+	if (error != OK):
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
+	
+	return {};
+
+
+func create_fetch_directory_file_request(scene: Node, directory):
+	var config = load_config();
+	
+	if (!config.has("config")):
+		return config;
+	
+	var headers = create_fetch_directory_file_headers(config);
+	
+	var url = config.get_value("urls", "base_repo");
+	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
+	
+	return make_fetch_directory_file_request(scene, headers, url);
