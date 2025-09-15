@@ -53,15 +53,16 @@ func _on_post_curr_text():
 		return;
 	
 	var post_request = Requests.new();
-	if (!post_request.create_error_popup.is_connected(create_error_popup)):
-		post_request.create_error_popup.connect(create_error_popup);
 	
-	post_request.create_post_request(
+	var error = post_request.create_post_request(
 		self, 
 		post_list.get_edit_ref(), 
 		text_preview.get_text(),
 		finalize.get_filename()
 	);
+	
+	if (error.has("error")):
+		workspace_container.create_error_popup(error["error"], error["error_type"]);
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
@@ -70,10 +71,11 @@ func _on_text_changed_preview(_new_text: String) -> void:
 
 func _on_http_post_completed(result, response_code, _headers, body):
 	var request = Requests.new();
-	if (!request.create_notif_popup.is_connected(create_notif_popup)):
-		request.create_notif_popup.connect(create_notif_popup);
 	
-	if (!request.passed_checks(result, response_code)):
+	var error = request.process_results(result, response_code);
+	
+	if (error.has("error")):
+		workspace_container.create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
 	
 	var body_str = body.get_string_from_utf8();
@@ -92,10 +94,11 @@ func _on_http_post_completed(result, response_code, _headers, body):
 			post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
 			post_list.update_directory_file(info["name"], "add");
 			clear_post();
-	
-	var msg = request.create_notif_msg("post", response_code, body_str);
+		_:
+			pass;
+		
+	var msg = request.build_notif_msg("post", response_code, body_str);
 	workspace_container.create_notif_popup(msg);
-	request.create_notif_popup.disconnect(create_notif_popup);
 
 
 func _on_enable_buttons():
