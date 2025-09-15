@@ -110,3 +110,52 @@ func load_config():
 		return { "error": error, "error_type": AppInfo.ErrorType.ConfigError };
 	
 	return { "config": config };
+
+
+func create_get_devlogs_headers(config: ConfigFile):
+	var app_name = config.get_value("app_info", "app_name");
+	var auth_type = config.get_value("user_info", "user_token_type");
+	var user_token = config.get_value("user_info", "user_token");
+	
+	return [
+		"User-Agent: " + app_name,
+		"Accept: application/vnd.github+json",
+		"Accept-Encoding: gzip, deflate",
+		"Authorization: " + auth_type + " " + user_token,
+	];
+
+
+func create_get_devlogs_queries(config: ConfigFile):
+	return HTTPClient.new().query_string_from_dict({ 
+		"ref": config.get_value("repo_info", "repo_branch_update"),
+	});
+
+
+func make_get_devlogs_request(scene: Node, headers: Array, url: String):
+	var h_client = HTTPRequest.new();
+	scene.add_child(h_client);
+	h_client.request_completed.connect(scene._on_http_get_posts_completed);
+	
+	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
+	
+	if (error != OK):
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
+	
+	return {};
+
+
+func create_get_devlogs_request(scene: Node):
+	var config = load_config();
+	
+	if (!config.has("config")):
+		return config;
+	
+	var headers = create_get_devlogs_headers(config);
+	var queries = create_get_devlogs_queries(config);
+	
+	var url = config.get_value("urls", "base_repo");
+	# TODO url stripping depending on type of content path
+	url = url.rstrip("/") + "?"; # [/text_files/ vs /text_files] redirected to main branch
+	url += queries;
+	
+	return make_get_devlogs_request(scene, headers, url);

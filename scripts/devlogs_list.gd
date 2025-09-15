@@ -51,49 +51,24 @@ func create_post_info(new_file_name: String, url: String, sha: String):
 	list.add_child(container);
 
 
-func _on_get_devlogs():
+func clear_list():
 	var amt_of_children = list.get_child_count();
 	if (amt_of_children > 1):
 		var children = list.get_children();
 		for i in range(amt_of_children - 1, 0, -1):
 			list.remove_child(children[i]);
 			children[i].queue_free();
+
+
+func _on_get_devlogs():
+	clear_list();
 	
-	var config = load_config_file();
+	var request = Requests.new();
+	var error = request.create_get_devlogs_request(self);
 	
-	if (config == null):
-		return;
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	var fields = { 
-		"ref": config.get_value("repo_info", "repo_branch_update"),
-	};
-	
-	var queries = HTTPClient.new().query_string_from_dict(fields);
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_get_posts_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	# TODO url stripping depending on type of content path
-	url = url.rstrip("/") + "?"; # [/text_files/ vs /text_files] redirected to main branch
-	url += queries;
-	
-	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
+
 
 
 func _on_http_get_posts_completed(result, response_code, _headers, body):
