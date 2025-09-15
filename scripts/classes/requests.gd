@@ -293,3 +293,35 @@ func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: R
 			pass;
 	
 	return headers;
+
+
+
+func create_get_directory_file_request(scene: Node, directory):
+	var config = load_config();
+	
+	if (!config.has("config")):
+		return config;
+	
+	var headers = create_headers(
+		config, AcceptType.Text, RequestType.GetData, {}
+	);
+	
+	var url = directory.download_url;
+	
+	return make_get_directory_file_request(scene, headers, url);
+	
+	
+
+
+
+func make_get_directory_file_request(scene: Node, headers: Array, url: String):
+	var h_client = HTTPRequest.new();
+	scene.add_child(h_client);
+	h_client.request_completed.connect(scene._on_http_download_text_completed);
+	
+	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
+	
+	if (error != OK):
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
+	
+	return {};
