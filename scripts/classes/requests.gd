@@ -1,6 +1,16 @@
 class_name Requests
 
 
+enum RequestType {
+	SendData,
+	GetData
+}
+
+enum AcceptType {
+	Text,
+	GitJSON
+}
+
 func create_post_request(scene: Node, edit_ref: Node, content: String, filename: String):
 	var config = load_config();
 	
@@ -311,3 +321,31 @@ func create_fetch_directory_file_request(scene: Node, directory):
 	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
 	
 	return make_fetch_directory_file_request(scene, headers, url);
+
+
+func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: RequestType, addt_data: Dictionary):
+	var app_name = config.get_value("app_info", "app_name");
+	var auth_type = config.get_value("user_info", "user_token_type");
+	var user_token = config.get_value("user_info", "user_token");
+	
+	var accept = "application/vnd.github+json"; # default
+	if (accept_type == AcceptType.Text):
+		accept = "text/plain";
+	
+	var headers = [
+		"User-Agent: " + app_name,
+		"Accept: %s" % accept,
+		"Accept-Encoding: gzip, deflate",
+		"Authorization: " + auth_type + " " + user_token,
+	];
+	
+	match request_type:
+		RequestType.SendData:
+			headers.append_array([
+				"Content-Type: application/json",
+				"Content-Length: " + addt_data["body_length"]
+			]);
+		_:
+			pass;
+	
+	return headers;
