@@ -73,13 +73,21 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 		HTTPClient.RESPONSE_OK:
 			if (msg_type == "post"):
 				msg += "Successfully edited devlog!";
+			if (msg_type == "get_devlogs"):
+				msg = "";
 		HTTPClient.RESPONSE_CREATED:
 			if (msg_type == "post"):
 				msg += "Successfully created devlog!";
+		HTTPClient.RESPONSE_FOUND:
+			msg += "Found, but temporarily redirected\n%s" % body;
+		HTTPClient.RESPONSE_NOT_MODIFIED:
+			msg += "Nothing changed\n%s" % body;
 		HTTPClient.RESPONSE_NOT_FOUND:
 			msg += "Not Found!\n%s" % body;
 		HTTPClient.RESPONSE_CONFLICT:
 			msg += "Conflict!\n%s" % body;
+		HTTPClient.RESPONSE_FORBIDDEN:
+			msg += "You don't have access to that!\n%s" % body;
 		HTTPClient.RESPONSE_UNPROCESSABLE_ENTITY:
 			msg += "Validation failed / Spam\n%s" % body;
 		_:
