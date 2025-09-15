@@ -206,4 +206,4 @@ func create_edit_download_request(scene: Node, button: Button):
 	var headers = create_get_file_headers(config);
 	var url = button.get_meta("url");
 	
-	make_download_file_request(scene, headers, url);
+	return make_download_file_request(scene, headers, url);
