@@ -184,21 +184,6 @@ func create_edit_download_request(scene: Node, button: Button):
 	return make_download_file_request(scene, headers, url);
 
 
-func create_edit_directory_body(config: ConfigFile, directory):
-	var body = {
-		"message": "Edited directory.",
-		"content": Marshalls.utf8_to_base64(directory.data),
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"branch": config.get_value("repo_info", "repo_branch_update"),
-		"sha": directory.sha
-	};
-	
-	return JSON.stringify(body);
-
-
 func make_edit_directory_file_request(scene: Node, headers: Array, body: String, url: String):
 	var h_client = HTTPRequest.new();
 	scene.add_child(h_client);
@@ -218,7 +203,8 @@ func create_edit_directory_file_request(scene: Node, directory):
 	if (!config.has("config")):
 		return config;
 	
-	var body_str = create_edit_directory_body(config, directory);
+	var addt_data = { "content": directory["data"], "sha": directory["sha"] };
+	var body_str = create_body(config, "Edited directory.", addt_data);
 	var headers = create_headers(
 		config, AcceptType.GitJSON, RequestType.SendData,
 		{ "body_length": str(body_str.length()) }
