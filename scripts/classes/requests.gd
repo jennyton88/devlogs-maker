@@ -18,9 +18,16 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	if (!config.has("config")):
 		return config;
 	
-	var body = create_post_body(config, edit_ref, content);
-	body = JSON.stringify(body);
+	var addt_data = { "content": content };
+	var msg = "Posted";
 	
+	if (edit_ref != null):
+		addt_data["sha"] = edit_ref.get_meta("sha");
+		msg = "Edited";
+	
+	msg += " devlog.";
+	
+	var body = create_body(config, msg, addt_data);
 	var headers = create_headers(
 		config, AcceptType.GitJSON, RequestType.SendData, 
 		{ "body_length": str(body.length()) }
@@ -30,25 +37,6 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	url += filename;
 	
 	return make_post_request(scene, headers, body, url);
-
-
-func create_post_body(config: ConfigFile, edit_ref: Node, content: String):
-	var msg = "Edited" if edit_ref != null else "Posted";
-	
-	var body = {
-		"message": "%s devlog." % msg,
-		"content": Marshalls.utf8_to_base64(content),
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"branch": config.get_value("repo_info", "repo_branch_update")
-	};
-	
-	if (edit_ref != null):
-		body["sha"] = edit_ref.get_meta("sha");
-	
-	return body;
 
 
 func make_post_request(scene: Node, headers: Array, body: String, url: String):
