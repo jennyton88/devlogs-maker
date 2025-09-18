@@ -27,16 +27,16 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	
 	msg += " devlog.";
 	
-	var body = create_body(config, msg, addt_data);
+	var body_str = create_body(config, msg, addt_data);
 	var headers = create_headers(
 		config, AcceptType.GitJSON, RequestType.SendData, 
-		{ "body_length": str(body.length()) }
+		{ "body_length": str(body_str.length()) }
 	);
 	
 	var url = config.get_value("urls", "base_repo");
 	url += filename;
 	
-	return make_post_request(scene, headers, body, url);
+	return make_post_request(scene, headers, body_str, url);
 
 
 func make_post_request(scene: Node, headers: Array, body: String, url: String):
