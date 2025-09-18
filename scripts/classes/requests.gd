@@ -112,19 +112,6 @@ func create_queries(fields: Dictionary):
 	return HTTPClient.new().query_string_from_dict(fields);
 
 
-func make_get_devlogs_request(scene: Node, headers: Array, url: String):
-	var h_client = HTTPRequest.new();
-	scene.add_child(h_client);
-	h_client.request_completed.connect(scene._on_http_get_posts_completed);
-	
-	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
-	
-	return {};
-
-
 func create_get_devlogs_request(scene: Node):
 	var config = load_config();
 	
@@ -142,7 +129,10 @@ func create_get_devlogs_request(scene: Node):
 	url = url.rstrip("/") + "?"; # [/text_files/ vs /text_files] redirected to main branch
 	url += queries;
 	
-	return make_get_devlogs_request(scene, headers, url);
+	return make_http_request(
+		scene, scene._on_http_get_posts_completed, HTTPClient.METHOD_GET,
+		url, headers
+	);
 
 
 func make_download_file_request(scene: Node, headers: Array, url: String):
