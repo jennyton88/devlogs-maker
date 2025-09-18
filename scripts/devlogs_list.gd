@@ -118,7 +118,6 @@ func _on_http_download_text_completed(result, response_code, _headers, body):
 		return;
 	
 	var body_str = body.get_string_from_utf8();
-	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
@@ -234,7 +233,6 @@ func _on_http_delete_post_completed(result, response_code, _headers, body):
 		return;
 	
 	var body_str = body.get_string_from_utf8();
-	var response = request.convert_to_json(body_str);
 	
 	var msg = request.build_notif_msg("delete_file", response_code, body_str);
 	get_parent().create_notif_popup(msg);
