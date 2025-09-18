@@ -11,35 +11,72 @@ enum AcceptType {
 	GitJSON
 }
 
+# =====================
+# === Main Methods ====
+# =====================
 
-func create_post_request(scene: Node, edit_ref: Node, content: String, filename: String):
-	var config = load_config();
+func make_http_request(
+	scene: Node, callable: Callable, method: HTTPClient.Method, 
+	url: String, headers: Array, request_data: String = ""
+) -> Dictionary:
+	var h_client = HTTPRequest.new();
+	scene.add_child(h_client);
+	h_client.request_completed.connect(callable);
 	
-	if (typeof(config) == TYPE_DICTIONARY):
-		return config;
+	var error = h_client.request(url, headers, method, request_data);
 	
-	var addt_data = { "content": content };
-	var msg = "Posted";
+	if (error != OK):
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
 	
-	if (edit_ref != null):
-		addt_data["sha"] = edit_ref.get_meta("sha");
-		msg = "Edited";
+	return {};
+
+
+func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> String:
+	var body = { # required for commits
+		"message": msg,
+		"committer": {
+			"name": config.get_value("user_info", "user_name"),
+			"email": config.get_value("user_info", "user_email"),
+		},
+		"branch": config.get_value("repo_info", "repo_branch_update")
+	};
 	
-	msg += " devlog.";
+	# addt. info to add if applicable
+	if (addt_data.has("sha")):
+		body["sha"] = addt_data["sha"];
 	
-	var body_str = create_body(config, msg, addt_data);
-	var headers = create_headers(
-		config, AcceptType.GitJSON, RequestType.SendData, 
-		{ "body_length": str(body_str.length()) }
-	);
+	if (addt_data.has("content")):
+		body["content"] = Marshalls.utf8_to_base64(addt_data["content"]);
 	
-	var url = config.get_value("urls", "base_repo");
-	url += filename;
+	return JSON.stringify(body);
+
+
+func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: RequestType, addt_data: Dictionary):
+	var app_name = config.get_value("app_info", "app_name");
+	var auth_type = config.get_value("user_info", "user_token_type");
+	var user_token = config.get_value("user_info", "user_token");
 	
-	return make_http_request(
-		scene, scene._on_http_post_completed, HTTPClient.METHOD_PUT, 
-		url, headers, body_str
-	);
+	var accept = "application/vnd.github+json"; # default
+	if (accept_type == AcceptType.Text):
+		accept = "text/plain";
+	
+	var headers = [
+		"User-Agent: " + app_name,
+		"Accept: %s" % accept,
+		"Accept-Encoding: gzip, deflate",
+		"Authorization: " + auth_type + " " + user_token,
+	];
+	
+	match request_type:
+		RequestType.SendData:
+			headers.append_array([
+				"Content-Type: application/json",
+				"Content-Length: " + addt_data["body_length"]
+			]);
+		_:
+			pass;
+	
+	return headers;
 
 
 func build_notif_msg(msg_type: String, response_code: int, body: String):
@@ -84,6 +121,15 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 	return msg;
 
 
+func create_queries(fields: Dictionary):
+	return HTTPClient.new().query_string_from_dict(fields);
+
+
+# =====================
+# ====== Helpers ======
+# =====================
+
+
 func process_results(result: int, response_code: int):
 	if (result != OK):
 		return { "error": "%d\nHTTP request response error.\nResult %d" % [response_code, result] };
@@ -107,10 +153,9 @@ func load_config():
 	
 	return config;
 
-
-func create_queries(fields: Dictionary):
-	return HTTPClient.new().query_string_from_dict(fields);
-
+# =====================
+# == Custom Requests ==
+# =====================
 
 func create_get_devlogs_request(scene: Node):
 	var config = load_config();
@@ -132,6 +177,36 @@ func create_get_devlogs_request(scene: Node):
 	return make_http_request(
 		scene, scene._on_http_get_posts_completed, HTTPClient.METHOD_GET,
 		url, headers
+	);
+
+
+func create_post_request(scene: Node, edit_ref: Node, content: String, filename: String):
+	var config = load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY):
+		return config;
+	
+	var addt_data = { "content": content };
+	var msg = "Posted";
+	
+	if (edit_ref != null):
+		addt_data["sha"] = edit_ref.get_meta("sha");
+		msg = "Edited";
+	
+	msg += " devlog.";
+	
+	var body_str = create_body(config, msg, addt_data);
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData, 
+		{ "body_length": str(body_str.length()) }
+	);
+	
+	var url = config.get_value("urls", "base_repo");
+	url += filename;
+	
+	return make_http_request(
+		scene, scene._on_http_post_completed, HTTPClient.METHOD_PUT, 
+		url, headers, body_str
 	);
 
 
@@ -193,54 +268,6 @@ func create_fetch_directory_file_request(scene: Node, directory):
 	);
 
 
-func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: RequestType, addt_data: Dictionary):
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	var accept = "application/vnd.github+json"; # default
-	if (accept_type == AcceptType.Text):
-		accept = "text/plain";
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: %s" % accept,
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-	];
-	
-	match request_type:
-		RequestType.SendData:
-			headers.append_array([
-				"Content-Type: application/json",
-				"Content-Length: " + addt_data["body_length"]
-			]);
-		_:
-			pass;
-	
-	return headers;
-
-
-func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> String:
-	var body = { # required for commits
-		"message": msg,
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"branch": config.get_value("repo_info", "repo_branch_update")
-	};
-	
-	# addt. info to add if applicable
-	if (addt_data.has("sha")):
-		body["sha"] = addt_data["sha"];
-	
-	if (addt_data.has("content")):
-		body["content"] = Marshalls.utf8_to_base64(addt_data["content"]);
-	
-	return JSON.stringify(body);
-
-
 func create_get_directory_file_request(scene: Node, directory):
 	var config = load_config();
 	
@@ -280,19 +307,3 @@ func create_delete_file_request(scene: Node, entry_delete_button: Button):
 		scene, scene._on_http_delete_post_completed, HTTPClient.METHOD_DELETE,
 		url, headers, body_str
 	);
-
-
-func make_http_request(
-	scene: Node, callable: Callable, method: HTTPClient.Method, 
-	url: String, headers: Array, request_data: String = ""
-) -> Dictionary:
-	var h_client = HTTPRequest.new();
-	scene.add_child(h_client);
-	h_client.request_completed.connect(callable);
-	
-	var error = h_client.request(url, headers, method, request_data);
-	
-	if (error != OK):
-		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
-	
-	return {};
