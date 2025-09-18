@@ -306,9 +306,6 @@ func create_get_directory_file_request(scene: Node, directory):
 	var url = directory.download_url;
 	
 	return make_get_directory_file_request(scene, headers, url);
-	
-	
-
 
 
 func make_get_directory_file_request(scene: Node, headers: Array, url: String):
@@ -322,18 +319,6 @@ func make_get_directory_file_request(scene: Node, headers: Array, url: String):
 		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
 	
 	return {};
-
-
-func create_delete_file_body(config: ConfigFile, button_ref: Button):
-	return JSON.stringify({
-		"message": "Deleted devlog.",
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"sha": button_ref.get_meta("sha"),
-		"branch": config.get_value("repo_info", "repo_branch_update")
-	});
 
 
 func make_delete_file_request(scene: Node, headers: Array, body: String, url: String):
@@ -357,8 +342,7 @@ func create_delete_file_request(scene: Node, entry_delete_button: Button):
 	
 	var button_ref = entry_delete_button;
 	
-	var body_str = create_delete_file_body(config, button_ref);
-	
+	var body_str = create_body(config, "Deleted devlog.", { "sha": button_ref.get_meta("sha") });
 	var headers = create_headers(
 		config, AcceptType.GitJSON, RequestType.SendData, 
 		{ "body_length": str(body_str.length()) }
