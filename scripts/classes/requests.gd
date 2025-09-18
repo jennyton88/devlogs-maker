@@ -329,3 +329,49 @@ func make_get_directory_file_request(scene: Node, headers: Array, url: String):
 		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
 	
 	return {};
+
+
+func create_delete_file_body(config: ConfigFile, button_ref: Button):
+	return JSON.stringify({
+		"message": "Deleted devlog.",
+		"committer": {
+			"name": config.get_value("user_info", "user_name"),
+			"email": config.get_value("user_info", "user_email"),
+		},
+		"sha": button_ref.get_meta("sha"),
+		"branch": config.get_value("repo_info", "repo_branch_update")
+	});
+
+
+func make_delete_file_request(scene: Node, headers: Array, body: String, url: String):
+	var h_client = HTTPRequest.new();
+	scene.add_child(h_client);
+	h_client.request_completed.connect(scene._on_http_delete_post_completed);
+	
+	var error = h_client.request(url, headers, HTTPClient.METHOD_DELETE, body);
+	
+	if (error != OK):
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
+	
+	return {};
+
+
+func create_delete_file_request(scene: Node, entry_delete_button: Button):
+	var config = load_config();
+	
+	if (!config.has("config")):
+		return config;
+	
+	var button_ref = entry_delete_button;
+	
+	var body_str = create_delete_file_body(config, button_ref);
+	
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData, 
+		{ "body_length": str(body_str.length()) }
+	);
+	
+	var url = config.get_value("urls", "base_repo");
+	url += button_ref.get_meta("name");
+	
+	return make_delete_file_request(scene, headers, body_str, url);

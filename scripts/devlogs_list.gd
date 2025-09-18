@@ -194,51 +194,12 @@ func _on_delete_button_pressed(log_entry_delete_button: Button):
 	);
 
 
-func _on_serious_delete_button_pressed(log_entry_delete_button: Button):
-	var button_ref = log_entry_delete_button;
+func _on_serious_delete_button_pressed(entry_delete_button: Button):
+	var request = Requests.new();
+	var button_ref = entry_delete_button;
+	var error = request.create_delete_file_request(self, button_ref);
 	
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
-	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	var body = {
-		"message": "Deleted devlog.",
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"sha": button_ref.get_meta("sha"),
-		"branch": config.get_value("repo_info", "repo_branch_update")
-	};
-	
-	body = JSON.stringify(body);
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-		"Content-Type: application/json", 
-		"Content-Length: " + str(body.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_delete_post_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += button_ref.get_meta("name");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_DELETE, body);
-	
-	if (error != OK):
+	if (error.has('error')):
 		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 	else:
 		if (edit_button_ref != null && (button_ref.get_meta("sha") == edit_button_ref.get_meta("sha"))):
