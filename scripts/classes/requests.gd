@@ -299,6 +299,25 @@ func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: R
 	return headers;
 
 
+func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> String:
+	var body = { # required for commits
+		"message": msg,
+		"committer": {
+			"name": config.get_value("user_info", "user_name"),
+			"email": config.get_value("user_info", "user_email"),
+		},
+		"branch": config.get_value("repo_info", "repo_branch_update")
+	};
+	
+	# addt. info to add if applicable
+	if (addt_data.has["sha"]):
+		body["sha"] = addt_data["sha"];
+	
+	if (addt_data.has["content"]):
+		body["content"] = Marshalls.utf8_to_base64(addt_data["content"]);
+	
+	return JSON.stringify(body);
+
 
 func create_get_directory_file_request(scene: Node, directory):
 	var config = load_config();
