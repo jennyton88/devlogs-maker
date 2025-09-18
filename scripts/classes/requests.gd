@@ -174,19 +174,6 @@ func create_edit_directory_file_request(scene: Node, directory):
 	);
 
 
-func make_fetch_directory_file_request(scene: Node, headers: Array, url: String):
-	var h_client = HTTPRequest.new();
-	scene.add_child(h_client);
-	h_client.request_completed.connect(scene._on_http_download_json_completed);
-	
-	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
-	
-	return {};
-
-
 func create_fetch_directory_file_request(scene: Node, directory):
 	var config = load_config();
 	
@@ -200,7 +187,10 @@ func create_fetch_directory_file_request(scene: Node, directory):
 	var url = config.get_value("urls", "base_repo");
 	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
 	
-	return make_fetch_directory_file_request(scene, headers, url);
+	return make_http_request(
+		scene, scene._on_http_download_json_completed, HTTPClient.METHOD_GET,
+		url, headers
+	);
 
 
 func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: RequestType, addt_data: Dictionary):
