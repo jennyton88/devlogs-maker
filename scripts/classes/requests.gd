@@ -283,10 +283,10 @@ func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> Stri
 	};
 	
 	# addt. info to add if applicable
-	if (addt_data.has["sha"]):
+	if (addt_data.has("sha")):
 		body["sha"] = addt_data["sha"];
 	
-	if (addt_data.has["content"]):
+	if (addt_data.has("content")):
 		body["content"] = Marshalls.utf8_to_base64(addt_data["content"]);
 	
 	return JSON.stringify(body);
