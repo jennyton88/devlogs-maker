@@ -79,6 +79,8 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 					msg = "Successfully downloaded file!";
 				"edit_dir":
 					msg = "";
+				"delete_file":
+					msg = "Successfully deleted!";
 		HTTPClient.RESPONSE_CREATED: # 201
 			if (msg_type == "post"):
 				msg += "Successfully created devlog!";
@@ -94,6 +96,8 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 			msg += "You don't have access to that!\n%s" % body;
 		HTTPClient.RESPONSE_UNPROCESSABLE_ENTITY: # 422
 			msg += "Validation failed / Spam\n%s" % body;
+		HTTPClient.RESPONSE_SERVICE_UNAVAILABLE: # 503
+			msg += "Service unavailable, try again later\n%s" % body;
 		_:
 			if (msg_type == "edit_dir"):
 				msg += "Not implemented, failed to edit directory!\n%s" % body;
