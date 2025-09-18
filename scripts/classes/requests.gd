@@ -119,10 +119,8 @@ func load_config():
 	return { "config": config };
 
 
-func create_get_devlogs_queries(config: ConfigFile):
-	return HTTPClient.new().query_string_from_dict({ 
-		"ref": config.get_value("repo_info", "repo_branch_update"),
-	});
+func create_queries(fields: Dictionary):
+	return HTTPClient.new().query_string_from_dict(fields);
 
 
 func make_get_devlogs_request(scene: Node, headers: Array, url: String):
@@ -147,7 +145,8 @@ func create_get_devlogs_request(scene: Node):
 	var headers = create_headers(
 		config, AcceptType.GitJSON, RequestType.GetData, {}
 	);
-	var queries = create_get_devlogs_queries(config);
+	var fields = { "ref": config.get_value("repo_info", "repo_branch_update") };
+	var queries = create_queries(fields);
 	
 	var url = config.get_value("urls", "base_repo");
 	# TODO url stripping depending on type of content path
