@@ -351,3 +351,19 @@ func create_delete_file_request(scene: Node, entry_delete_button: Button):
 	url += button_ref.get_meta("name");
 	
 	return make_delete_file_request(scene, headers, body_str, url);
+
+
+func make_http_request(
+	scene: Node, callable: Callable, method: HTTPClient.Method, 
+	headers: Array, url: String, request_data: String = ""
+) -> Dictionary:
+	var h_client = HTTPRequest.new();
+	scene.add_child(h_client);
+	h_client.request_completed.connect(callable);
+	
+	var error = h_client.request(url, headers, method, request_data);
+	
+	if (error != OK):
+		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
+	
+	return {};
