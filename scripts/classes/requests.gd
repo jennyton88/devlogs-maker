@@ -135,19 +135,6 @@ func create_get_devlogs_request(scene: Node):
 	);
 
 
-func make_download_file_request(scene: Node, headers: Array, url: String):
-	var h_client = HTTPRequest.new();
-	scene.add_child(h_client);
-	h_client.request_completed.connect(scene._on_http_download_text_completed);
-	
-	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
-	
-	return {};
-
-
 func create_edit_download_request(scene: Node, button: Button):
 	var config = load_config();
 	
@@ -159,7 +146,10 @@ func create_edit_download_request(scene: Node, button: Button):
 	);
 	var url = button.get_meta("url");
 	
-	return make_download_file_request(scene, headers, url);
+	return make_http_request(
+		scene, scene._on_http_download_text_completed, HTTPClient.METHOD_GET,
+		url, headers
+	);
 
 
 func make_edit_directory_file_request(scene: Node, headers: Array, body: String, url: String):
