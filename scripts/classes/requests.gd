@@ -36,22 +36,11 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	var url = config.get_value("urls", "base_repo");
 	url += filename;
 	
-	return make_post_request(scene, headers, body_str, url);
+	return make_http_request(
+		scene, scene._on_http_post_completed, HTTPClient.METHOD_PUT, 
+		url, headers, body_str
+	);
 
-
-func make_post_request(scene: Node, headers: Array, body: String, url: String):
-	var h_client = HTTPRequest.new();
-	scene.add_child(h_client);
-	h_client.request_completed.connect(scene._on_http_post_completed);
-	
-	var error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
-	
-	if (error != OK):
-		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
-	
-	return {};
-
-# Helpers
 
 func build_notif_msg(msg_type: String, response_code: int, body: String):
 	var msg = "%d\n" % response_code;
