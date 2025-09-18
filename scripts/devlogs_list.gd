@@ -209,41 +209,14 @@ func _on_serious_delete_button_pressed(entry_delete_button: Button):
 		update_directory_file(deleted_filename, "delete");
 
 
-
-func load_config_file() -> ConfigFile:
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
-	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return null;
-	
-	return config;
-
-
-
-func failed_checks(result: int, response_code: int):
-	if (result != OK):
-		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		get_parent().create_notif_popup(error_result);
-		return true;
-
-
-func convert_to_json(body):
-	var json = JSON.new();
-	json.parse(body.get_string_from_utf8());
-	
-	return json.get_data();
-
-
 func check_file_name(curr_file_name: String) -> String:
 	var regex = RegEx.new();
 	regex.compile("^(\\d{4})_(\\d{2})_(\\d{2})");
 	var matches = regex.search(curr_file_name);
-
+	
 	if (matches):
 		return "devlog";
-
+		
 	if (curr_file_name == "directory.txt"):
 		return "directory";
 	
@@ -292,7 +265,7 @@ func edit_directory_file():
 	var request = Requests.new();
 	
 	var error = request.create_edit_directory_file_request(self, directory);
-
+	
 	if (error.has("error")):
 		get_parent().create_error_popup(error["error"], error["error_type"]);
 
@@ -353,7 +326,7 @@ func _on_http_download_json_completed(result, response_code, _headers, body):
 	if (error.has("error")):
 		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
-
+	
 	var body_str = body.get_string_from_utf8();
 	var response = request.convert_to_json(body_str);
 	
