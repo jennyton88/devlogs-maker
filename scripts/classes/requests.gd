@@ -355,7 +355,7 @@ func create_delete_file_request(scene: Node, entry_delete_button: Button):
 
 func make_http_request(
 	scene: Node, callable: Callable, method: HTTPClient.Method, 
-	headers: Array, url: String, request_data: String = ""
+	url: String, headers: Array, request_data: String = ""
 ) -> Dictionary:
 	var h_client = HTTPRequest.new();
 	scene.add_child(h_client);
