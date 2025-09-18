@@ -15,7 +15,7 @@ enum AcceptType {
 func create_post_request(scene: Node, edit_ref: Node, content: String, filename: String):
 	var config = load_config();
 	
-	if (!config.has("config")):
+	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
 	var addt_data = { "content": content };
@@ -116,7 +116,7 @@ func load_config():
 	if error != OK:
 		return { "error": error, "error_type": AppInfo.ErrorType.ConfigError };
 	
-	return { "config": config };
+	return config;
 
 
 func create_queries(fields: Dictionary):
@@ -139,7 +139,7 @@ func make_get_devlogs_request(scene: Node, headers: Array, url: String):
 func create_get_devlogs_request(scene: Node):
 	var config = load_config();
 	
-	if (!config.has("config")):
+	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
 	var headers = create_headers(
@@ -172,7 +172,7 @@ func make_download_file_request(scene: Node, headers: Array, url: String):
 func create_edit_download_request(scene: Node, button: Button):
 	var config = load_config();
 	
-	if (!config.has("config")):
+	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
 	var headers = create_headers(
@@ -199,7 +199,7 @@ func make_edit_directory_file_request(scene: Node, headers: Array, body: String,
 func create_edit_directory_file_request(scene: Node, directory):
 	var config = load_config();
 	
-	if (!config.has("config")):
+	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
 	var addt_data = { "content": directory["data"], "sha": directory["sha"] };
@@ -231,7 +231,7 @@ func make_fetch_directory_file_request(scene: Node, headers: Array, url: String)
 func create_fetch_directory_file_request(scene: Node, directory):
 	var config = load_config();
 	
-	if (!config.has("config")):
+	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
 	var headers = create_headers(
@@ -295,7 +295,7 @@ func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> Stri
 func create_get_directory_file_request(scene: Node, directory):
 	var config = load_config();
 	
-	if (!config.has("config")):
+	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
 	var headers = create_headers(
@@ -336,7 +336,7 @@ func make_delete_file_request(scene: Node, headers: Array, body: String, url: St
 func create_delete_file_request(scene: Node, entry_delete_button: Button):
 	var config = load_config();
 	
-	if (!config.has("config")):
+	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
 	var button_ref = entry_delete_button;
