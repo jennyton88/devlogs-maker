@@ -152,19 +152,6 @@ func create_edit_download_request(scene: Node, button: Button):
 	);
 
 
-func make_edit_directory_file_request(scene: Node, headers: Array, body: String, url: String):
-	var h_client = HTTPRequest.new();
-	scene.add_child(h_client);
-	h_client.request_completed.connect(scene._on_http_edit_directory_completed);
-	
-	var error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
-
-	if (error != OK):
-		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
-	
-	return {};
-
-
 func create_edit_directory_file_request(scene: Node, directory):
 	var config = load_config();
 	
@@ -181,7 +168,10 @@ func create_edit_directory_file_request(scene: Node, directory):
 	var url = config.get_value("urls", "base_repo");
 	url += directory.name;
 	
-	return make_edit_directory_file_request(scene, headers, body_str, url);
+	return make_http_request(
+		scene, scene._on_http_edit_directory_completed, HTTPClient.METHOD_PUT,
+		url, headers, body_str
+	);
 
 
 func make_fetch_directory_file_request(scene: Node, headers: Array, url: String):
