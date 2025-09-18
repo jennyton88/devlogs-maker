@@ -304,20 +304,10 @@ func create_get_directory_file_request(scene: Node, directory):
 	
 	var url = directory.download_url;
 	
-	return make_get_directory_file_request(scene, headers, url);
-
-
-func make_get_directory_file_request(scene: Node, headers: Array, url: String):
-	var h_client = HTTPRequest.new();
-	scene.add_child(h_client);
-	h_client.request_completed.connect(scene._on_http_download_text_completed);
-	
-	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
-	
-	return {};
+	return make_http_request(
+		scene, scene._on_http_download_text_completed, HTTPClient.METHOD_GET,
+		url, headers
+	);
 
 
 func create_delete_file_request(scene: Node, entry_delete_button: Button):
