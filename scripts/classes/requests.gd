@@ -3,13 +3,15 @@ class_name Requests
 
 enum RequestType {
 	SendData,
-	GetData
+	GetData,
+	SendURLData
 }
 
 enum AcceptType {
 	Text,
 	GitJSON
 }
+
 
 # =====================
 # === Main Methods ====
@@ -73,6 +75,11 @@ func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: R
 				"Content-Type: application/json",
 				"Content-Length: " + addt_data["body_length"]
 			]);
+		RequestType.SendURLData:
+			headers.append_array([
+				"Content-Type: application/x-www-form-urlencoded", 
+				"Content-Length: " + addt_data["body_length"]
+			]);
 		_:
 			pass;
 	
@@ -128,7 +135,6 @@ func create_queries(fields: Dictionary):
 # =====================
 # ====== Helpers ======
 # =====================
-
 
 func process_results(result: int, response_code: int):
 	if (result != OK):
