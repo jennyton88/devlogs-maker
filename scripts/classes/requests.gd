@@ -66,7 +66,6 @@ func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: R
 		"User-Agent: " + app_name,
 		"Accept: %s" % accept,
 		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
 	];
 	
 	match request_type:
@@ -82,6 +81,9 @@ func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: R
 			]);
 		_:
 			pass;
+	
+	if (request_type != RequestType.SendURLData):
+		headers.append("Authorization: " + auth_type + " " + user_token);
 	
 	return headers;
 
