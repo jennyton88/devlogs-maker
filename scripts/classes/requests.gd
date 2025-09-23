@@ -313,3 +313,23 @@ func create_delete_file_request(scene: Node, entry_delete_button: Button):
 		scene, scene._on_http_delete_post_completed, HTTPClient.METHOD_DELETE,
 		url, headers, body_str
 	);
+
+
+## user code to verify device, NOT user token for api requests
+func create_generate_user_code_request(scene: Node):
+	var config = load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY):
+		return config;
+	
+	var queries = create_queries({ "client_id": config.get_value("app_info", "app_client_id") });
+	var headers = create_headers(config, AcceptType.GitJSON, RequestType.SendURLData, 
+		{ "body_length": str(queries.length()) }
+	);
+	
+	var url = config.get_value("urls", "ask_for_user_code");
+	
+	return make_http_request(
+		scene, scene._on_http_req_completed, HTTPClient.METHOD_POST, 
+		url, headers, queries
+	);

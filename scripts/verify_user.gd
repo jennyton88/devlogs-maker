@@ -98,36 +98,11 @@ func setup_tokens():
 
 ## user code to verify device, NOT user token for api requests
 func generate_user_code_request():
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var request = Requests.new();
+	var error = request.create_generate_user_code_request(self);
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var queries = HTTPClient.new().query_string_from_dict({ 
-		"client_id": config.get_value("app_info", "app_client_id") 
-	});
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Content-Type: application/x-www-form-urlencoded", 
-		"Content-Length: " + str(queries.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_req_completed);
-	
-	var url = config.get_value("urls", "ask_for_user_code");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_POST, queries);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 		request_code.disabled = false;
 
 
