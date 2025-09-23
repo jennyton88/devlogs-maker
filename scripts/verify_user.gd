@@ -187,16 +187,24 @@ func _on_expire_timeout() -> void:
 
 
 func _on_http_req_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+	var request = Requests.new();
+	
+	var error = request.process_results(result, response_code);
+	if (error.has("error")):
+		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
 	
-	var response = convert_to_json(body);
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
 			allow_user_to_verify(response);
 		_:
-			get_parent().create_notif_popup("%d Error\n Result %d" % [response_code, result]);
+			pass;
+	
+	var msg = request.build_notif_msg("get_verify_code", response_code, body_str);
+	get_parent().create_notif_popup(msg);
 
 
 func _on_http_poll_completed(result, response_code, _headers, body):

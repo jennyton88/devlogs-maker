@@ -102,6 +102,8 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 					msg = "";
 				"delete_file":
 					msg = "Successfully deleted!";
+				"get_verify_code":
+					msg = "";
 		HTTPClient.RESPONSE_CREATED: # 201
 			if (msg_type == "post"):
 				msg += "Successfully created devlog!";
