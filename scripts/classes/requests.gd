@@ -337,3 +337,35 @@ func create_generate_user_code_request(scene: Node):
 		scene, scene._on_http_req_completed, HTTPClient.METHOD_POST, 
 		url, headers, queries
 	);
+
+
+func create_poll_verification_request(scene: Node, refresh_code: bool, device_code):
+	var config = load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY):
+		return config;
+	
+	# client secret not needed since using device flow
+	var fields = { 
+		"client_id": config.get_value("app_info", "app_client_id"),
+	};
+	
+	if (refresh_code):
+		fields["grant_type"] = "refresh_token";
+		fields["refresh_token"] = config.get_value("user_info", "refresh_token");
+	else:
+		fields["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code";
+		fields["device_code"] = device_code;
+	
+	var queries = create_queries(fields);
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendURLData,
+		{ "body_length": str(queries.length()) }
+	);
+	
+	var url = config.get_value("urls", "poll_for_user_verify");
+	
+	return make_http_request(
+		scene, scene._on_http_poll_completed, HTTPClient.METHOD_POST,
+		url, headers, queries
+	);

@@ -120,47 +120,11 @@ func allow_user_to_verify(response) -> void:
 
 
 func poll_verification(refresh_code: bool):
-	var config = ConfigFile.new();
-	var error = config.load('user://config.cfg');
+	var request = Requests.new();
+	var error = request.create_poll_verification_request(self, refresh_code, device_code);
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	# client secret not needed since using device flow
-	var fields = { 
-		"client_id": config.get_value("app_info", "app_client_id"),
-	};
-	
-	if (refresh_code):
-		fields["grant_type"] = "refresh_token";
-		fields["refresh_token"] = config.get_value("user_info", "refresh_token");
-	else:
-		fields["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code";
-		fields["device_code"] = device_code;
-	
-	var queries = HTTPClient.new().query_string_from_dict(fields);
-	
-	var app_name = config.get_value("app_info", "app_name");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Content-Type: application/x-www-form-urlencoded", 
-		"Content-Length: " + str(queries.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_poll_completed);
-	
-	var url = config.get_value("urls", "poll_for_user_verify");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_POST, queries);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 		request_code.disabled = false;
 
 
