@@ -70,8 +70,7 @@ func _on_get_devlogs():
 		get_parent().create_error_popup(error["error"], error["error_type"]);
 
 
-
-func _on_http_get_posts_completed(result, response_code, _headers, body):
+func _on_http_request_completed(result, response_code, _headers, body, action: String):
 	var request = Requests.new();
 	
 	var error = request.process_results(result, response_code);
@@ -82,17 +81,20 @@ func _on_http_get_posts_completed(result, response_code, _headers, body):
 	var body_str = body.get_string_from_utf8();
 	var response = request.convert_to_json(body_str);
 	
-	match response_code:
-		HTTPClient.RESPONSE_OK:
-			for post in response:
-				if (post["name"] != "directory.txt"):
-					create_post_info(post["name"], post["download_url"], post["sha"]);
-				else:
-					update_directory_ref(post["name"], post["download_url"], post["sha"]);
-		_:
-			pass;
+	var msg = "";
 	
-	var msg = request.build_notif_msg("get_devlogs", response_code, body_str);
+	match action:
+		"get_devlogs":
+			match response_code:
+				HTTPClient.RESPONSE_OK:
+					for post in response:
+						if (post["name"] != "directory.txt"):
+							create_post_info(post["name"], post["download_url"], post["sha"]);
+						else:
+							update_directory_ref(post["name"], post["download_url"], post["sha"]);
+	
+	msg = request.build_notif_msg(action, response_code, body_str);
+	
 	if (msg != ""):
 		get_parent().create_notif_popup(msg);
 
