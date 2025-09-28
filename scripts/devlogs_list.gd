@@ -83,34 +83,29 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 	
 	var msg = "";
 	
-	match action:
-		"get_devlogs":
-			match response_code:
-				HTTPClient.RESPONSE_OK:
+	match response_code:
+		HTTPClient.RESPONSE_OK:
+			match action:
+				"get_devlogs":
 					for post in response:
 						if (post["name"] != "directory.txt"):
 							create_post_info(post["name"], post["download_url"], post["sha"]);
 						else:
 							update_directory_ref(post["name"], post["download_url"], post["sha"]);
-		"get_file":
-			match response_code:
-				HTTPClient.RESPONSE_OK:
+				"get_file":
 					check_format_text(body_str);
-		"edit_dir":
-			match response_code:
-				HTTPClient.RESPONSE_OK: # update post
-					var info = response["content"];
+				"edit_dir":
+					var info = response["content"]; # update [pst
 					update_directory_ref(info["name"], info["download_url"], info["sha"]);
-			
-			clean_directory_edit();
-		"get_directory": # create new action here
-			match response_code:
-				HTTPClient.RESPONSE_OK:
+					clean_directory_edit();
+				"get_directory": # create new action here
 					var info = response;
 					update_directory_ref(info["name"], info["download_url"], info["sha"]);
 					get_directory_file();
 		_:
-			pass;
+			match action:
+				"edit_dir":
+					clean_directory_edit();
 	
 	msg = request.build_notif_msg(action, response_code, body_str);
 	
