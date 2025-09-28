@@ -96,6 +96,13 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 			match response_code:
 				HTTPClient.RESPONSE_OK:
 					check_format_text(body_str);
+		"edit_dir":
+			match response_code:
+				HTTPClient.RESPONSE_OK: # update post
+					var info = response["content"];
+					update_directory_ref(info["name"], info["download_url"], info["sha"]);
+			
+			clean_directory_edit();
 		_:
 			pass;
 	
@@ -213,9 +220,6 @@ func check_file_name(curr_file_name: String) -> String:
 	return "";
 
 
-
-
-
 func get_edit_ref():
 	return edit_button_ref;
 
@@ -246,7 +250,6 @@ func edit_directory_file():
 		get_parent().create_error_popup(error["error"], error["error_type"]);
 
 
-
 func get_directory_file():
 	var request = Requests.new();
 	
@@ -256,29 +259,6 @@ func get_directory_file():
 	if (error.has("error")):
 		update_dir = false;
 		get_parent().create_error_popup(error["error"], error["error_type"]);
-
-
-func _on_http_edit_directory_completed(result, response_code, _headers, body):
-	var request = Requests.new();
-	
-	var error = request.process_results(result, response_code);
-	if (error.has("error")):
-		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
-		return;
-	
-	var body_str = body.get_string_from_utf8();
-	var response = request.convert_to_json(body_str);
-	
-	match response_code:
-		HTTPClient.RESPONSE_OK: # update post
-			var info = response["content"];
-			update_directory_ref(info["name"], info["download_url"], info["sha"]);
-	
-	clean_directory_edit();
-	
-	var msg = request.build_notif_msg("edit_dir", response_code, body_str);
-	if (msg != ""):
-		get_parent().create_notif_popup(msg);
 
 
 func clean_directory_edit():
