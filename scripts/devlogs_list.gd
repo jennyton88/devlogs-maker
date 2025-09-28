@@ -103,6 +103,12 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 					update_directory_ref(info["name"], info["download_url"], info["sha"]);
 			
 			clean_directory_edit();
+		"get_directory": # create new action here
+			match response_code:
+				HTTPClient.RESPONSE_OK:
+					var info = response;
+					update_directory_ref(info["name"], info["download_url"], info["sha"]);
+					get_directory_file();
 		_:
 			pass;
 	
@@ -273,26 +279,3 @@ func fetch_directory_file():
 
 	if (error.has("error")):
 		get_parent().create_error_popup(error["error"], error["error_type"]);
-
-
-func _on_http_download_json_completed(result, response_code, _headers, body):
-	var request = Requests.new();
-	
-	var error = request.process_results(result, response_code);
-	if (error.has("error")):
-		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
-		return;
-	
-	var body_str = body.get_string_from_utf8();
-	var response = request.convert_to_json(body_str);
-	
-	match response_code:
-		HTTPClient.RESPONSE_OK:
-			var info = response;
-			update_directory_ref(info["name"], info["download_url"], info["sha"]);
-			get_directory_file();
-		_:
-			pass;
-	
-	var msg = request.build_notif_msg("get_devlogs", response_code, body_str);
-	get_parent().create_notif_popup(msg);
