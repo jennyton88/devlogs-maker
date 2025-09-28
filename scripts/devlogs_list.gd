@@ -96,6 +96,8 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 			match response_code:
 				HTTPClient.RESPONSE_OK:
 					check_format_text(body_str);
+		_:
+			pass;
 	
 	msg = request.build_notif_msg(action, response_code, body_str);
 	
@@ -211,17 +213,7 @@ func check_file_name(curr_file_name: String) -> String:
 	return "";
 
 
-func _on_http_delete_post_completed(result, response_code, _headers, body):
-	var request = Requests.new();
-	var error = request.process_results(result, response_code);
-	if (error.has("error")):
-		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
-		return;
-	
-	var body_str = body.get_string_from_utf8();
-	
-	var msg = request.build_notif_msg("delete_file", response_code, body_str);
-	get_parent().create_notif_popup(msg);
+
 
 
 func get_edit_ref():
