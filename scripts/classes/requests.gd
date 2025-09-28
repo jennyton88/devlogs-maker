@@ -33,6 +33,10 @@ func make_http_request(
 	return {};
 
 
+# addt_data: Dictionary {
+# content: String /  OPTIONAL
+# sha: String / OPTIONAL
+# }
 func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> String:
 	var body = { # required for commits
 		"message": msg,
