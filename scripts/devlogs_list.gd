@@ -92,6 +92,10 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 							create_post_info(post["name"], post["download_url"], post["sha"]);
 						else:
 							update_directory_ref(post["name"], post["download_url"], post["sha"]);
+		"get_file":
+			match response_code:
+				HTTPClient.RESPONSE_OK:
+					check_format_text(body_str);
 	
 	msg = request.build_notif_msg(action, response_code, body_str);
 	
@@ -109,26 +113,6 @@ func _on_edit_button_pressed(button: Button):
 		edit_button_ref = null;
 	else:
 		edit_button_ref = button;
-
-
-func _on_http_download_text_completed(result, response_code, _headers, body):
-	var request = Requests.new();
-	
-	var error = request.process_results(result, response_code);
-	if (error.has("error")):
-		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
-		return;
-	
-	var body_str = body.get_string_from_utf8();
-	
-	match response_code:
-		HTTPClient.RESPONSE_OK:
-			check_format_text(body_str);
-		_:
-			pass;
-	
-	var msg = request.build_notif_msg("get_file", response_code, body_str);
-	get_parent().create_notif_popup(msg);
 
 
 func check_format_text(text_blob) -> void:
