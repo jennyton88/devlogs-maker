@@ -98,7 +98,7 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 					var info = response["content"]; # update [pst
 					update_directory_ref(info["name"], info["download_url"], info["sha"]);
 					clean_directory_edit();
-				"get_directory": # create new action here
+				"fetch_directory": # create new action here
 					var info = response;
 					update_directory_ref(info["name"], info["download_url"], info["sha"]);
 					get_directory_file();
