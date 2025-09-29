@@ -319,7 +319,7 @@ func create_delete_file_request(scene: Node, entry_delete_button: Button):
 	url += button_ref.get_meta("name");
 	
 	return make_http_request(
-		scene, scene._on_http_request_completed, HTTPClient.METHOD_DELETE,
+		scene, scene._on_http_request_completed.bind("delete_devlog"), HTTPClient.METHOD_DELETE,
 		url, headers, body_str
 	);
 
