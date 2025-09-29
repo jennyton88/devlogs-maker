@@ -5,6 +5,8 @@ signal fill_in_details(post_info: Dictionary);
 signal clear_post;
 signal collected_img(img_data, img_name: String);
 
+signal create_notif_popup(msg);
+
 var text_to_save = "";
 var curr_file_mode = "";
 
@@ -51,7 +53,7 @@ func _on_file_selected(path: String):
 			var filename = path.get_file();
 			
 			if (check_file_name(filename) == ""):
-				get_parent().create_notif_popup("Not a recognizable file name!\nPlease edit a different file.");
+				create_notif_popup.emit("Not a recognizable file name!\nPlease edit a different file.");
 				return;
 			
 			clear_post.emit();

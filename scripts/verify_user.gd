@@ -5,6 +5,8 @@ signal user_token_expired;
 signal refresh_token_expired;
 signal enable_buttons;
 
+signal create_error_popup(error, error_type);
+signal create_notif_popup(msg);
 
 # Buttons =====
 @onready var request_code = $HBC1/VBC1/ReqCode;
@@ -65,7 +67,7 @@ func setup_tokens():
 	
 	# allow user to restart setup_tokens
 	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
+		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
 		return;
 	
 	check_access.uri = "https://github.com/settings/connections/applications/%s" % config.get_value("app_info", "app_client_id");
@@ -102,7 +104,7 @@ func generate_user_code_request():
 	var error = request.create_generate_user_code_request(self);
 	
 	if (error.has("error")):
-		get_parent().create_error_popup(error["error"], error["error_type"]);
+		create_error_popup.emit(error["error"], error["error_type"]);
 		request_code.disabled = false;
 
 
@@ -124,7 +126,7 @@ func poll_verification(refresh_code: bool):
 	var error = request.create_poll_verification_request(self, refresh_code, device_code);
 	
 	if (error.has("error")):
-		get_parent().create_error_popup(error["error"], error["error_type"]);
+		create_error_popup.emit(error["error"], error["error_type"]);
 		request_code.disabled = false;
 
 
@@ -146,7 +148,7 @@ func _on_refresh_app_pressed():
 
 
 func _on_expire_timeout() -> void:
-	get_parent().create_notif_popup("Expired code\nRequest user code again");
+	create_notif_popup.emit("Expired code\nRequest user code again");
 	request_code.disabled = false;
 
 
@@ -155,7 +157,7 @@ func _on_http_req_completed(result, response_code, _headers, body):
 	
 	var error = request.process_results(result, response_code);
 	if (error.has("error")):
-		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
+		create_notif_popup.emit(error["error"]);  # TODO create error popup type
 		return;
 	
 	var body_str = body.get_string_from_utf8();
@@ -168,7 +170,7 @@ func _on_http_req_completed(result, response_code, _headers, body):
 			pass;
 	
 	var msg = request.build_notif_msg("get_verify_code", response_code, body_str);
-	get_parent().create_notif_popup(msg);
+	create_notif_popup.emit(msg);
 
 
 func _on_http_poll_completed(result, response_code, _headers, body):
@@ -176,7 +178,7 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 	
 	var error = request.process_results(result, response_code);
 	if (error.has("error")):
-		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
+		create_notif_popup.emit(error["error"]);  # TODO create error popup type
 		return;
 	
 	var body_str = body.get_string_from_utf8();
@@ -204,14 +206,14 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 					_:
 						error_msg += "Error!\n%s" % response["error"];
 				
-				get_parent().create_notif_popup(error_msg);
+				create_notif_popup.emit(error_msg);
 				
 				return;
 			
 			var config = request.load_config();
 			
 			if (typeof(config) == TYPE_DICTIONARY): # error
-				get_parent().create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [config["error"], response["access_token"], response["refresh_token"]]);
+				create_notif_popup.emit("%d\nFailed to load config file. Token: %s, Refresh: %s" % [config["error"], response["access_token"], response["refresh_token"]]);
 				return;
 			
 			config.set_value("user_info", "user_token", response["access_token"]);
@@ -228,11 +230,11 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 			expire_label.text = Time.get_datetime_string_from_datetime_dict(config.get_value("user_info", "user_token_expiration"), false);
 			refresh_token.disabled = true;
 			
-			get_parent().create_notif_popup("Completed Poll Verification!");
+			create_notif_popup.emit("Completed Poll Verification!");
 			
 			enable_buttons.emit();
 		_:
-			get_parent().create_notif_popup("%d\n Result %d" % [response_code, result]);
+			create_notif_popup.emit("%d\n Result %d" % [response_code, result]);
 
 
 # ============================
