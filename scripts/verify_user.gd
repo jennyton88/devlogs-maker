@@ -210,7 +210,7 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 			
 			var config = request.load_config();
 			
-			if (config.has("error")):
+			if (typeof(config) == TYPE_DICTIONARY): # error
 				get_parent().create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [config["error"], response["access_token"], response["refresh_token"]]);
 				return;
 			
