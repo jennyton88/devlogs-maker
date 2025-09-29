@@ -185,7 +185,7 @@ func load_config():
 	return config;
 
 # =====================
-# == Custom Requests ==
+# == Custom Requests == # deals with unique urls, queries, actions
 # =====================
 
 func create_get_devlogs_request(scene: Node):
@@ -267,10 +267,7 @@ func create_edit_directory_file_request(scene: Node, directory):
 	var url = config.get_value("urls", "base_repo");
 	url += directory.name;
 	
-	return make_http_request(
-		scene, scene._on_http_edit_directory_completed, HTTPClient.METHOD_PUT,
-		url, headers, body_str
-	);
+	return send_files(scene, "edit_dir", url, headers, body_str);
 
 
 func create_fetch_directory_file_request(scene: Node, directory):
