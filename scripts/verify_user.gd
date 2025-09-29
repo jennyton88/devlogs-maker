@@ -172,10 +172,15 @@ func _on_http_req_completed(result, response_code, _headers, body):
 
 
 func _on_http_poll_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+	var request = Requests.new();
+	
+	var error = request.process_results(result, response_code);
+	if (error.has("error")):
+		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
 	
-	var response = convert_to_json(body);
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
@@ -203,11 +208,10 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 				
 				return;
 			
-			var config = ConfigFile.new();
-			var error = config.load('user://config.cfg');
+			var config = request.load_config();
 			
-			if error != OK:
-				get_parent().create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [error, response["access_token"], response["refresh_token"]]);
+			if (config.has("error")):
+				get_parent().create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [config["error"], response["access_token"], response["refresh_token"]]);
 				return;
 			
 			config.set_value("user_info", "user_token", response["access_token"]);
@@ -372,17 +376,3 @@ func create_expiration_time(start_time: String, deadline_time: int) -> Dictionar
 	deadline["year"] = curr_year;
 	
 	return deadline;
-
-
-func failed_checks(result: int, response_code: int):
-	if (result != OK):
-		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		get_parent().create_notif_popup(error_result);
-		return true;
-
-
-func convert_to_json(body):
-	var json = JSON.new();
-	json.parse(body.get_string_from_utf8());
-	
-	return json.get_data();
