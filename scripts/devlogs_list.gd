@@ -51,111 +51,78 @@ func create_post_info(new_file_name: String, url: String, sha: String):
 	list.add_child(container);
 
 
-func _on_get_devlogs():
+func clear_list():
 	var amt_of_children = list.get_child_count();
 	if (amt_of_children > 1):
 		var children = list.get_children();
 		for i in range(amt_of_children - 1, 0, -1):
 			list.remove_child(children[i]);
 			children[i].queue_free();
-	
-	var config = load_config_file();
-	
-	if (config == null):
-		return;
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	var fields = { 
-		"ref": config.get_value("repo_info", "repo_branch_update"),
-	};
-	
-	var queries = HTTPClient.new().query_string_from_dict(fields);
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_get_posts_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	# TODO url stripping depending on type of content path
-	url = url.rstrip("/") + "?"; # [/text_files/ vs /text_files] redirected to main branch
-	url += queries;
-	
-	var error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 
 
-func _on_http_get_posts_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+func _on_get_devlogs():
+	clear_list();
+	
+	var request = Requests.new();
+	var error = request.create_get_devlogs_request(self);
+	
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
+
+
+func _on_http_request_completed(result, response_code, _headers, body, action: String):
+	var request = Requests.new();
+	
+	var error = request.process_results(result, response_code);
+	if (error.has("error")):
+		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
 	
-	var response = convert_to_json(body);
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
+	
+	var msg = "";
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
-			for post in response:
-				if (post["name"] != "directory.txt"):
-					create_post_info(post["name"], post["download_url"], post["sha"]);
-				else:
-					update_directory_ref(post["name"], post["download_url"], post["sha"]);
+			match action:
+				"get_devlogs":
+					for post in response:
+						if (post["name"] != "directory.txt"):
+							create_post_info(post["name"], post["download_url"], post["sha"]);
+						else:
+							update_directory_ref(post["name"], post["download_url"], post["sha"]);
+				"get_file":
+					check_format_text(body_str);
+				"edit_dir":
+					var info = response["content"]; # update [pst
+					update_directory_ref(info["name"], info["download_url"], info["sha"]);
+					clean_directory_edit();
+				"fetch_directory": # create new action here
+					var info = response;
+					update_directory_ref(info["name"], info["download_url"], info["sha"]);
+					get_directory_file();
 		_:
-			get_parent().create_notif_popup("%d\nNot implemented!" % response_code);
+			match action:
+				"edit_dir":
+					clean_directory_edit();
+	
+	msg = request.build_notif_msg(action, response_code, body_str);
+	
+	if (msg != ""):
+		get_parent().create_notif_popup(msg);
 
 
 func _on_edit_button_pressed(button: Button):
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var request = Requests.new();
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
+	var error = request.create_edit_download_request(self, button);
 	
-	edit_button_ref = button;
-	
-	var app_name = config.get_value("app_info", "app_name");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: text/plain",
-		"Accept-Encoding: gzip, deflate",
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_download_text_completed);
-	
-	var url = button.get_meta("url");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 		edit_button_ref = null;
-
-
-func _on_http_download_text_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
-		return;
-	
-	match response_code:
-		HTTPClient.RESPONSE_OK:
-			var downloaded_text = body.get_string_from_utf8();
-			check_format_text(downloaded_text);
-		_:
-			get_parent().create_notif_popup("%d\nNot implemented!" % response_code);
-			
-			print(body.get_string_from_utf8());
+	else:
+		edit_button_ref = button;
 
 
 func check_format_text(text_blob) -> void:
@@ -222,51 +189,12 @@ func _on_delete_button_pressed(log_entry_delete_button: Button):
 	);
 
 
-func _on_serious_delete_button_pressed(log_entry_delete_button: Button):
-	var button_ref = log_entry_delete_button;
+func _on_serious_delete_button_pressed(entry_delete_button: Button):
+	var request = Requests.new();
+	var button_ref = entry_delete_button;
+	var error = request.create_delete_file_request(self, button_ref);
 	
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
-	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	var body = {
-		"message": "Deleted devlog.",
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"sha": button_ref.get_meta("sha"),
-		"branch": config.get_value("repo_info", "repo_branch_update")
-	};
-	
-	body = JSON.stringify(body);
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-		"Content-Type: application/json", 
-		"Content-Length: " + str(body.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_delete_post_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += button_ref.get_meta("name");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_DELETE, body);
-	
-	if (error != OK):
+	if (error.has('error')):
 		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
 	else:
 		if (edit_button_ref != null && (button_ref.get_meta("sha") == edit_button_ref.get_meta("sha"))):
@@ -276,41 +204,14 @@ func _on_serious_delete_button_pressed(log_entry_delete_button: Button):
 		update_directory_file(deleted_filename, "delete");
 
 
-
-func load_config_file() -> ConfigFile:
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
-	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return null;
-	
-	return config;
-
-
-
-func failed_checks(result: int, response_code: int):
-	if (result != OK):
-		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		get_parent().create_notif_popup(error_result);
-		return true;
-
-
-func convert_to_json(body):
-	var json = JSON.new();
-	json.parse(body.get_string_from_utf8());
-	
-	return json.get_data();
-
-
 func check_file_name(curr_file_name: String) -> String:
 	var regex = RegEx.new();
 	regex.compile("^(\\d{4})_(\\d{2})_(\\d{2})");
 	var matches = regex.search(curr_file_name);
-
+	
 	if (matches):
 		return "devlog";
-
+		
 	if (curr_file_name == "directory.txt"):
 		return "directory";
 	
@@ -318,29 +219,6 @@ func check_file_name(curr_file_name: String) -> String:
 		return "project";
 	
 	return "";
-
-
-func _on_http_delete_post_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
-		return;
-		
-	var response = convert_to_json(body);
-	
-	var r_msg = "%d\n" % response_code;
-	
-	match response_code:
-		HTTPClient.RESPONSE_OK:
-			r_msg += "Successfully deleted!";
-		HTTPClient.RESPONSE_NOT_FOUND:
-			r_msg += "Not found!";
-		HTTPClient.RESPONSE_CONFLICT:
-			r_msg += "There was a conflict!";
-		HTTPClient.RESPONSE_UNPROCESSABLE_ENTITY:
-			r_msg += "Validation failed: %s" % [response_code, response["message"]];
-		_:
-			r_msg += "Not implemented!\n%s" % [response_code, response["message"]];
-	
-	get_parent().create_notif_popup(r_msg);
 
 
 func get_edit_ref():
@@ -365,100 +243,23 @@ func update_directory_file(filename: String, action: String):
 
 
 func edit_directory_file():
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var request = Requests.new();
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
+	var error = request.create_edit_directory_file_request(self, directory);
 	
-	var body = {
-		"message": "Edited directory.",
-		"content": Marshalls.utf8_to_base64(directory.data),
-		"committer": {
-			"name": config.get_value("user_info", "user_name"),
-			"email": config.get_value("user_info", "user_email"),
-		},
-		"branch": config.get_value("repo_info", "repo_branch_update")
-	};
-	
-	body["sha"] = directory.sha;
-	body = JSON.stringify(body);
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var auth_type = config.get_value("user_info", "user_token_type");
-	var user_token = config.get_value("user_info", "user_token");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Authorization: " + auth_type + " " + user_token,
-		"Content-Type: application/json", 
-		"Content-Length: " + str(body.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_edit_directory_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += directory.name;
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_PUT, body);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
-
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 
 
 func get_directory_file():
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
-	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
+	var request = Requests.new();
 	
 	update_dir = true;
+	var error = request.create_get_directory_file_request(self, directory);
 	
-	var app_name = config.get_value("app_info", "app_name");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: text/plain",
-		"Accept-Encoding: gzip, deflate",
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_download_text_completed);
-	
-	var url = directory.download_url;
-	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
-
-
-func _on_http_edit_directory_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
-		return;
-	
-	var response = convert_to_json(body);
-	
-	var r_msg = "%d\n" % response_code;
-	
-	match response_code:
-		HTTPClient.RESPONSE_OK: # update post
-			var info = response["content"];
-			update_directory_ref(info["name"], info["download_url"], info["sha"]);
-			clean_directory_edit();
-		_:
-			r_msg += "Not implemented! Failed to edit directory";
-			clean_directory_edit();
-			print(response);
-			get_parent().create_notif_popup(r_msg);
+	if (error.has("error")):
+		update_dir = false;
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 
 
 func clean_directory_edit():
@@ -467,48 +268,9 @@ func clean_directory_edit():
 
 
 func fetch_directory_file():
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var request = Requests.new();
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	var app_name = config.get_value("app_info", "app_name");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_download_json_completed);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_GET);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	var error = request.create_fetch_directory_file_request(self, directory);
 
-
-func _on_http_download_json_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
-		return;
-	
-	var response = convert_to_json(body);
-	
-	var r_msg = "%d\n" % response_code;
-	
-	match response_code:
-		HTTPClient.RESPONSE_OK:
-			var info = response;
-			update_directory_ref(info["name"], info["download_url"], info["sha"]);
-			get_directory_file();
-		_:
-			r_msg += "Not implemented!";
-			print(response);
-			get_parent().create_notif_popup(r_msg);
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);

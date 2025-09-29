@@ -98,36 +98,11 @@ func setup_tokens():
 
 ## user code to verify device, NOT user token for api requests
 func generate_user_code_request():
-	var config = ConfigFile.new();
-	var error = config.load("user://config.cfg");
+	var request = Requests.new();
+	var error = request.create_generate_user_code_request(self);
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	var app_name = config.get_value("app_info", "app_name");
-	var queries = HTTPClient.new().query_string_from_dict({ 
-		"client_id": config.get_value("app_info", "app_client_id") 
-	});
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Content-Type: application/x-www-form-urlencoded", 
-		"Content-Length: " + str(queries.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_req_completed);
-	
-	var url = config.get_value("urls", "ask_for_user_code");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_POST, queries);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 		request_code.disabled = false;
 
 
@@ -145,47 +120,11 @@ func allow_user_to_verify(response) -> void:
 
 
 func poll_verification(refresh_code: bool):
-	var config = ConfigFile.new();
-	var error = config.load('user://config.cfg');
+	var request = Requests.new();
+	var error = request.create_poll_verification_request(self, refresh_code, device_code);
 	
-	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
-		return;
-	
-	# client secret not needed since using device flow
-	var fields = { 
-		"client_id": config.get_value("app_info", "app_client_id"),
-	};
-	
-	if (refresh_code):
-		fields["grant_type"] = "refresh_token";
-		fields["refresh_token"] = config.get_value("user_info", "refresh_token");
-	else:
-		fields["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code";
-		fields["device_code"] = device_code;
-	
-	var queries = HTTPClient.new().query_string_from_dict(fields);
-	
-	var app_name = config.get_value("app_info", "app_name");
-	
-	var headers = [
-		"User-Agent: " + app_name,
-		"Accept: application/vnd.github+json",
-		"Accept-Encoding: gzip, deflate",
-		"Content-Type: application/x-www-form-urlencoded", 
-		"Content-Length: " + str(queries.length()),
-	];
-	
-	var h_client = HTTPRequest.new();
-	add_child(h_client);
-	h_client.request_completed.connect(_on_http_poll_completed);
-	
-	var url = config.get_value("urls", "poll_for_user_verify");
-	
-	error = h_client.request(url, headers, HTTPClient.METHOD_POST, queries);
-	
-	if (error != OK):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+	if (error.has("error")):
+		get_parent().create_error_popup(error["error"], error["error_type"]);
 		request_code.disabled = false;
 
 
@@ -212,23 +151,36 @@ func _on_expire_timeout() -> void:
 
 
 func _on_http_req_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+	var request = Requests.new();
+	
+	var error = request.process_results(result, response_code);
+	if (error.has("error")):
+		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
 	
-	var response = convert_to_json(body);
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
 			allow_user_to_verify(response);
 		_:
-			get_parent().create_notif_popup("%d Error\n Result %d" % [response_code, result]);
+			pass;
+	
+	var msg = request.build_notif_msg("get_verify_code", response_code, body_str);
+	get_parent().create_notif_popup(msg);
 
 
 func _on_http_poll_completed(result, response_code, _headers, body):
-	if (failed_checks(result, response_code)):
+	var request = Requests.new();
+	
+	var error = request.process_results(result, response_code);
+	if (error.has("error")):
+		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
 		return;
 	
-	var response = convert_to_json(body);
+	var body_str = body.get_string_from_utf8();
+	var response = request.convert_to_json(body_str);
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
@@ -256,11 +208,10 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 				
 				return;
 			
-			var config = ConfigFile.new();
-			var error = config.load('user://config.cfg');
+			var config = request.load_config();
 			
-			if error != OK:
-				get_parent().create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [error, response["access_token"], response["refresh_token"]]);
+			if (typeof(config) == TYPE_DICTIONARY): # error
+				get_parent().create_notif_popup("%d\nFailed to load config file. Token: %s, Refresh: %s" % [config["error"], response["access_token"], response["refresh_token"]]);
 				return;
 			
 			config.set_value("user_info", "user_token", response["access_token"]);
@@ -425,17 +376,3 @@ func create_expiration_time(start_time: String, deadline_time: int) -> Dictionar
 	deadline["year"] = curr_year;
 	
 	return deadline;
-
-
-func failed_checks(result: int, response_code: int):
-	if (result != OK):
-		var error_result = "%d\nHTTP request response error.\nResult %d" % [response_code, result];
-		get_parent().create_notif_popup(error_result);
-		return true;
-
-
-func convert_to_json(body):
-	var json = JSON.new();
-	json.parse(body.get_string_from_utf8());
-	
-	return json.get_data();
