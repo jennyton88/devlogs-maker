@@ -205,10 +205,7 @@ func create_get_devlogs_request(scene: Node):
 	url = url.rstrip("/") + "?"; # [/text_files/ vs /text_files] redirected to main branch
 	url += queries;
 	
-	return make_http_request(
-		scene, scene._on_http_get_posts_completed, HTTPClient.METHOD_GET,
-		url, headers
-	);
+	return get_files(scene, "get_devlogs", url, headers);
 
 
 func create_post_request(scene: Node, edit_ref: Node, content: String, filename: String):
@@ -252,10 +249,7 @@ func create_edit_download_request(scene: Node, button: Button):
 	);
 	var url = button.get_meta("url");
 	
-	return make_http_request(
-		scene, scene._on_http_download_text_completed, HTTPClient.METHOD_GET,
-		url, headers
-	);
+	return get_files(scene, "get_file", url, headers);
 
 
 func create_edit_directory_file_request(scene: Node, directory):
@@ -293,10 +287,7 @@ func create_fetch_directory_file_request(scene: Node, directory):
 	var url = config.get_value("urls", "base_repo");
 	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
 	
-	return make_http_request(
-		scene, scene._on_http_download_json_completed, HTTPClient.METHOD_GET,
-		url, headers
-	);
+	return get_files(scene, "fetch_directory", url, headers);
 
 
 func create_get_directory_file_request(scene: Node, directory):
@@ -311,10 +302,7 @@ func create_get_directory_file_request(scene: Node, directory):
 	
 	var url = directory.download_url;
 	
-	return make_http_request(
-		scene, scene._on_http_download_text_completed, HTTPClient.METHOD_GET,
-		url, headers
-	);
+	return get_files(scene, "get_file", url, headers);
 
 
 func create_delete_file_request(scene: Node, entry_delete_button: Button):
