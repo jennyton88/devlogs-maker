@@ -69,7 +69,7 @@ func _on_text_changed_preview(_new_text: String) -> void:
 	update_preview();
 
 
-func _on_http_post_completed(result, response_code, _headers, body):
+func _on_http_request_completed(result, response_code, _headers, body, _action):
 	var request = Requests.new();
 	
 	var error = request.process_results(result, response_code);

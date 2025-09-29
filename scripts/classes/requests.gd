@@ -214,12 +214,14 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
+	var action_type = "post_devlog";
 	var addt_data = { "content": content };
 	var msg = "Posted";
 	
 	if (edit_ref != null):
 		addt_data["sha"] = edit_ref.get_meta("sha");
 		msg = "Edited";
+		action_type = "edit_devlog";
 	
 	msg += " devlog.";
 	
@@ -232,10 +234,7 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	var url = config.get_value("urls", "base_repo");
 	url += filename;
 	
-	return make_http_request(
-		scene, scene._on_http_post_completed, HTTPClient.METHOD_PUT, 
-		url, headers, body_str
-	);
+	return send_files(scene, action_type, url, headers, body_str);
 
 
 func create_edit_download_request(scene: Node, button: Button):
