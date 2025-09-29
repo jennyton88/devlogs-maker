@@ -80,7 +80,6 @@ script = ExtResource("6_n2wff")
 layout_mode = 2
 current_tab = 0
 drag_to_rearrange_enabled = true
-script = ExtResource("6_n2wff")
 
 [node name="Finalize" parent="HB/VB/Workspace/Modules" instance=ExtResource("6_kycab")]
 layout_mode = 2
