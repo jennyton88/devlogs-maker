@@ -10,6 +10,9 @@ extends MarginContainer
 
 signal connect_startup(component: String);
 
+signal create_error_popup(error, error_type);
+signal create_notif_popup(msg);
+
 # =====================
 # ====== Methods ======
 # =====================
@@ -69,7 +72,7 @@ func save_settings(user_set: Dictionary) -> void:
 	
 	config.save("user://config.cfg");
 	
-	get_parent().create_notif_popup("Saved!");
+	create_notif_popup.emit("Saved!");
 
 
 # ============================
@@ -101,7 +104,7 @@ func load_config_file() -> ConfigFile:
 	var error = config.load("user://config.cfg");
 	
 	if error != OK:
-		get_parent().create_error_popup(error, AppInfo.ErrorType.ConfigError);
+		create_error_popup.emit(error, AppInfo.ErrorType.ConfigError);
 		return null;
 	
 	return config;
