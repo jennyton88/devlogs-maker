@@ -230,6 +230,8 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 			
 			expire_label.text = Time.get_datetime_string_from_datetime_dict(config.get_value("user_info", "user_token_expiration"), false);
 			refresh_token.disabled = true;
+			refresh_app.disabled = true;
+			request_code.disabled = true;
 			
 			create_notif_popup.emit("Completed Poll Verification!");
 			
