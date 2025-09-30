@@ -107,8 +107,14 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 				"edit_dir":
 					msg = "";
 				"delete_file":
-					msg = "Successfully deleted!";
+					msg = "Successfully deleted devlog!";
 				"get_verify_code":
+					msg = "";
+				"get_token_code":
+					msg = "";
+				"fetch_directory":
+					msg = "";
+				"get_directory":
 					msg = "";
 		HTTPClient.RESPONSE_CREATED: # 201
 			if (msg_type == "post"):
@@ -298,7 +304,7 @@ func create_get_directory_file_request(scene: Node, directory):
 	
 	var url = directory.download_url;
 	
-	return get_files(scene, "get_file", url, headers);
+	return get_files(scene, "get_directory", url, headers);
 
 
 func create_delete_file_request(scene: Node, entry_delete_button: Button):
