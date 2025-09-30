@@ -170,7 +170,8 @@ func _on_http_req_completed(result, response_code, _headers, body):
 			pass;
 	
 	var msg = request.build_notif_msg("get_verify_code", response_code, body_str);
-	create_notif_popup.emit(msg);
+	if (msg != ""):
+		create_notif_popup.emit(msg);
 
 
 func _on_http_poll_completed(result, response_code, _headers, body):
@@ -233,8 +234,10 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 			create_notif_popup.emit("Completed Poll Verification!");
 			
 			enable_buttons.emit();
-		_:
-			create_notif_popup.emit("%d\n Result %d" % [response_code, result]);
+	
+	var msg = request.build_notif_msg("get_token_code", response_code, body_str);
+	if (msg != ""):
+		create_notif_popup.emit(msg);
 
 
 # ============================
