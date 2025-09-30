@@ -1,6 +1,7 @@
-[gd_resource type="Theme" load_steps=13 format=3 uid="uid://bg45fa5ynd7fs"]
+[gd_resource type="Theme" load_steps=15 format=3 uid="uid://bg45fa5ynd7fs"]
 
 [ext_resource type="FontFile" uid="uid://b7htxquxgsgdt" path="res://assets/fonts/CourierPrime-Regular.ttf" id="1_pwgot"]
+[ext_resource type="StyleBox" uid="uid://djnhdn6udnimd" path="res://assets/materials/line_edit.tres" id="2_6k8fh"]
 [ext_resource type="StyleBox" uid="uid://tcvdwqsymvwa" path="res://assets/themes/components/tab_mail.tres" id="2_go4nu"]
 [ext_resource type="StyleBox" uid="uid://bqxkndhvjaki0" path="res://assets/themes/components/tab_unselected_mail.tres" id="3_d7f4l"]
 
@@ -67,17 +68,24 @@ corner_detail = 4
 bg_color = Color(0.660396, 0.660396, 0.660396, 1)
 corner_detail = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sysrr"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vyyjx"]
 content_margin_left = 30.0
-content_margin_top = 50.0
+content_margin_top = 16.0
 content_margin_right = 30.0
-content_margin_bottom = 50.0
+content_margin_bottom = 5.0
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i5l1k"]
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
+content_margin_bottom = 16.0
 bg_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bo1ie"]
-content_margin_left = 16.0
+content_margin_left = 30.0
 content_margin_top = 16.0
-content_margin_right = 16.0
+content_margin_right = 30.0
 content_margin_bottom = 16.0
 bg_color = Color(1, 1, 1, 1)
 border_color = Color(0.45098, 0.733333, 1, 1)
@@ -118,7 +126,8 @@ LineEdit/colors/font_color = Color(0, 0, 0, 1)
 LineEdit/colors/font_placeholder_color = Color(0.352941, 0.352941, 0.352941, 1)
 LineEdit/font_sizes/font_size = 20
 LineEdit/fonts/font = ExtResource("1_pwgot")
-LineEdit/styles/normal = ExtResource("2_go4nu")
+LineEdit/styles/focus = ExtResource("2_6k8fh")
+LineEdit/styles/normal = ExtResource("2_6k8fh")
 LinkButton/colors/font_color = Color(2.5028e-06, 0.888589, 0.987104, 1)
 LinkButton/colors/font_hover_color = Color(0.85098, 0.94902, 0.94902, 1)
 LinkButton/colors/font_hover_pressed_color = Color(0, 0, 0.517647, 1)
@@ -133,7 +142,8 @@ RichTextLabel/font_sizes/italics_font_size = 20
 RichTextLabel/font_sizes/mono_font_size = 20
 RichTextLabel/font_sizes/normal_font_size = 20
 RichTextLabel/fonts/normal_font = ExtResource("1_pwgot")
-RichTextLabel/styles/normal = SubResource("StyleBoxFlat_sysrr")
+RichTextLabel/styles/focus = SubResource("StyleBoxFlat_vyyjx")
+RichTextLabel/styles/normal = SubResource("StyleBoxFlat_i5l1k")
 TabBar/font_sizes/font_size = 20
 TabBar/fonts/font = ExtResource("1_pwgot")
 TabContainer/colors/font_hovered_color = Color(0.372549, 0.372549, 0.372549, 1)

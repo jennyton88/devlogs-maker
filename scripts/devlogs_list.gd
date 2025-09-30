@@ -4,6 +4,10 @@ signal connect_startup(component: String);
 signal clear_post;
 signal fill_in_details(post_info: Dictionary);
 
+signal create_error_popup(error, error_type);
+signal create_notif_popup(msg);
+signal create_action_popup(msg, button_info, action);
+
 @onready var list = $ScrollContainer/List;
 
 
@@ -67,7 +71,7 @@ func _on_get_devlogs():
 	var error = request.create_get_devlogs_request(self);
 	
 	if (error.has("error")):
-		get_parent().create_error_popup(error["error"], error["error_type"]);
+		create_error_popup.emit(error["error"], error["error_type"]);
 
 
 func _on_http_request_completed(result, response_code, _headers, body, action: String):
@@ -75,7 +79,7 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 	
 	var error = request.process_results(result, response_code);
 	if (error.has("error")):
-		get_parent().create_notif_popup(error["error"]);  # TODO create error popup type
+		create_notif_popup.emit(error["error"]);  # TODO create error popup type
 		return;
 	
 	var body_str = body.get_string_from_utf8();
@@ -110,7 +114,7 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 	msg = request.build_notif_msg(action, response_code, body_str);
 	
 	if (msg != ""):
-		get_parent().create_notif_popup(msg);
+		create_notif_popup.emit(msg);
 
 
 func _on_edit_button_pressed(button: Button):
@@ -119,7 +123,7 @@ func _on_edit_button_pressed(button: Button):
 	var error = request.create_edit_download_request(self, button);
 	
 	if (error.has("error")):
-		get_parent().create_error_popup(error["error"], error["error_type"]);
+		create_error_popup.emit(error["error"], error["error_type"]);
 		edit_button_ref = null;
 	else:
 		edit_button_ref = button;
@@ -178,11 +182,11 @@ func check_format_text(text_blob) -> void:
 					"project":
 						pass;
 					_:
-						get_parent().create_notif_popup("Not a recognizable file name!\nPlease edit a different file.");
+						create_notif_popup.emit("Not a recognizable file name!\nPlease edit a different file.");
 
 
 func _on_delete_button_pressed(log_entry_delete_button: Button):
-	get_parent().create_action_popup(
+	create_action_popup.emit(
 		"Are you sure you want to delete this post?",
 		{ 'yes': "Delete Post", 'no': "Cancel" },
 		_on_serious_delete_button_pressed.bind(log_entry_delete_button) 
@@ -195,7 +199,7 @@ func _on_serious_delete_button_pressed(entry_delete_button: Button):
 	var error = request.create_delete_file_request(self, button_ref);
 	
 	if (error.has('error')):
-		get_parent().create_error_popup(error, AppInfo.ErrorType.HTTPError);
+		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
 	else:
 		if (edit_button_ref != null && (button_ref.get_meta("sha") == edit_button_ref.get_meta("sha"))):
 			clear_post.emit();
@@ -248,7 +252,7 @@ func edit_directory_file():
 	var error = request.create_edit_directory_file_request(self, directory);
 	
 	if (error.has("error")):
-		get_parent().create_error_popup(error["error"], error["error_type"]);
+		create_error_popup.emit(error["error"], error["error_type"]);
 
 
 func get_directory_file():
@@ -259,7 +263,7 @@ func get_directory_file():
 	
 	if (error.has("error")):
 		update_dir = false;
-		get_parent().create_error_popup(error["error"], error["error_type"]);
+		create_error_popup.emit(error["error"], error["error_type"]);
 
 
 func clean_directory_edit():
@@ -273,4 +277,4 @@ func fetch_directory_file():
 	var error = request.create_fetch_directory_file_request(self, directory);
 
 	if (error.has("error")):
-		get_parent().create_error_popup(error["error"], error["error_type"]);
+		create_error_popup.emit(error["error"], error["error_type"]);
