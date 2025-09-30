@@ -188,7 +188,7 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 	match response_code:
 		HTTPClient.RESPONSE_OK:
 			if (response.has("error")):
-				var error_msg = "%d\n" % response_code;
+				var error_msg = "%d... But ERROR\n" % response_code;
 				match response["error"]:
 					"slow_down":
 						error_msg += "Slow down, wait 5 more seconds";
@@ -199,7 +199,7 @@ func _on_http_poll_completed(result, response_code, _headers, body):
 					"unsupported_grant_type":
 						error_msg += "Wrong grant type";
 					"incorrect_client_credentials":
-						error_msg += "Check your client credentials";
+						error_msg += "Check if your client credentials are correct";
 					"access_denied":
 						error_msg += "Canceled process, request new one";
 					"device_flow_disabled":
