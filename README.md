@@ -47,3 +47,7 @@ Collection of devlogs for editing / viewing.
 Refresh tokens here, with some instructions to myself.
 
 <img width="1440" alt="Screenshot 2025-06-14 at 7 43 46 AM" src="https://github.com/user-attachments/assets/23a0e619-0309-4c3e-ab6f-443a11b8ba6a" />
+
+## License
+
+Only the source code is licensed under the [MIT License](LICENSE.md). This includes `.tres` files, but not the `.png` files.
