@@ -77,19 +77,32 @@ func _on_file_selected(path: String):
 			
 			fill_in_details.emit(post_data);
 		elif (curr_file_mode == "img_file"):
+			var request = Requests.new();
+			var config = request.load_config();
+			
+			if (typeof(config) == TYPE_DICTIONARY): # error
+				create_notif_popup.emit("Failed to load config file.");
+				return;
+			
+			create_img_folder(config);
+			
 			var file_exts = ["jpg", "png"];
 			var filename = path.get_file();
 			var ext = filename.get_extension();
+			
+			var img_path = config.get_value("repo_info", "image_path");
+			img_path = img_path.rstrip("/");
 			
 			for file_ext in file_exts:
 				if (ext == file_ext):
 					var img = Image.new();
 					img.load(path);
+					
 					match ext:
 						"jpg":
-							img.save_jpg("res://assets/imported_imgs/%s" % filename);
+							img.save_jpg("user://assets/%s/%s" % [img_path, filename]);
 						"png":
-							img.save_png("res://assets/imported_imgs/%s" % filename);
+							img.save_png("user://assets/%s/%s" % [img_path, filename]);
 					var tex = ImageTexture.new();
 					tex.set_image(img);
 					collected_img.emit(tex, path.get_file());
@@ -115,3 +128,19 @@ func check_file_name(curr_file_name: String) -> String:
 		return "project";
 	
 	return "";
+
+
+func create_img_folder(config: ConfigFile):
+	var dir_access = DirAccess.open("user://");
+	if (!dir_access.dir_exists("assets")):
+		var error = dir_access.make_dir("assets");
+		if (error != OK):
+			create_notif_popup.emit("Failed to create assets folder!");
+	
+	var img_path = config.get_value("repo_info", "image_path");
+	img_path = img_path.rstrip("/");
+	if (!dir_access.dir_exists("assets/%s" % img_path)):
+		var error = dir_access.make_dir_recursive("assets/%s" % img_path);
+		if (error != OK):
+			create_notif_popup.emit("Failed to create folder(s) for image!");
+	
