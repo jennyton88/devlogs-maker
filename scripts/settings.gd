@@ -28,6 +28,7 @@ func startup() -> void:
 		"repo_name": get_node("VB/HB1/VB2/RepoName"),
 		"repo_branch": get_node("VB/RepoBranch"),
 		"content_path": get_node("VB/ContentPath"),
+		"image_path": get_node("VB/ImagePath"),
 		"author": get_node("VB/Author"),
 		"email": get_node("VB/Email"),
 	};
@@ -47,6 +48,7 @@ func setup_settings(user_set: Dictionary) -> void:
 	user_set.repo_name.text = config.get_value("repo_info", "repo_name");
 	user_set.repo_branch.text = config.get_value("repo_info", "repo_branch_update");
 	user_set.content_path.text = config.get_value("repo_info", "content_path");
+	user_set.image_path.text = config.get_value("repo_info", "image_path");
 
 
 func save_settings(user_set: Dictionary) -> void:
@@ -58,14 +60,22 @@ func save_settings(user_set: Dictionary) -> void:
 	config.set_value("repo_info", "repo_name", user_set.repo_name.text);
 	config.set_value("repo_info", "repo_branch_update", user_set.repo_branch.text);
 	config.set_value("repo_info", "content_path", user_set.content_path.text);
+	config.set_value("repo_info", "image_path", user_set.image_path.text);
 	
-	var build_url = "https://api.github.com/repos/%s/%s/contents/%s" % [
+	var build_file_url = "https://api.github.com/repos/%s/%s/contents/%s" % [
 		user_set.repo_owner.text, 
 		user_set.repo_name.text, 
 		user_set.content_path.text
 	];
 	
-	config.set_value("urls", "base_repo", build_url);
+	var build_image_url = "https://api.github.com/repos/%s/%s/contents/%s" % [
+		user_set.repo_owner.text, 
+		user_set.repo_name.text, 
+		user_set.image_path.text
+	];
+	
+	config.set_value("urls", "base_repo", build_file_url);
+	config.set_value("urls", "base_image_repo", build_image_url);
 	
 	config.set_value("user_info", "user_name", get_node("VB/Author").text);
 	config.set_value("user_info", "user_email", get_node("VB/Email").text);
@@ -85,6 +95,7 @@ func _on_save_settings_pressed(apply_changes: bool) -> void:
 		"repo_name": get_node("VB/HB1/VB2/RepoName"),
 		"repo_branch": get_node("VB/RepoBranch"),
 		"content_path": get_node("VB/ContentPath"),
+		"image_path": get_node("VB/ImagePath"),
 		"author": get_node("VB/Author"),
 		"email": get_node("VB/Email"),
 	};
