@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cijs2jun0ywe3"]
 
-[ext_resource type="Script" path="res://scripts/images.gd" id="1_wvvlt"]
+[ext_resource type="Script" uid="uid://c75lk20pfaej1" path="res://scripts/images.gd" id="1_wvvlt"]
 
 [node name="Images" type="MarginContainer"]
 size_flags_horizontal = 3

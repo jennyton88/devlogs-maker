@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dgwq3cnobx4ac"]
 
-[ext_resource type="Script" path="res://scripts/preview.gd" id="1_ljlpc"]
+[ext_resource type="Script" uid="uid://b17dihwflkbvk" path="res://scripts/preview.gd" id="1_ljlpc"]
 
 [node name="Preview" type="MarginContainer"]
 theme_override_constants/margin_left = 14
