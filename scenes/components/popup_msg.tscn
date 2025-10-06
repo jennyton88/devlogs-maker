@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cg4nnfhi2bqyp"]
 
-[ext_resource type="Script" path="res://scripts/components/popup_msg.gd" id="1_5vs66"]
+[ext_resource type="Script" uid="uid://dpihtmtldaxhj" path="res://scripts/components/popup_msg.gd" id="1_5vs66"]
 
 [node name="PopUpMsg" type="MarginContainer"]
 script = ExtResource("1_5vs66")

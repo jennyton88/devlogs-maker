@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://stqqmsajhpt6"]
 
-[ext_resource type="Script" path="res://scripts/working_file.gd" id="1_y4vmc"]
+[ext_resource type="Script" uid="uid://cu8pmpfna5j5n" path="res://scripts/working_file.gd" id="1_y4vmc"]
 
 [node name="FileDialog" type="FileDialog"]
 auto_translate_mode = 1

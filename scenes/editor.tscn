@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://da0y0eeeu881k"]
 
-[ext_resource type="Script" path="res://scripts/editor.gd" id="1_r5ufh"]
+[ext_resource type="Script" uid="uid://0iu3yhg2wsqr" path="res://scripts/editor.gd" id="1_r5ufh"]
 
 [node name="Editor" type="MarginContainer"]
 theme_override_constants/margin_left = 14
