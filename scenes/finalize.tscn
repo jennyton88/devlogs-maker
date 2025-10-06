@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bd3yn3luhu540"]
 
-[ext_resource type="Script" path="res://scripts/finalize.gd" id="1_ej4bi"]
+[ext_resource type="Script" uid="uid://x03d1oafffwo" path="res://scripts/finalize.gd" id="1_ej4bi"]
 
 [node name="Finalize" type="MarginContainer"]
 theme_override_constants/margin_left = 20
