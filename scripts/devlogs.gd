@@ -30,6 +30,9 @@ func _ready():
 	file_dialog.connect_startup.connect(_on_connect_startup);
 	file_dialog.startup();
 	
+	images.connect_startup.connect(_on_connect_startup);
+	images.startup();
+	
 	editor.startup(update_preview);
 	finalize.startup(_on_text_changed_preview, update_preview);
 	
@@ -209,6 +212,8 @@ func _on_connect_startup(component: String):
 			file_dialog.fill_in_details.connect(fill_in_details);
 			file_dialog.collected_img.connect(_on_collected_img);
 			file_dialog.create_notif_popup.connect(workspace_container.create_notif_popup);
+		"images":
+			images.create_notif_popup.connect(workspace_container.create_notif_popup);
 		"verify_user":
 			verify_user.enable_buttons.connect(_on_enable_buttons);
 			verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));

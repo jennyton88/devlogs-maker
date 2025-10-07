@@ -1,5 +1,11 @@
 extends MarginContainer
 
+
+signal connect_startup();
+
+signal create_notif_popup(msg);
+
+
 @onready var img_list = $Scroll/VBox;
 
 func save_img(img_data, img_name):
