@@ -1,12 +1,17 @@
 extends MarginContainer
 
 
-signal connect_startup();
+signal connect_startup(component: String);
 
 signal create_notif_popup(msg);
 
 
 @onready var img_list = $Scroll/VBox;
+
+func startup():
+	load_imgs();
+	
+	connect_startup.emit("images");
 
 func save_img(img_data, img_name):
 	img_list.add_child(build_img_part(img_data, img_name));
