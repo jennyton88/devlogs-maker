@@ -120,8 +120,10 @@ func _on_serious_delete_button_pressed(delete_button: Button):
 			var filename = component.text.get_file();
 			var img_path =  config.get_value("repo_info", "image_path");
 			var global_path = ProjectSettings.globalize_path("user://assets/" + img_path + filename);
-			OS.move_to_trash(global_path); # TODO check for errors
-			
+			var error = OS.move_to_trash(global_path); # TODO check for errors
+			if (error != OK):
+				create_notif_popup.emit("File doesn't exist / Unsupported\nDeleted image entry.");
+	
 	img_part.queue_free();
 
 func _on_copy_button_pressed(copy_button):
