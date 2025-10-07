@@ -48,19 +48,20 @@ func load_curr_img(path: String, filename: String):
 	img.load("user://assets/" + path + "/%s" % filename); # should check for errors
 	var tex = ImageTexture.new();
 	tex.set_image(img);
-	var img_path = path.replace("public", ""); # specific to website here
-	save_img(tex, img_path + "/" + filename);
+	# specific to website here removing public folder
+	save_img(tex, path.replace("public", "") + "/" + filename, path);
 
 
-func save_img(img_data, img_name):
-	img_list.add_child(build_img_part(img_data, img_name));
+func save_img(img_data, img_name: String, img_path: String):
+	img_list.add_child(build_img_part(img_data, img_name, img_path));
 
 
-func build_img_part(img_data, img_name):
+func build_img_part(img_data, img_name: String, img_path: String):
 	var panel_cont = PanelContainer.new();
 	panel_cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL;
 	var bg_mat = load("res://assets/materials/image_part.tres");
 	panel_cont.add_theme_stylebox_override("panel", bg_mat);
+	panel_cont.set_meta("file_path", img_path + "/" + img_name.get_file());
 	
 	var hbox = HBoxContainer.new();
 	

@@ -3,7 +3,7 @@ extends FileDialog
 signal connect_startup(component: String);
 signal fill_in_details(post_info: Dictionary);
 signal clear_post;
-signal collected_img(img_data, img_name: String);
+signal collected_img(img_data, img_name: String, img_path: String);
 
 signal create_notif_popup(msg);
 
@@ -105,8 +105,8 @@ func _on_file_selected(path: String):
 							img.save_png("user://assets/%s/%s" % [img_path, filename]);
 					var tex = ImageTexture.new();
 					tex.set_image(img);
-					img_path = img_path.replace("public", ""); # specific to website here
-					collected_img.emit(tex, img_path + "/" + filename);
+					# specific to website removing public folder path
+					collected_img.emit(tex, img_path.replace("public", "") + "/" + filename, img_path);
 					return;
 	else: # export
 		var txt_file = FileAccess.open(path, FileAccess.WRITE);

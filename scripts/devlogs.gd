@@ -194,8 +194,8 @@ func _on_import_image():
 	file_dialog.import_image();
 
 
-func _on_collected_img(img_data, img_name: String):
-	images.save_img(img_data, img_name);
+func _on_collected_img(img_data, img_name: String, img_path: String):
+	images.save_img(img_data, img_name, img_path);
 
 
 func _on_connect_startup(component: String):
