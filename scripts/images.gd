@@ -13,6 +13,40 @@ func startup():
 	
 	connect_startup.emit("images");
 
+func load_imgs():
+	var request = Requests.new();
+	var config = request.load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY): # error
+		create_notif_popup.emit("Failed to load config file.");
+		return;
+	
+	var img_path =  config.get_value("repo_info", "image_path");
+	img_path = img_path.rstrip("/");
+	var dir_access = DirAccess.open("user://");
+	
+	var path = "assets/%s" % img_path;
+	if (dir_access.dir_exists(path)):
+		dir_access.change_dir(path);
+		var files = dir_access.get_files();
+		for filename in files:
+			match filename.get_extension():
+				"jpg":
+					load_curr_img(path, filename);
+				"png":
+					load_curr_img(path, filename);
+				_:
+					pass;
+
+
+func load_curr_img(path: String, filename: String):
+	var img = Image.new();
+	img.load("user://" + path + "/%s" % filename); # should check for errors
+	var tex = ImageTexture.new();
+	tex.set_image(img);
+	save_img(tex, filename);
+
+
 func save_img(img_data, img_name):
 	img_list.add_child(build_img_part(img_data, img_name));
 
