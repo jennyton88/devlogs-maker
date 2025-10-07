@@ -26,29 +26,63 @@ func update_preview(post_data: Dictionary):
 	text += post_data["creation_date"] + "\n";
 	text += post_data["post_title"] + "\n";
 	text += post_data["post_summary"] + "\n";
-	
-	var processed_text = text;
-	processed_text += process_post(post_data["post_body"], post_data["post_images"]);
-	
 	text += post_data["post_body"];
+	plain_text_post = text;
 	
-	plain_text_post = text; # TODO needs replacement real paths to the images
-	post_preview.text = processed_text;
-	#post_preview.text = text;
+	process_post(post_data, post_data["post_images"]);
 
 
-func process_post(post_body: String, img_list):
-	var post_lines = post_body.split("\n", true);
+func process_post(post_data: Dictionary, img_list):
+	post_preview.push_bold();
+	post_preview.add_text(post_data["post_title"]);
+	post_preview.pop();
+	post_preview.newline();
+	post_preview.newline();
+	post_preview.push_italics();
+	post_preview.add_text("Edited: ");
+	post_preview.pop();
+	post_preview.add_text(post_data["edit_date"]);
+	post_preview.push_italics();
+	post_preview.add_text("/ Created: ");
+	post_preview.pop();
+	post_preview.add_text(post_data["creation_date"]);
+	post_preview.newline();
+	post_preview.newline(); 
 	
-	var combine_lines: String = "";
+	var post_lines = post_data["post_body"].split("\n", true);
 	
-	for x in range(0, post_lines.size(), 1):
-		if (post_lines[x].begins_with("![")):
-			combine_lines += attach_img(post_lines[x], img_list) + "\n";
-		else:
-			combine_lines += post_lines[x] + "\n";
-	
-	return combine_lines;
+	for line in post_lines:
+		if (line.contains("## >>")): # header
+			post_preview.push_bold();
+			var a_line = line.replace("#", "");
+			post_preview.add_text(a_line);
+			post_preview.pop();
+			post_preview.newline();
+		elif (line.contains("![")): # image
+			var addt_txt = line.substr(0, line.find("!"));
+			var addt_end_txt = line.substr(line.find(")") + 1);
+			post_preview.add_text(addt_txt);
+				
+			var tex = get_image_texture(line, img_list);
+			if (tex):
+				post_preview.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER);
+				post_preview.add_image(tex, 128);
+				post_preview.pop();
+			
+			post_preview.add_text(addt_end_txt);
+		elif (line.contains("http") && line.contains("[") && line.contains(")")): # url TODO better checks
+			var addt_txt = line.substr(0, line.find("["));
+			var addt_end_txt = line.substr(line.find(")") + 1);
+			post_preview.add_text(addt_txt);
+			var url = line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1);
+			post_preview.push_meta(url);
+			post_preview.add_text(line.substr(line.find("[") + 1, line.find("]") - line.find("[") - 1));
+			post_preview.pop();
+			post_preview.add_text(addt_end_txt);
+		else: # regular
+			post_preview.add_text(line);
+		
+		post_preview.newline();
 
 
 func get_image_texture(img_line: String, img_list):
