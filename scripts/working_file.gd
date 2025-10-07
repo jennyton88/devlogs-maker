@@ -105,7 +105,8 @@ func _on_file_selected(path: String):
 							img.save_png("user://assets/%s/%s" % [img_path, filename]);
 					var tex = ImageTexture.new();
 					tex.set_image(img);
-					collected_img.emit(tex, path.get_file());
+					img_path = img_path.replace("public", ""); # specific to website here
+					collected_img.emit(tex, img_path + "/" + filename);
 					return;
 	else: # export
 		var txt_file = FileAccess.open(path, FileAccess.WRITE);

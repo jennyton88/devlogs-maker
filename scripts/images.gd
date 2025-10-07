@@ -25,6 +25,9 @@ func load_imgs():
 	img_path = img_path.rstrip("/");
 	var dir_access = DirAccess.open("user://");
 	
+	if (!dir_access.dir_exists("assets")): # startup
+		return;
+	
 	var path = "assets/%s" % img_path;
 	if (dir_access.dir_exists(path)):
 		dir_access.change_dir(path);
@@ -32,19 +35,20 @@ func load_imgs():
 		for filename in files:
 			match filename.get_extension():
 				"jpg":
-					load_curr_img(path, filename);
+					load_curr_img(img_path, filename);
 				"png":
-					load_curr_img(path, filename);
+					load_curr_img(img_path, filename);
 				_:
 					pass;
 
 
 func load_curr_img(path: String, filename: String):
 	var img = Image.new();
-	img.load("user://" + path + "/%s" % filename); # should check for errors
+	img.load("user://assets/" + path + "/%s" % filename); # should check for errors
 	var tex = ImageTexture.new();
 	tex.set_image(img);
-	save_img(tex, filename);
+	var img_path = path.replace("public", ""); # specific to website here
+	save_img(tex, img_path + "/" + filename);
 
 
 func save_img(img_data, img_name):
