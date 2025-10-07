@@ -112,4 +112,4 @@ func clear_text():
 # =====================
 
 func get_text():
-	return post_preview.text;
+	return plain_text_post;
