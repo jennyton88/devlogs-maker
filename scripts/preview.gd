@@ -51,19 +51,21 @@ func process_post(post_body: String, img_list):
 	return combine_lines;
 
 
-func attach_img(img_line: String, img_list):
+func get_image_texture(img_line: String, img_list):
 	var img_path = img_line.get_slice("(", 1);
-	img_path = img_path.rstrip(")");
+	var link_end = img_path.find(")");
+	img_path = img_path.substr(0, link_end); # if there are additional chars at the end
 	
 	var imgs = img_list.get_children();
-	for x in range(1, imgs.size(), 1):
-		var img_name = imgs[x].get_child(0).get_child(2).text; # panel > hbox > img # TODO make this better
-		if (img_name == img_path):
-			img_path = "res://assets/imported_imgs/%s" % img_name;
-			
-			return "[center][img=128]" + "%s[/img][/center]" % img_path;
+	for x in range(1, imgs.size(), 1): #ignoring title
+			var img_name = imgs[x].get_meta("file_path");
+			if (img_name.replace("public", "") == img_path):
+				var components = imgs[x].get_child(0).get_children(); # hbox holds all
+				for component in components:
+					if (component is TextureRect):
+						return component.texture;
 	
-	return img_line;
+	return null;
 
 
 func clear_text():
