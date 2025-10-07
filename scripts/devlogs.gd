@@ -214,6 +214,7 @@ func _on_connect_startup(component: String):
 			file_dialog.create_notif_popup.connect(workspace_container.create_notif_popup);
 		"images":
 			images.create_notif_popup.connect(workspace_container.create_notif_popup);
+			images.create_action_popup.connect(workspace_container.create_action_popup);
 		"verify_user":
 			verify_user.enable_buttons.connect(_on_enable_buttons);
 			verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));

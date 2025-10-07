@@ -4,6 +4,7 @@ extends MarginContainer
 signal connect_startup(component: String);
 
 signal create_notif_popup(msg);
+signal create_action_popup(msg, button_info, action);
 
 
 @onready var img_list = $Scroll/VBox;
@@ -96,9 +97,32 @@ func build_img_part(img_data, img_name):
 	return panel_cont;
 
 
-func _on_delete_button_pressed(delete_button):
-	delete_button.get_parent().queue_free();
+func _on_delete_button_pressed(delete_button: Button):
+	create_action_popup.emit(
+		"Are you sure you want to delete this image?",
+		{ 'yes': "Delete Image", 'no': "Cancel" },
+		_on_serious_delete_button_pressed.bind(delete_button) 
+	);
 
+
+func _on_serious_delete_button_pressed(delete_button: Button):
+	var request = Requests.new();
+	var config = request.load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY): # error
+		create_notif_popup.emit("Failed to load config file.");
+		return;
+	
+	var img_part = delete_button.get_parent();
+	var components = img_part.get_children();
+	for component in components:
+		if (component is Label):
+			var filename = component.text.get_file();
+			var img_path =  config.get_value("repo_info", "image_path");
+			var global_path = ProjectSettings.globalize_path("user://assets/" + img_path + filename);
+			OS.move_to_trash(global_path); # TODO check for errors
+			
+	img_part.queue_free();
 
 func _on_copy_button_pressed(copy_button):
 	DisplayServer.clipboard_set(copy_button.get_parent().get_child(2).text);
