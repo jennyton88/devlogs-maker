@@ -62,11 +62,9 @@ func build_img_part(img_data, img_name: String, img_path: String):
 	var bg_mat = load("res://assets/materials/image_part.tres");
 	panel_cont.add_theme_stylebox_override("panel", bg_mat);
 	panel_cont.set_meta("file_path", img_path + "/" + img_name.get_file());
+	panel_cont.set_meta("filename", img_name);
 	
 	var hbox = HBoxContainer.new();
-	
-	var check = CheckBox.new();
-	check.size_flags_vertical = Control.SIZE_SHRINK_CENTER;
 	
 	var thumb = TextureRect.new();
 	thumb.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL;
@@ -89,13 +87,13 @@ func build_img_part(img_data, img_name: String, img_path: String):
 	delete_button.text = "Delete";
 	delete_button.pressed.connect(_on_delete_button_pressed.bind(delete_button));
 	delete_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER;
-	panel_cont.add_child(hbox);  # TODO ENUM for each feature
-	hbox.add_child(check); # 0
-	hbox.add_child(thumb); # 1
-	hbox.add_child(filename); # 2
-	hbox.add_child(copy_button); # 3
-	hbox.add_child(delete_button); # 4
-	hbox.add_child(MarginContainer.new()); # 5
+	
+	panel_cont.add_child(hbox);
+	hbox.add_child(thumb);
+	hbox.add_child(filename);
+	hbox.add_child(copy_button);
+	hbox.add_child(delete_button);
+	hbox.add_child(MarginContainer.new());
 	
 	return panel_cont;
 
