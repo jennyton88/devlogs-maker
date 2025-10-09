@@ -220,6 +220,7 @@ func _on_connect_startup(component: String):
 			file_dialog.fill_in_details.connect(fill_in_details);
 			file_dialog.collected_img.connect(_on_collected_img);
 			file_dialog.create_notif_popup.connect(workspace_container.create_notif_popup);
+			file_dialog.create_action_popup.connect(workspace_container.create_action_popup);
 		"images":
 			images.create_notif_popup.connect(workspace_container.create_notif_popup);
 			images.create_action_popup.connect(workspace_container.create_action_popup);
