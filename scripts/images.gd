@@ -128,5 +128,5 @@ func _on_serious_delete_button_pressed(delete_button: Button):
 	img_part.queue_free();
 
 func _on_copy_button_pressed(copy_button):
-	DisplayServer.clipboard_set(copy_button.get_parent().get_child(2).text);
+	DisplayServer.clipboard_set(copy_button.get_parent().get_parent().get_meta("filename"));
 	
