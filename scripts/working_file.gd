@@ -7,7 +7,6 @@ signal collected_img(img_data, img_name: String, img_path: String);
 
 signal create_notif_popup(msg);
 
-var text_to_save = "";
 var curr_file_mode = "";
 
 func startup():
@@ -27,13 +26,20 @@ func import_file():
 	show();
 
 
-func export_file(filename: String, file_text: String):
-	text_to_save = file_text;
+func export_file(filename: String, file_text: String, file_img_paths: Array[String]):
 	var download_path = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
 	
-	current_path = download_path + "/" + filename + ".txt";
-	file_mode = FileDialog.FileMode.FILE_MODE_SAVE_FILE;
-	show();
+	var dir_access = DirAccess.open(download_path);
+	
+	var folder_name = filename.replace("." + filename.get_extension(), "");
+	if (!dir_access.dir_exists(folder_name)):
+		var error = dir_access.make_dir(folder_name);
+		if (error != OK):
+			create_notif_popup.emit("Error %d\nFailed to create folder!" % error);
+		else:
+			save_post_files(download_path, folder_name, filename, file_text, file_img_paths);
+	else:
+		ask_to_overwrite_files(download_path, folder_name, filename, file_text, file_img_paths);
 
 
 func import_image():
@@ -108,10 +114,6 @@ func _on_file_selected(path: String):
 					# specific to website removing public folder path
 					collected_img.emit(tex, img_path.replace("public", "") + "/" + filename, img_path);
 					return;
-	else: # export
-		var txt_file = FileAccess.open(path, FileAccess.WRITE);
-		txt_file.store_string(text_to_save);
-		text_to_save = "";
 
 
 func check_file_name(curr_file_name: String) -> String:

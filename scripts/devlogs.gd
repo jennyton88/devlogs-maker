@@ -183,7 +183,15 @@ func fill_in_details(post_info: Dictionary):
 
 
 func _on_export_file():
-	file_dialog.export_file(finalize.get_filename(), text_preview.get_text());
+	if (finalize.get_filename() == ""):
+		workspace_container.create_notif_popup("You haven't named your file yet!");
+		return;
+	
+	file_dialog.export_file(
+		finalize.get_filename(), 
+		text_preview.get_text(), 
+		text_preview.process_post_for_imgs(images.img_list)
+	);
 
 
 func _on_import_file():
