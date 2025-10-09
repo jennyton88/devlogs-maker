@@ -77,16 +77,18 @@ func build_img_part(img_data, img_name: String, img_path: String):
 	
 	var filename = Label.new();
 	filename.size_flags_horizontal = Control.SIZE_EXPAND_FILL;
+	filename.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS;
 	filename.text = img_name;
 	
 	var copy_button = Button.new();
 	copy_button.text = "Copy";
 	copy_button.pressed.connect(_on_copy_button_pressed.bind(copy_button));
+	copy_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER;
 	
 	var delete_button = Button.new();
 	delete_button.text = "Delete";
 	delete_button.pressed.connect(_on_delete_button_pressed.bind(delete_button));
-	
+	delete_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER;
 	panel_cont.add_child(hbox);  # TODO ENUM for each feature
 	hbox.add_child(check); # 0
 	hbox.add_child(thumb); # 1
