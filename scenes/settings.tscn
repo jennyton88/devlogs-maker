@@ -69,11 +69,34 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
 
-[node name="ContentPathTitle" type="Label" parent="VB"]
+[node name="HB2" type="HBoxContainer" parent="VB"]
+layout_mode = 2
+
+[node name="VB" type="VBoxContainer" parent="VB/HB2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="ContentPathTitle" type="Label" parent="VB/HB2/VB"]
 layout_mode = 2
 text = "File Path"
 
-[node name="ContentPath" type="LineEdit" parent="VB"]
+[node name="ContentPath" type="LineEdit" parent="VB/HB2/VB"]
+layout_mode = 2
+caret_blink = true
+caret_blink_interval = 0.5
+caret_mid_grapheme = true
+
+[node name="VB2" type="VBoxContainer" parent="VB/HB2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="ImagePathTitle" type="Label" parent="VB/HB2/VB2"]
+layout_mode = 2
+text = "Image Path"
+
+[node name="ImagePath" type="LineEdit" parent="VB/HB2/VB2"]
 layout_mode = 2
 caret_blink = true
 caret_blink_interval = 0.5
@@ -83,16 +106,6 @@ caret_mid_grapheme = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.15
-
-[node name="ImagePathTitle" type="Label" parent="VB"]
-layout_mode = 2
-text = "Image Path"
-
-[node name="ImagePath" type="LineEdit" parent="VB"]
-layout_mode = 2
-caret_blink = true
-caret_blink_interval = 0.5
-caret_mid_grapheme = true
 
 [node name="S6" type="MarginContainer" parent="VB"]
 layout_mode = 2

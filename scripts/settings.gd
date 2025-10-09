@@ -23,15 +23,7 @@ func startup() -> void:
 	
 	connect_startup.emit("settings");
 	
-	var user_set = {
-		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
-		"repo_name": get_node("VB/HB1/VB2/RepoName"),
-		"repo_branch": get_node("VB/RepoBranch"),
-		"content_path": get_node("VB/ContentPath"),
-		"image_path": get_node("VB/ImagePath"),
-		"author": get_node("VB/Author"),
-		"email": get_node("VB/Email"),
-	};
+	var user_set = get_user_input_areas();
 	
 	setup_settings(user_set);
 
@@ -90,15 +82,7 @@ func save_settings(user_set: Dictionary) -> void:
 # ============================
 
 func _on_save_settings_pressed(apply_changes: bool) -> void:
-	var user_set = {
-		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
-		"repo_name": get_node("VB/HB1/VB2/RepoName"),
-		"repo_branch": get_node("VB/RepoBranch"),
-		"content_path": get_node("VB/ContentPath"),
-		"image_path": get_node("VB/ImagePath"),
-		"author": get_node("VB/Author"),
-		"email": get_node("VB/Email"),
-	};
+	var user_set = get_user_input_areas();
 	
 	if (apply_changes):
 		save_settings(user_set);
@@ -109,6 +93,18 @@ func _on_save_settings_pressed(apply_changes: bool) -> void:
 # =====================
 # ====== Helpers ======
 # =====================
+
+func get_user_input_areas():
+	return {
+		"repo_owner": get_node("VB/HB1/VB/RepoOwner"),
+		"repo_name": get_node("VB/HB1/VB2/RepoName"),
+		"repo_branch": get_node("VB/RepoBranch"),
+		"content_path": get_node("VB/HB2/VB/ContentPath"),
+		"image_path": get_node("VB/HB2/VB2/ImagePath"),
+		"author": get_node("VB/Author"),
+		"email": get_node("VB/Email"),
+	};
+
 
 func load_config_file() -> ConfigFile:
 	var config = ConfigFile.new();
