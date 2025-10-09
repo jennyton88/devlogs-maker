@@ -102,6 +102,28 @@ func get_image_texture(img_line: String, img_list):
 	return null;
 
 
+func process_post_for_imgs(img_list):
+	var post_lines = plain_text_post.split("\n", true);
+	
+	var img_paths: Array[String] = [];
+	var imgs_to_send: Array[String] = [];
+	for line in post_lines:
+		if (line.contains("![")): # image
+			img_paths.append(line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1));
+	
+	var dir_access = DirAccess.open("user://");
+	var imgs = img_list.get_children();
+	
+	for img_path in img_paths:
+		for x in range(1, imgs.size(), 1): #ignoring title
+			var img_name = imgs[x].get_meta("file_path");
+			if (img_name.replace("public", "") == img_path):
+				if (dir_access.file_exists("user://assets/" + img_name)):
+					imgs_to_send.append(img_name);
+	
+	return imgs_to_send;
+
+
 func clear_text():
 	plain_text_post = "";
 	post_preview.text = "";
