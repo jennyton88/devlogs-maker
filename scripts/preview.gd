@@ -12,7 +12,7 @@ extends MarginContainer
 # ===== Variables =====
 # =====================
 
-var plain_text_post = "";
+var plain_text_post: String = "";
 
 # =====================
 # ====== Methods ======
@@ -71,12 +71,17 @@ func process_post(post_data: Dictionary, img_list):
 			
 			post_preview.add_text(addt_end_txt);
 		elif (line.contains("http") && line.contains("[") && line.contains(")")): # url TODO better checks
-			var addt_txt = line.substr(0, line.find("["));
-			var addt_end_txt = line.substr(line.find(")") + 1);
+			var link_begin = line.find("(");
+			var link_end = line.find(")");
+			var link_txt_begin = line.find("[");
+			var link_txt_end = line.find("]");
+			
+			var addt_txt = line.substr(0, link_txt_begin);
+			var addt_end_txt = line.substr(link_end + 1);
 			post_preview.add_text(addt_txt);
-			var url = line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1);
+			var url = line.substr(link_begin + 1, link_end - link_begin - 1);
 			post_preview.push_meta(url);
-			post_preview.add_text(line.substr(line.find("[") + 1, line.find("]") - line.find("[") - 1));
+			post_preview.add_text(line.substr(link_txt_begin + 1, link_txt_end - link_txt_begin - 1));
 			post_preview.pop();
 			post_preview.add_text(addt_end_txt);
 		else: # regular
