@@ -243,6 +243,26 @@ func create_post_request(scene: Node, edit_ref: Node, content: String, filename:
 	return send_files(scene, action_type, url, headers, body_str);
 
 
+## Get the reference (branch) commit sha
+func get_ref(scene: Node):
+	var config = load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY): # change to ( ! is ConfigFile)
+		return config;
+	
+	var headers = create_headers(config, AcceptType.GitJSON, RequestType.GetData, {});
+	
+	var url = "https://api.github.com/repos/%s/%s/git/ref/heads/%s" % [
+		config.get_value("repo_info", "repo_owner"),
+		config.get_value("repo_info", "repo_name"),
+		config.get_value("repo_info", "repo_branch_update")
+	];
+	
+	return make_http_request(
+		scene, scene._on_http_request_completed.bind("get_ref"), HTTPClient.METHOD_GET, 
+		url, headers
+	);
+
 func create_edit_download_request(scene: Node, button: Button):
 	var config = load_config();
 	
