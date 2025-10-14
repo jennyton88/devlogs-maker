@@ -263,6 +263,35 @@ func get_ref(scene: Node):
 		url, headers
 	);
 
+
+## Upload file to the repo as a blob. This can be used as a part of a tree.
+## File must be encoded already to base64
+func create_blob(scene: Node, file):
+	var config = load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY): # change to ( ! is ConfigFile)
+		return config;
+	
+	var body_str = JSON.stringify({
+		"content": file,
+		"encoding": "base64"
+	});
+	
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData, 
+		{ "body_length": str(body_str.length()) }
+	);
+	
+	var url = "https://api.github.com/repos/%s/%s/git/blobs" % [
+		config.get_value("repo_info", "repo_owner"),
+		config.get_value("repo_info", "repo_name"),
+	];
+	
+	return make_http_request(
+		scene, scene._on_http_request_completed.bind("create_blob"), HTTPClient.METHOD_POST, 
+		url, headers, body_str
+	);
+
 func create_edit_download_request(scene: Node, button: Button):
 	var config = load_config();
 	
