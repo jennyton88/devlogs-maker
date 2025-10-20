@@ -1,5 +1,8 @@
 extends MarginContainer
 
+signal create_error_popup(error, error_type);
+signal create_notif_popup(msg);
+signal create_action_popup(msg, button_info, action);
 
 @onready var menu_options = $HB/MenuOptions;
 
