@@ -58,17 +58,46 @@ func _on_post_curr_text():
 		workspace_container.create_notif_popup("You haven't completed all parts of your post yet!");
 		return;
 	
-	var post_request = Requests.new();
+	var request = Requests.new();
+	var config = request.load_config();
 	
-	var error = post_request.create_post_request(
-		self, 
-		post_list.get_edit_ref(), 
-		text_preview.get_text(),
-		finalize.get_filename()
-	);
+	if (!config is ConfigFile):
+		workspace_container.create_error_popup(config["error"], config["error_type"]);
 	
-	if (error.has("error")):
-		workspace_container.create_error_popup(error["error"], error["error_type"]);
+	# Start preparing the data for post/editing
+	var data = {
+		"action_type": "post_devlog",
+		"commit_msg": "Posted devlog.",
+		"files": [],
+	};
+	
+	# Replace messages if editing a devlog
+	var edit_ref = post_list.get_edit_ref();
+	if (edit_ref):
+		data["action_type"] = "edit_devlog";
+		data["sha"] = edit_ref.get_meta("sha");
+		data["commit_msg"] = "Edited devlog.";
+	
+	# The plain text content
+	data["files"].append({
+		"content": Marshalls.utf8_to_base64(text_preview.get_text()),
+		"path": config.get_value("repo_info", "content_path") + finalize.get_filename(),
+		"mode": "100644", # file blob
+		"type": "blob",
+	});
+	
+	# Image(s) data encoded in base64
+	var imgs: Array[String] = text_preview.process_post_for_imgs(images.img_list);
+	for img_path in imgs:
+		var img_data = Image.new();
+		img_data.load("user://assets/%s" % img_path);
+		var encoded_bytes = Marshalls.raw_to_base64(img_data.save_png_to_buffer());
+		data["files"].append({
+			"content": encoded_bytes,
+			"path": img_path, # location of file in repository
+			"mode": "100644", # file blob
+			"type": "blob"
+		});
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
