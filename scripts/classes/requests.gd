@@ -347,7 +347,7 @@ func create_commit(scene: Node, msg: String, parents: Array[String], tree_ref_sh
 	];
 	
 	return make_http_request(
-		scene, scene._on_http_request_completed, HTTPClient.METHOD_POST,
+		scene, scene._on_http_request_completed.bind("create_commit"), HTTPClient.METHOD_POST,
 		url, headers, body_str
 	);
 	
