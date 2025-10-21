@@ -152,6 +152,11 @@ func _on_post_curr_text():
 	
 	var new_commit_sha = commit_sha;
 	commit_sha = "";
+	
+	result = await request.update_ref(self, new_commit_sha);
+	if (result.has("error")):
+		workspace_container.create_error_popup(result["error"], result["error_type"]);
+		return;
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
@@ -181,6 +186,8 @@ func _on_http_request_completed(result, response_code, _headers, body, action):
 					clear_post();
 			elif (action == "get_ref"):
 				branch_ref = response["object"]["sha"];
+			elif (action == "update_ref"):
+				pass;
 		HTTPClient.RESPONSE_CREATED: # new post
 			if (action == "post_devlog"):
 				var info = response["content"];
