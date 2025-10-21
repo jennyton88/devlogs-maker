@@ -200,21 +200,12 @@ func load_config():
 func create_get_devlogs_request(scene: Node):
 	var config = load_config();
 	
-	if (typeof(config) == TYPE_DICTIONARY):
+	if (!config is ConfigFile):
 		return config;
 	
-	var headers = create_headers(
-		config, AcceptType.GitJSON, RequestType.GetData, {}
-	);
-	var fields = { "ref": config.get_value("repo_info", "repo_branch_update") };
-	var queries = create_queries(fields);
+	var url = config.get_value("repo_info", "content_path");
 	
-	var url = config.get_value("urls", "base_repo");
-	# TODO url stripping depending on type of content path
-	url = url.rstrip("/") + "?"; # [/text_files/ vs /text_files] redirected to main branch
-	url += queries;
-	
-	return get_files(scene, "get_devlogs", url, headers);
+	return get_file(scene, "get_devlogs", url);
 
 
 ## Must have EITHER [path to file] OR [full download url]
@@ -391,17 +382,8 @@ func update_ref(scene: Node, commit_ref: String):
 
 
 func create_edit_download_request(scene: Node, button: Button):
-	var config = load_config();
-	
-	if (typeof(config) == TYPE_DICTIONARY):
-		return config;
-	
-	var headers = create_headers(
-		config, AcceptType.Text, RequestType.GetData, {}
-	);
 	var url = button.get_meta("url");
-	
-	return get_files(scene, "get_file", url, headers);
+	return get_file(scene, "get_file", "", url);
 
 
 func create_edit_directory_file_request(scene: Node, directory):
@@ -429,14 +411,10 @@ func create_fetch_directory_file_request(scene: Node, directory):
 	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
-	var headers = create_headers(
-		config, AcceptType.GitJSON, RequestType.GetData, {}
-	);
-	
 	var url = config.get_value("urls", "base_repo");
 	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
 	
-	return get_files(scene, "fetch_directory", url, headers);
+	return get_file(scene, "fetch_directory", "", url);
 
 
 func create_get_directory_file_request(scene: Node, directory):
@@ -445,13 +423,9 @@ func create_get_directory_file_request(scene: Node, directory):
 	if (typeof(config) == TYPE_DICTIONARY):
 		return config;
 	
-	var headers = create_headers(
-		config, AcceptType.Text, RequestType.GetData, {}
-	);
-	
 	var url = directory.download_url;
 	
-	return get_files(scene, "get_directory", url, headers);
+	return get_file(scene, "get_directory", "", url, AcceptType.Text);
 
 
 func create_delete_file_request(scene: Node, entry_delete_button: Button):
