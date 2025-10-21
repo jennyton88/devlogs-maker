@@ -24,6 +24,7 @@ signal create_action_popup(msg, button_info, action);
 
 # Temporary Variables
 var creation_date = "";
+var branch_ref: String = "";
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
