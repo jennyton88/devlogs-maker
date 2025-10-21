@@ -320,6 +320,39 @@ func create_tree(scene: Node, head_ref_sha: String, tree_data: Array[Dictionary]
 	);
 
 
+func create_commit(scene: Node, msg: String, parents: Array[String], tree_ref_sha: String):
+	var config = load_config();
+	
+	if (!config is ConfigFile):
+		return config;
+	
+	var body_str = JSON.stringify({
+		"message": msg,
+		"tree": tree_ref_sha, # what you are adding
+		"parents": parents, # what it will start from
+		"author": {
+			"name": config.get_value("user_info", "user_name"),
+			"email": config.get_value("user_info", "user_email"),
+		}
+	});
+	
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData,
+		{ "body_length": str(body_str.length()) }
+	);
+	
+	var url = "https://api.github.com/repos/%s/%s/git/commits" % [
+		config.get_value("repo_info", "repo_owner"),
+		config.get_value("repo_info", "repo_name")
+	];
+	
+	return make_http_request(
+		scene, scene._on_http_request_completed, HTTPClient.METHOD_POST,
+		url, headers, body_str
+	);
+	
+
+
 func create_edit_download_request(scene: Node, button: Button):
 	var config = load_config();
 	
