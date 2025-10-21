@@ -25,6 +25,7 @@ signal create_action_popup(msg, button_info, action);
 # Temporary Variables
 var creation_date = "";
 var branch_ref: String = "";
+var file_shas: Array[String] = [];
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -110,6 +111,23 @@ func _on_post_curr_text():
 	
 	var head_ref_sha = branch_ref;
 	branch_ref = "";
+	
+	# Create blobs
+	for file in data["files"]:
+		result = await request.create_blob(self, file["content"]);
+		if (result.has("error")):
+			workspace_container.create_error_popup(result["error"], result["error_type"]);
+			return;
+		else:
+			await result["request_signal"]; # wait for response to arrive
+			await get_tree().create_timer(1.0).timeout; # for secondary rate limit
+	
+	# Add collected shas to the file data as ordered, and erase "content" entry used in blob
+	for i in range(data["files"].size()):
+		data["files"][i].erase("content");
+		data["files"][i]["sha"] = file_shas[i];
+	
+	file_shas = [];
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
@@ -145,6 +163,8 @@ func _on_http_request_completed(result, response_code, _headers, body, action):
 				post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
 				post_list.update_directory_file(info["name"], "add");
 				clear_post();
+			elif (action == "create_blob"):
+				file_shas.append(response["sha"]); # only need sha of blob
 		_:
 			pass;
 		
