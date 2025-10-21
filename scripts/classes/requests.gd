@@ -9,7 +9,8 @@ enum RequestType {
 
 enum AcceptType {
 	Text,
-	GitJSON
+	GitJSON,
+	Raw,
 }
 
 
@@ -64,9 +65,16 @@ func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: R
 	var auth_type = config.get_value("user_info", "user_token_type");
 	var user_token = config.get_value("user_info", "user_token");
 	
-	var accept = "application/vnd.github+json"; # default
-	if (accept_type == AcceptType.Text):
-		accept = "text/plain";
+	var accept = "";
+	match accept_type:
+		AcceptType.GitJSON:
+			accept = "application/vnd.github+json";
+		AcceptType.Text:
+			accept = "application/vnd.github.text+json";
+		AcceptType.Raw:
+			accept = "application/vnd.github.raw+json";
+		_:
+			accept = "application/vnd.github+json"; # default
 	
 	var headers = [
 		"User-Agent: " + app_name,
