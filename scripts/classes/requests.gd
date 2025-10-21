@@ -350,7 +350,34 @@ func create_commit(scene: Node, msg: String, parents: Array[String], tree_ref_sh
 		scene, scene._on_http_request_completed.bind("create_commit"), HTTPClient.METHOD_POST,
 		url, headers, body_str
 	);
+
+
+func update_ref(scene: Node, commit_ref: String):
+	var config = load_config();
 	
+	if (!config is ConfigFile):
+		return config;
+	
+	var body_str = JSON.stringify({
+		"sha": commit_ref,
+		"force": false
+	});
+	
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData, 
+		{ "body_length": str(body_str.length()) }
+	);
+	
+	var url = "https://api.github.com/repos/%s/%s/git/refs/heads/%s" % [
+		config.get_value("repo_info", "repo_owner"),
+		config.get_value("repo_info", "repo_name"),
+		config.get_value("repo_info", "repo_branch_update")
+	];
+	
+	return make_http_request(
+		scene, scene._on_http_request_completed.bind("update_ref"), HTTPClient.METHOD_PATCH,
+		url, headers, body_str
+	);
 
 
 func create_edit_download_request(scene: Node, button: Button):
