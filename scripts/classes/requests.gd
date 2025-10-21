@@ -266,14 +266,14 @@ func get_ref(scene: Node):
 
 ## Upload file to the repo as a blob. This can be used as a part of a tree.
 ## File must be encoded already to base64
-func create_blob(scene: Node, file):
+func create_blob(scene: Node, content: String):
 	var config = load_config();
 	
 	if (typeof(config) == TYPE_DICTIONARY): # change to ( ! is ConfigFile)
 		return config;
 	
 	var body_str = JSON.stringify({
-		"content": file,
+		"content": content,
 		"encoding": "base64"
 	});
 	
