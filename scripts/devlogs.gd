@@ -98,6 +98,17 @@ func _on_post_curr_text():
 			"mode": "100644", # file blob
 			"type": "blob"
 		});
+	
+	# Get the reference to the branch the changes will be committed to
+	var result = request.get_ref(self);
+	if (result.has("error")):
+		workspace_container.create_error_popup(result["error"], result["error_type"]);
+		return;
+	else:
+		await result["request_signal"]; # make sure ref is collected
+	
+	var head_ref_sha = branch_ref;
+	branch_ref = "";
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
@@ -125,6 +136,8 @@ func _on_http_request_completed(result, response_code, _headers, body, action):
 					edit_ref.set_meta("sha", info["sha"]);
 					post_list.set_edit_ref(null);
 					clear_post();
+			elif (action == "get_ref"):
+				branch_ref = response["object"]["sha"];
 		HTTPClient.RESPONSE_CREATED: # new post
 			if (action == "post_devlog"):
 				var info = response["content"];
