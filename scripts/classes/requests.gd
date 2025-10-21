@@ -30,7 +30,7 @@ func make_http_request(
 	if (error != OK):
 		return { "error": error, "error_type": AppInfo.ErrorType.HTTPError };
 	
-	return {};
+	return { "request_signal": h_client.request_completed };
 
 
 # addt_data: Dictionary {
