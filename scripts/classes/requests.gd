@@ -292,6 +292,34 @@ func create_blob(scene: Node, content: String):
 		url, headers, body_str
 	);
 
+
+func create_tree(scene: Node, head_ref_sha: String, tree_data: Array[Dictionary]):
+	var config = load_config();
+	
+	if (!config is ConfigFile):
+		return config;
+	
+	var body_str = JSON.stringify({
+		"tree": tree_data,
+		"base_tree": head_ref_sha
+	});
+	
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData, 
+		{ "body_length": str(body_str.length()) }
+	);
+	
+	var url = "https://api.github.com/repos/%s/%s/git/trees" % [
+		config.get_value("repo_info", "repo_owner"),
+		config.get_value("repo_info", "repo_name"),
+	];
+	
+	return make_http_request(
+		scene, scene._on_http_request_completed.bind("create_tree"), HTTPClient.METHOD_POST,
+		url, headers, body_str
+	);
+
+
 func create_edit_download_request(scene: Node, button: Button):
 	var config = load_config();
 	
