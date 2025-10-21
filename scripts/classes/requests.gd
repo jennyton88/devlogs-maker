@@ -293,7 +293,7 @@ func create_blob(scene: Node, content: String):
 	);
 
 
-func create_tree(scene: Node, head_ref_sha: String, tree_data: Array[Dictionary]):
+func create_tree(scene: Node, head_ref_sha: String, tree_data: Array):
 	var config = load_config();
 	
 	if (!config is ConfigFile):
