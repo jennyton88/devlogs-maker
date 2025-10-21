@@ -216,6 +216,42 @@ func create_get_devlogs_request(scene: Node):
 	return get_files(scene, "get_devlogs", url, headers);
 
 
+## Must have EITHER [path to file] OR [full download url]
+## Can request for a single file or a list of files at a directory
+func get_file(
+	scene: Node, action: String, 
+	path: String = "", download_url: String = "", accept_file_type: AcceptType = AcceptType.GitJSON
+):
+	var config = load_config();
+	
+	if (!config is ConfigFile):
+		return config;
+	
+	var headers = create_headers(config, accept_file_type, RequestType.GetData);
+	
+	var url = "";
+	if (path != ""): # for files at repo only
+		url = "https://api.github.com/repos/%s/%s/contents/%s" % [
+			config.get_value("repo_info", "repo_owner"),
+			config.get_value("repo_info", "repo_name"),
+			path
+		];
+		
+		var fields = { "ref": config.get_value("repo_info", "repo_branch_update") };
+		var queries = create_queries(fields);
+		# ex. '/' ends redirects to files in main dir instead of files in curr dir
+		url = url.rstrip("/") + "?" + queries; 
+	else: # for any file
+		url = download_url;
+	
+	# TODO Add warning for giving no urls
+	
+	return make_http_request(
+		scene, scene._on_http_request_completed.bind(action), 
+		HTTPClient.METHOD_GET, url, headers
+	);
+
+
 ## Get the reference (branch) commit sha
 func get_ref(scene: Node):
 	var config = load_config();
