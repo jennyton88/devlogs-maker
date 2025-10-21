@@ -60,7 +60,9 @@ func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> Stri
 	return JSON.stringify(body);
 
 
-func create_headers(config: ConfigFile, accept_type: AcceptType, request_type: RequestType, addt_data: Dictionary):
+func create_headers(
+	config: ConfigFile, accept_type: AcceptType, request_type: RequestType, addt_data: Dictionary = {}
+) -> Array:
 	var app_name = config.get_value("app_info", "app_name");
 	var auth_type = config.get_value("user_info", "user_token_type");
 	var user_token = config.get_value("user_info", "user_token");
