@@ -17,6 +17,7 @@ enum AcceptType {
 # === Main Methods ====
 # =====================
 
+
 func make_http_request(
 	scene: Node, callable: Callable, method: HTTPClient.Method, 
 	url: String, headers: Array, request_data: String = ""
@@ -37,6 +38,7 @@ func make_http_request(
 # content: String /  OPTIONAL
 # sha: String / OPTIONAL
 # }
+# TODO rename function
 func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> String:
 	var body = { # required for commits
 		"message": msg,
@@ -212,35 +214,6 @@ func create_get_devlogs_request(scene: Node):
 	url += queries;
 	
 	return get_files(scene, "get_devlogs", url, headers);
-
-
-func create_post_request(scene: Node, edit_ref: Node, content: String, filename: String):
-	var config = load_config();
-	
-	if (typeof(config) == TYPE_DICTIONARY):
-		return config;
-	
-	var action_type = "post_devlog";
-	var addt_data = { "content": content };
-	var msg = "Posted";
-	
-	if (edit_ref != null):
-		addt_data["sha"] = edit_ref.get_meta("sha");
-		msg = "Edited";
-		action_type = "edit_devlog";
-	
-	msg += " devlog.";
-	
-	var body_str = create_body(config, msg, addt_data);
-	var headers = create_headers(
-		config, AcceptType.GitJSON, RequestType.SendData, 
-		{ "body_length": str(body_str.length()) }
-	);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += filename;
-	
-	return send_files(scene, action_type, url, headers, body_str);
 
 
 ## Get the reference (branch) commit sha
