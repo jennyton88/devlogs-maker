@@ -26,6 +26,7 @@ signal create_action_popup(msg, button_info, action);
 var creation_date = "";
 var branch_ref: String = "";
 var file_shas: Array[String] = [];
+var tree_sha: String = "";
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -128,6 +129,17 @@ func _on_post_curr_text():
 		data["files"][i]["sha"] = file_shas[i];
 	
 	file_shas = [];
+	
+	result = await request.create_tree(self, head_ref_sha, data["files"]);
+	if (result.has("error")):
+		workspace_container.create_error_popup(result["error"], result["error_type"]);
+		return;
+	else:
+		await result["request_signal"];
+		await get_tree().create_timer(1.0).timeout; # for secondary rate limit
+	
+	var new_tree_sha = tree_sha;
+	tree_sha = "";
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
@@ -165,6 +177,8 @@ func _on_http_request_completed(result, response_code, _headers, body, action):
 				clear_post();
 			elif (action == "create_blob"):
 				file_shas.append(response["sha"]); # only need sha of blob
+			elif (action == "create_tree"):
+				tree_sha = response["sha"];
 		_:
 			pass;
 		
