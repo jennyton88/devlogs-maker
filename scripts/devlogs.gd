@@ -104,7 +104,7 @@ func _on_text_changed_preview(_new_text: String) -> void:
 	update_preview();
 
 
-func _on_http_request_completed(result, response_code, _headers, body, _action):
+func _on_http_request_completed(result, response_code, _headers, body, action):
 	var request = Requests.new();
 	
 	var error = request.process_results(result, response_code);
@@ -118,17 +118,19 @@ func _on_http_request_completed(result, response_code, _headers, body, _action):
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # update post
-			var info = response["content"];
-			var edit_ref = post_list.get_edit_ref();
-			if (edit_ref != null):
-				edit_ref.set_meta("sha", info["sha"]);
-				post_list.set_edit_ref(null);
-				clear_post();
+			if (action == "edit_devlog"):
+				var info = response["content"];
+				var edit_ref = post_list.get_edit_ref();
+				if (edit_ref != null):
+					edit_ref.set_meta("sha", info["sha"]);
+					post_list.set_edit_ref(null);
+					clear_post();
 		HTTPClient.RESPONSE_CREATED: # new post
-			var info = response["content"];
-			post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
-			post_list.update_directory_file(info["name"], "add");
-			clear_post();
+			if (action == "post_devlog"):
+				var info = response["content"];
+				post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
+				post_list.update_directory_file(info["name"], "add");
+				clear_post();
 		_:
 			pass;
 		
