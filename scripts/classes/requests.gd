@@ -18,7 +18,6 @@ enum AcceptType {
 # === Main Methods ====
 # =====================
 
-
 func make_http_request(
 	scene: Node, callable: Callable, method: HTTPClient.Method, 
 	url: String, headers: Array, request_data: String = ""
@@ -270,6 +269,36 @@ func create_update_file(
 		HTTPClient.METHOD_PUT, url, headers, body_str
 	);
 
+## Must have path to file including filename
+## file_data: Dictionary {
+##   "sha": String, 
+## }
+func delete_file(scene: Node, action: String, path: String, file_sha: String):
+	var config = load_config();
+	
+	if (!config is ConfigFile):
+		return config;
+	
+	var body_str = create_commit_body(config, "Deleted devlog!", 
+		{ "sha": file_sha }
+	);
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData, 
+		{ "body_length": str(body_str.length()) }
+	);
+	
+	var url = "https://api.github.com/repos/%s/%s/contents/%s" % [
+		config.get_value("repo_info", "repo_owner"),
+		config.get_value("repo_info", "repo_name"),
+		path
+	];
+	
+	return make_http_request(
+		scene, scene._on_http_request_completed.bind(action), HTTPClient.METHOD_DELETE,
+		url, headers, body_str
+	);
+
+
 ## Get the reference (branch) commit sha
 func get_ref(scene: Node):
 	var config = load_config();
@@ -403,29 +432,6 @@ func update_ref(scene: Node, commit_ref: String):
 	
 	return make_http_request(
 		scene, scene._on_http_request_completed.bind("update_ref"), HTTPClient.METHOD_PATCH,
-		url, headers, body_str
-	);
-
-
-func create_delete_file_request(scene: Node, entry_delete_button: Button):
-	var config = load_config();
-	
-	if (typeof(config) == TYPE_DICTIONARY):
-		return config;
-	
-	var button_ref = entry_delete_button;
-	
-	var body_str = create_body(config, "Deleted devlog.", { "sha": button_ref.get_meta("sha") });
-	var headers = create_headers(
-		config, AcceptType.GitJSON, RequestType.SendData, 
-		{ "body_length": str(body_str.length()) }
-	);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += button_ref.get_meta("name");
-	
-	return make_http_request(
-		scene, scene._on_http_request_completed.bind("delete_devlog"), HTTPClient.METHOD_DELETE,
 		url, headers, body_str
 	);
 
