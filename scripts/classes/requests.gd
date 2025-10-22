@@ -183,6 +183,7 @@ func load_config():
 	
 	return config;
 
+
 # =====================
 # == Custom Requests == # deals with unique urls, queries, actions
 # =====================
@@ -404,53 +405,6 @@ func update_ref(scene: Node, commit_ref: String):
 		scene, scene._on_http_request_completed.bind("update_ref"), HTTPClient.METHOD_PATCH,
 		url, headers, body_str
 	);
-
-
-func create_edit_download_request(scene: Node, button: Button):
-	var url = button.get_meta("url");
-	return get_file(scene, "get_file", "", url);
-
-
-func create_edit_directory_file_request(scene: Node, directory):
-	var config = load_config();
-	
-	if (typeof(config) == TYPE_DICTIONARY):
-		return config;
-	
-	var addt_data = { "content": directory["data"], "sha": directory["sha"] };
-	var body_str = create_body(config, "Edited directory.", addt_data);
-	var headers = create_headers(
-		config, AcceptType.GitJSON, RequestType.SendData,
-		{ "body_length": str(body_str.length()) }
-	);
-	
-	var url = config.get_value("urls", "base_repo");
-	url += directory.name;
-	
-	return send_files(scene, "edit_dir", url, headers, body_str);
-
-
-func create_fetch_directory_file_request(scene: Node, directory):
-	var config = load_config();
-	
-	if (typeof(config) == TYPE_DICTIONARY):
-		return config;
-	
-	var url = config.get_value("urls", "base_repo");
-	url += directory.name + "?ref=" + config.get_value("repo_info", "repo_branch_update");
-	
-	return get_file(scene, "fetch_directory", "", url);
-
-
-func create_get_directory_file_request(scene: Node, directory):
-	var config = load_config();
-	
-	if (typeof(config) == TYPE_DICTIONARY):
-		return config;
-	
-	var url = directory.download_url;
-	
-	return get_file(scene, "get_directory", "", url, AcceptType.Text);
 
 
 func create_delete_file_request(scene: Node, entry_delete_button: Button):
