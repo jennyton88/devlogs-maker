@@ -31,26 +31,23 @@ var commit_sha: String = "";
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	menu_options.connect_startup.connect(_on_connect_startup);
-	menu_options.startup();
+	var modules = [
+		menu_options, file_dialog, 
+		images, post_list, 
+		settings, verify_user
+	];
 	
-	file_dialog.connect_startup.connect(_on_connect_startup);
-	file_dialog.startup();
-	
-	images.connect_startup.connect(_on_connect_startup);
-	images.startup();
+	self.create_error_popup.connect(workspace_container.create_error_popup);
+	self.create_notif_popup.connect(workspace_container.create_notif_popup);
+	self.create_action_popup.connect(workspace_container.create_action_popup);
 	
 	editor.startup(update_preview);
 	finalize.startup(_on_text_changed_preview, update_preview);
 	
-	post_list.connect_startup.connect(_on_connect_startup);
-	post_list.startup();
-	
-	settings.connect_startup.connect(_on_connect_startup);
-	settings.startup();
-	
-	verify_user.connect_startup.connect(_on_connect_startup);
-	verify_user.startup();
+	for module in modules:
+		if (module.has_signal("connect_startup")):
+			module.connect_startup.connect(_on_connect_startup);
+			module.startup();
 
 
 # ==========================
