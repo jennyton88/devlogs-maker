@@ -105,8 +105,8 @@ func _on_post_curr_text():
 	if (result.has("error")):
 		create_error_popup.emit(result["error"], result["error_type"]);
 		return;
-	else:
-		await result["request_signal"]; # make sure ref is collected
+	
+	await result["request_signal"]; # make sure ref is collected
 	
 	var head_ref_sha = branch_ref;
 	branch_ref = "";
@@ -117,9 +117,9 @@ func _on_post_curr_text():
 		if (result.has("error")):
 			create_error_popup.emit(result["error"], result["error_type"]);
 			return;
-		else:
-			await result["request_signal"]; # wait for response to arrive
-			await get_tree().create_timer(1.0).timeout; # for secondary rate limit
+		
+		await result["request_signal"]; # wait for response to arrive
+		await get_tree().create_timer(1.0).timeout; # for secondary rate limit
 	
 	# Add collected shas to the file data as ordered, and erase "content" entry used in blob
 	for i in range(data["files"].size()):
@@ -132,9 +132,9 @@ func _on_post_curr_text():
 	if (result.has("error")):
 		create_error_popup.emit(result["error"], result["error_type"]);
 		return;
-	else:
-		await result["request_signal"];
-		await get_tree().create_timer(1.0).timeout; # for secondary rate limit
+	
+	await result["request_signal"];
+	await get_tree().create_timer(1.0).timeout; # for secondary rate limit
 	
 	var new_tree_sha = tree_sha;
 	tree_sha = "";
@@ -143,9 +143,9 @@ func _on_post_curr_text():
 	if (result.has("error")):
 		create_error_popup.emit(result["error"], result["error_type"]);
 		return;
-	else:
-		await result["request_signal"];
-		await get_tree().create_timer(1.0).timeout;
+	
+	await result["request_signal"];
+	await get_tree().create_timer(1.0).timeout;
 	
 	var new_commit_sha = commit_sha;
 	commit_sha = "";
@@ -154,6 +154,9 @@ func _on_post_curr_text():
 	if (result.has("error")):
 		create_error_popup.emit(result["error"], result["error_type"]);
 		return;
+	
+	await result["request_signal"];
+	await get_tree().create_timer(1.0).timeout;
 	
 	# TODO update SHA and add post info as before SHA unicode for null  ('\0') is not usable in Godot
 	
