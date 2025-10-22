@@ -10,18 +10,11 @@ signal create_action_popup(msg, button_info, action);
 
 @onready var list = $ScrollContainer/List;
 
-
 var edit_button_ref = null;
-var update_dir = false;
-
 var directory = {
 	"name": "directory.txt",
-	"download_url": "",
 	"sha": "",
 	"data": "",
-	"filename_to_edit": "",
-	"action": "",
-	"updated_data": ""
 };
 
 
