@@ -22,26 +22,26 @@ func startup():
 	connect_startup.emit("devlogs_list");
 
 
-func create_post_info(new_file_name: String, url: String, sha: String):
+func create_post_info(new_filename: String, url: String, sha: String):
 	var container = HBoxContainer.new();
 	var button = Button.new();
 	var delete_button = Button.new();
 	var a_post = Label.new();
 	
 	container.add_child(a_post);
-	a_post.text = new_file_name;
+	a_post.text = new_filename;
 	a_post.size_flags_horizontal = Control.SIZE_EXPAND_FILL;
 	
 	container.add_child(button);
 	button.text = "Edit";
 	button.set_meta("url", url);
 	button.set_meta("sha", sha);
-	button.set_meta("name", new_file_name);
+	button.set_meta("name", new_filename);
 	button.pressed.connect(_on_edit_button_pressed.bind(button));
 	
 	container.add_child(delete_button);
 	delete_button.text = "Delete";
-	delete_button.set_meta("name", new_file_name);
+	delete_button.set_meta("name", new_filename);
 	delete_button.set_meta("sha", sha);
 	delete_button.pressed.connect(_on_delete_button_pressed.bind(delete_button));
 	
@@ -62,7 +62,6 @@ func _on_get_devlogs():
 	
 	var request = Requests.new();
 	var error = request.create_get_devlogs_request(self);
-	
 	if (error.has("error")):
 		create_error_popup.emit(error["error"], error["error_type"]);
 
@@ -205,19 +204,12 @@ func _on_serious_delete_button_pressed(delete_entry_button: Button):
 	button_ref.get_parent().queue_free(); # delete entry in list
 
 
-func check_file_name(curr_file_name: String) -> String:
+func check_filename(curr_filename: String) -> String:
 	var regex = RegEx.new();
 	regex.compile("^(\\d{4})_(\\d{2})_(\\d{2})");
-	var matches = regex.search(curr_file_name);
-	
+	var matches = regex.search(curr_filename);
 	if (matches):
 		return "devlog";
-		
-	if (curr_file_name == "directory.txt"):
-		return "directory";
-	
-	if (curr_file_name == "projects_info.txt"):
-		return "project";
 	
 	return "";
 
