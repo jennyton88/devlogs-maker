@@ -56,14 +56,14 @@ func _ready():
 
 func _on_post_curr_text():
 	if (finalize.text_is_empty() || editor.text_is_empty()):
-		workspace_container.create_notif_popup("You haven't completed all parts of your post yet!");
+		create_notif_popup.emit("You haven't completed all parts of your post yet!");
 		return;
 	
 	var request = Requests.new();
 	var config = request.load_config();
 	
 	if (!config is ConfigFile):
-		workspace_container.create_error_popup(config["error"], config["error_type"]);
+		create_error_popup.emit(config["error"], config["error_type"]);
 	
 	# Start preparing the data for post/editing
 	var data = {
@@ -103,7 +103,7 @@ func _on_post_curr_text():
 	# Get the reference to the branch the changes will be committed to
 	var result = request.get_ref(self);
 	if (result.has("error")):
-		workspace_container.create_error_popup(result["error"], result["error_type"]);
+		create_error_popup.emit(result["error"], result["error_type"]);
 		return;
 	else:
 		await result["request_signal"]; # make sure ref is collected
@@ -115,7 +115,7 @@ func _on_post_curr_text():
 	for file in data["files"]:
 		result = await request.create_blob(self, file["content"]);
 		if (result.has("error")):
-			workspace_container.create_error_popup(result["error"], result["error_type"]);
+			create_error_popup.emit(result["error"], result["error_type"]);
 			return;
 		else:
 			await result["request_signal"]; # wait for response to arrive
@@ -130,7 +130,7 @@ func _on_post_curr_text():
 	
 	result = await request.create_tree(self, head_ref_sha, data["files"]);
 	if (result.has("error")):
-		workspace_container.create_error_popup(result["error"], result["error_type"]);
+		create_error_popup.emit(result["error"], result["error_type"]);
 		return;
 	else:
 		await result["request_signal"];
@@ -141,7 +141,7 @@ func _on_post_curr_text():
 	
 	result = await request.create_commit(self, data["commit_msg"], [head_ref_sha], new_tree_sha);
 	if (result.has("error")):
-		workspace_container.create_error_popup(result["error"], result["error_type"]);
+		create_error_popup.emit(result["error"], result["error_type"]);
 		return;
 	else:
 		await result["request_signal"];
@@ -152,7 +152,7 @@ func _on_post_curr_text():
 	
 	result = await request.update_ref(self, new_commit_sha);
 	if (result.has("error")):
-		workspace_container.create_error_popup(result["error"], result["error_type"]);
+		create_error_popup.emit(result["error"], result["error_type"]);
 		return;
 	
 	# TODO update SHA and add post info as before SHA unicode for null  ('\0') is not usable in Godot
@@ -177,7 +177,7 @@ func _on_http_request_completed(result, response_code, _headers, body, action):
 	var error = request.process_results(result, response_code);
 	
 	if (error.has("error")):
-		workspace_container.create_notif_popup(error["error"]);  # TODO create error popup type
+		create_notif_popup.emit(error["error"]);  # TODO create error popup type
 		return;
 	
 	var body_str = body.get_string_from_utf8();
@@ -214,7 +214,7 @@ func _on_http_request_completed(result, response_code, _headers, body, action):
 			pass;
 		
 	var msg = request.build_notif_msg("post", response_code, body_str);
-	workspace_container.create_notif_popup(msg);
+	create_notif_popup.emit(msg);
 
 
 func _on_enable_buttons():
@@ -227,13 +227,13 @@ func _on_token_expired(refresh_token: bool):
 	menu_options.get_posts.disabled = true;
 	
 	if (refresh_token):
-		workspace_container.create_notif_popup("Update your refresh token please! (Steps 1,2,3)");
+		create_notif_popup.emit("Update your refresh token please! (Steps 1,2,3)");
 	else:
-		workspace_container.create_notif_popup("Update your user token please! (Step 4)");
+		create_notif_popup.emit("Update your user token please! (Step 4)");
 
 
 func _on_clear_text():
-	workspace_container.create_action_popup(
+	create_action_popup.emit(
 		"Are you sure you want to clear EVERYTHING in this post?\n(Text, title, summary, post, file name, etc.)",
 		{ 'yes': "Clear All", 'no': 'Cancel' },
 		clear_post,
@@ -297,7 +297,7 @@ func fill_in_details(post_info: Dictionary):
 
 func _on_export_file():
 	if (finalize.get_filename() == ""):
-		workspace_container.create_notif_popup("You haven't named your file yet!");
+		create_notif_popup.emit("You haven't named your file yet!");
 		return;
 	
 	file_dialog.export_file(
