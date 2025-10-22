@@ -157,6 +157,17 @@ func _on_post_curr_text():
 	if (result.has("error")):
 		workspace_container.create_error_popup(result["error"], result["error_type"]);
 		return;
+	
+	# TODO update SHA and add post info as before SHA unicode for null  ('\0') is not usable in Godot
+	
+	if (edit_ref): # edited post, dir stays the same
+		#edit_ref.set_meta("sha", response["content"]["sha"]);
+		clear_post();
+	else: # new post, update dir, visuals
+		#var info = response["content"];
+		#post_list.create_post_info(["name"], info["download_url"], info["sha"]);
+		post_list.update_directory(finalize.get_filename(), "add_filename");
+		clear_post();
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
