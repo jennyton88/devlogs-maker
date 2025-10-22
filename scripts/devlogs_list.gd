@@ -233,48 +233,51 @@ func set_edit_ref(updated):
 	edit_button_ref = updated;
 
 
-func update_directory_ref(filename: String, download_url: String, sha: String):
-	directory.name = filename;
-	directory.download_url = download_url;
-	directory.sha = sha;
-
-
-func update_directory_file(filename: String, action: String):
-	directory.filename_to_edit = filename;
-	directory.action = action;
-		
-	fetch_directory_file();
-
-
-func edit_directory_file():
+## filename: String, full name, to add/delete to the directory.
+## action: String, either "add_filename" OR "delete_filename" 
+func update_directory(filename: String, action: String):
 	var request = Requests.new();
+	var config = request.load_config();
+	if (!config is ConfigFile):
+		create_error_popup.emit(config["error"], config["error_type"]);
+		return;
 	
-	var error = request.create_edit_directory_file_request(self, directory);
+	## Get directory for editing
+	var result = request.get_file(
+		self, "get_directory", 
+		config.get_value("repo_info", "content_path") + directory["name"]
+	);
+	if (result.has("error")):
+		create_error_popup.emit(result["error"], result["error_type"]);
+		return;
 	
-	if (error.has("error")):
-		create_error_popup.emit(error["error"], error["error_type"]);
-
-
-func get_directory_file():
-	var request = Requests.new();
+	await result["request_signal"];
 	
-	update_dir = true;
-	var error = request.create_get_directory_file_request(self, directory);
+	var commit_data = { "sha": directory["sha"] };
+	var update_content = directory["data"];
+	# TODO (REDO) use updated ver. of the directory in case of getting old data
+	var trimmed_filename = filename.trim_suffix("." + filename.get_extension());
 	
-	if (error.has("error")):
-		update_dir = false;
-		create_error_popup.emit(error["error"], error["error_type"]);
-
-
-func clean_directory_edit():
-	directory.filename_to_edit = "";
-	directory.action = "";
-
-
-func fetch_directory_file():
-	var request = Requests.new();
+	if (action == "add_filename"):
+		update_content = trimmed_filename + "\n" + directory["data"];
+		commit_data["msg"] = "Added filename to directory!";
+	elif (action == "delete_filename"):
+		var index = directory["data"].find(trimmed_filename);
+		if (index == -1):
+			return;
+		update_content = directory["data"].erase(
+			index, trimmed_filename.length() + 1 # include newline
+		);
+		commit_data["msg"] = "Deleted filename from directory!";
 	
-	var error = request.create_fetch_directory_file_request(self, directory);
-
-	if (error.has("error")):
-		create_error_popup.emit(error["error"], error["error_type"]);
+	commit_data["content"] = update_content;
+	
+	# Update directory with the modified content
+	result = request.create_update_file(
+		self, "edit_directory", 
+		config.get_value("repo_info", "content_path") + directory["name"], 
+		commit_data
+	);
+	if (result.has("error")):
+		create_error_popup.emit(result["error"], result["error_type"]);
+		return;
