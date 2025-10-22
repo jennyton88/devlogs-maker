@@ -35,12 +35,11 @@ func make_http_request(
 	return { "request_signal": h_client.request_completed };
 
 
-# addt_data: Dictionary {
-# content: String /  OPTIONAL
-# sha: String / OPTIONAL
-# }
-# TODO rename function
-func create_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> String:
+## addt_data: Dictionary {
+## content: String / OPTIONAL
+## sha: String / OPTIONAL
+## }
+func create_commit_body(config: ConfigFile, msg: String, addt_data: Dictionary) -> String:
 	var body = { # required for commits
 		"message": msg,
 		"committer": {
