@@ -235,6 +235,41 @@ func get_file(
 	);
 
 
+## Must have path to file, including filename
+## commit_data: Dictionary { 
+##  "content": String, 
+##  "msg": String, 
+##  "sha": String / optional, BUT REQUIRED for editing
+## }
+func create_update_file(
+	scene: Node, action: String, path: String, commit_data: Dictionary
+):
+	var config = load_config();
+	
+	if (!config is ConfigFile):
+		return config;
+	
+	var body_data = { "content": commit_data["content"] };
+	if (commit_data.has("sha")):
+		body_data["sha"] = commit_data["sha"];
+	
+	var body_str = create_commit_body(config, commit_data["msg"], body_data);
+	var headers = create_headers(
+		config, AcceptType.GitJSON, RequestType.SendData,
+		{ "body_length": str(body_str.length()) }
+	);
+	
+	var url = "https://api.github.com/repos/%s/%s/contents/%s" % [
+		config.get_value("repo_info", "repo_owner"),
+		config.get_value("repo_info", "repo_name"),
+		path
+	];
+	
+	return make_http_request(
+		scene, scene._on_http_request_completed.bind(action), 
+		HTTPClient.METHOD_PUT, url, headers, body_str
+	);
+
 ## Get the reference (branch) commit sha
 func get_ref(scene: Node):
 	var config = load_config();
