@@ -69,43 +69,35 @@ func _on_get_devlogs():
 
 func _on_http_request_completed(result, response_code, _headers, body, action: String):
 	var request = Requests.new();
-	
-	var error = request.process_results(result, response_code);
-	if (error.has("error")):
-		create_notif_popup.emit(error["error"]);  # TODO create error popup type
+	var request_result = request.process_results(result, response_code);
+	if (request_result.has("error")):
+		create_notif_popup.emit(request_result["error"]);  # TODO create error popup type
 		return;
 	
 	var body_str = body.get_string_from_utf8();
 	var response = request.convert_to_json(body_str);
 	
 	var msg = "";
-	
 	match response_code:
 		HTTPClient.RESPONSE_OK:
 			match action:
+				"get_directory":
+					directory["data"] = Marshalls.base64_to_utf8(response["content"]);
+					directory["sha"] = response["sha"];
 				"get_devlogs":
 					for post in response:
 						if (post["name"] != "directory.txt"):
 							create_post_info(post["name"], post["download_url"], post["sha"]);
-						else:
-							update_directory_ref(post["name"], post["download_url"], post["sha"]);
+						else: # remove directory, projects info from list
+							pass;
 				"get_file":
 					check_format_text(body_str);
-				"edit_dir":
-					var info = response["content"]; # update [pst
-					update_directory_ref(info["name"], info["download_url"], info["sha"]);
-					clean_directory_edit();
-				"fetch_directory": # create new action here
-					var info = response;
-					update_directory_ref(info["name"], info["download_url"], info["sha"]);
-					get_directory_file();
+				"delete_devlog":
+					pass;
 		_:
-			match action:
-				"edit_dir":
-					clean_directory_edit();
+			pass;
 	
 	msg = request.build_notif_msg(action, response_code, body_str);
-	
 	if (msg != ""):
 		create_notif_popup.emit(msg);
 
