@@ -111,28 +111,15 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 	match response_code:
 		HTTPClient.RESPONSE_OK: # 200
 			match msg_type:
-				"post":
-					msg += "Successfully edited devlog!";
-				"get_devlogs":
-					msg = "";
-				"get_file":
-					msg = "Successfully downloaded file!";
-				"edit_dir":
-					msg = "";
+				"update_ref":
+					msg = "Successfully uploaded devlog!"
 				"delete_file":
 					msg = "Successfully deleted devlog!";
-				"get_verify_code":
-					msg = "";
-				"get_token_code":
-					msg = "";
-				"fetch_directory":
-					msg = "";
-				"get_directory":
+				_:
 					msg = "";
 		HTTPClient.RESPONSE_CREATED: # 201
-			if (msg_type == "post"):
-				msg += "Successfully created devlog!";
-		HTTPClient.RESPONSE_FOUND: # 302
+			msg = "";
+		HTTPClient.RESPONSE_FOUND: # 302 # TODO UPDATE THIS
 			msg += "Found, but temporarily redirected\n%s" % body;
 		HTTPClient.RESPONSE_NOT_MODIFIED:
 			msg += "Nothing changed\n%s" % body;
