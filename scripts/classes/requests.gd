@@ -8,8 +8,9 @@ enum RequestType {
 }
 
 enum AcceptType {
-	Text,
+	GitText,
 	GitJSON,
+	Text,
 	Raw,
 }
 
@@ -70,6 +71,8 @@ func create_headers(
 		AcceptType.GitJSON:
 			accept = "application/vnd.github+json";
 		AcceptType.Text:
+			accept = "text/plain";
+		AcceptType.GitText:
 			accept = "application/vnd.github.text+json";
 		AcceptType.Raw:
 			accept = "application/vnd.github.raw+json";

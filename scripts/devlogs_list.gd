@@ -103,7 +103,9 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 
 func _on_edit_button_pressed(button: Button):
 	var request = Requests.new();
-	var result = request.get_file(self, "get_devlog", "", button.get_meta("url"));
+	var result = request.get_file(
+		self, "get_devlog", "", button.get_meta("url"), Requests.AcceptType.Text
+	); # TODO check accept header
 	
 	if (result.has("error")):
 		create_error_popup.emit(result["error"], result["error_type"]);
