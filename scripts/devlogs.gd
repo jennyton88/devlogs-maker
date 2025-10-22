@@ -216,8 +216,9 @@ func _on_http_request_completed(result, response_code, _headers, body, action):
 		_:
 			pass;
 		
-	var msg = request.build_notif_msg("post", response_code, body_str);
-	create_notif_popup.emit(msg);
+	var msg = request.build_notif_msg(action, response_code, body_str);
+	if (msg != ""):
+		create_notif_popup.emit(msg);
 
 
 func _on_enable_buttons():
