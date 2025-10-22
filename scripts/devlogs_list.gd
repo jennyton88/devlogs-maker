@@ -170,27 +170,39 @@ func check_format_text(text_blob) -> void:
 						create_notif_popup.emit("Not a recognizable file name!\nPlease edit a different file.");
 
 
-func _on_delete_button_pressed(log_entry_delete_button: Button):
+func _on_delete_button_pressed(delete_entry_button: Button):
 	create_action_popup.emit(
 		"Are you sure you want to delete this post?",
 		{ 'yes': "Delete Post", 'no': "Cancel" },
-		_on_serious_delete_button_pressed.bind(log_entry_delete_button) 
+		_on_serious_delete_button_pressed.bind(delete_entry_button) 
 	);
 
 
-func _on_serious_delete_button_pressed(entry_delete_button: Button):
+func _on_serious_delete_button_pressed(delete_entry_button: Button):
 	var request = Requests.new();
-	var button_ref = entry_delete_button;
-	var error = request.create_delete_file_request(self, button_ref);
+	var config = request.load_config();
+	if (!config is ConfigFile):
+		create_error_popup.emit(config["error"], config["error_type"]);
+		return;
 	
-	if (error.has('error')):
-		create_error_popup.emit(error, AppInfo.ErrorType.HTTPError);
-	else:
-		if (edit_button_ref != null && (button_ref.get_meta("sha") == edit_button_ref.get_meta("sha"))):
-			clear_post.emit();
-		var deleted_filename = button_ref.get_parent().get_child(0).text; # post name is first in line
-		button_ref.get_parent().queue_free(); # delete the log entry in the devlog list
-		update_directory_file(deleted_filename, "delete");
+	var button_ref = delete_entry_button;
+	var file_sha = button_ref.get_meta("sha");
+	var filename = button_ref.get_meta("name");
+	var result = request.delete_file(
+		self, "delete_devlog", 
+		config.get_value("repo_info", "content_path") + filename, file_sha
+	);
+	if (result.has("error")):
+		create_error_popup.emit(result["error"], result["error_type"]);
+		return;
+	
+	await result["request_signal"];
+	await get_tree().create_timer(1.0).timeout;
+	
+	if (edit_button_ref && (button_ref.get_meta("sha") == edit_button_ref.get_meta("sha"))):
+		clear_post.emit();
+	update_directory(filename, "delete_filename");
+	button_ref.get_parent().queue_free(); # delete entry in list
 
 
 func check_file_name(curr_file_name: String) -> String:
