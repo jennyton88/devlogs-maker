@@ -103,11 +103,10 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 
 func _on_edit_button_pressed(button: Button):
 	var request = Requests.new();
+	var result = request.get_file(self, "get_devlog", "", button.get_meta("url"));
 	
-	var error = request.create_edit_download_request(self, button);
-	
-	if (error.has("error")):
-		create_error_popup.emit(error["error"], error["error_type"]);
+	if (result.has("error")):
+		create_error_popup.emit(result["error"], result["error_type"]);
 		edit_button_ref = null;
 	else:
 		edit_button_ref = button;
