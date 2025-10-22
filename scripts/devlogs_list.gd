@@ -89,8 +89,8 @@ func _on_http_request_completed(result, response_code, _headers, body, action: S
 							create_post_info(post["name"], post["download_url"], post["sha"]);
 						else: # remove directory, projects info from list
 							pass;
-				"get_file":
-					check_format_text(body_str);
+				"get_devlog":
+					fill_out_devlog(body_str);
 				"delete_devlog":
 					pass;
 		_:
@@ -112,60 +112,23 @@ func _on_edit_button_pressed(button: Button):
 		edit_button_ref = button;
 
 
-func check_format_text(text_blob) -> void:
-	if (update_dir):
-		directory.data = text_blob;
-		update_dir = false;
+func fill_out_devlog(text: String):
+	var curr_filename = edit_button_ref.get_meta("name");
+	if (check_filename(curr_filename) == "devlog"):
+		var split_text = text.rsplit("\n");
+		var post_data = {
+			"filename": curr_filename, "creation_date": split_text[1],
+			"post_title": split_text[2], "post_summary": split_text[3]
+		};
 		
-		var dir_data = directory.updated_data if directory.updated_data != "" else directory.data;
+		var str_len = 0;
+		for i in range(4): # get the start of the text body
+			str_len += split_text[i].length();
+		post_data["post_body"] = text.substr(str_len + 4, -1); # 4 of \n
 		
-		var dir_filename = directory.filename_to_edit;
-		if (dir_filename.get_extension() != ""):
-			dir_filename = dir_filename.rstrip(".txt");
-		
-		match directory.action:
-			"delete":
-				var index = dir_data.find(dir_filename);
-				if (index != -1):
-					directory.data = dir_data.erase(index, dir_filename.length() + 1);
-				
-				directory.updated_data = directory.data;
-				edit_directory_file();
-			"add":
-				directory.data = dir_filename + "\n" + dir_data;
-				directory.updated_data = directory.data;
-				edit_directory_file();
-			_:
-				pass;
-	elif (edit_button_ref != null):
-		if (edit_button_ref.has_meta("name")):
-			var curr_filename = edit_button_ref.get_meta("name");
-			var file_type = check_file_name(curr_filename);
-			if (file_type != ""):
-				match file_type:
-					"devlog":
-						var split_text = text_blob.rsplit("\n");
-						
-						var post_data = {
-							"filename": curr_filename,
-							"creation_date": split_text[1],
-							"post_title": split_text[2],
-							"post_summary": split_text[3]
-						};
-					
-						var str_len = 0;
-						for i in range(4):
-							str_len += split_text[i].length();
-					
-						post_data["post_body"] = text_blob.substr(str_len + 4, -1); # 4 of \n
-					
-						fill_in_details.emit(post_data);
-					"directory":
-						pass;
-					"project":
-						pass;
-					_:
-						create_notif_popup.emit("Not a recognizable file name!\nPlease edit a different file.");
+		fill_in_details.emit(post_data);
+	else:
+		create_notif_popup.emit("Not a recognizable file name!\nPlease edit a different file.");
 
 
 func _on_delete_button_pressed(delete_entry_button: Button):
