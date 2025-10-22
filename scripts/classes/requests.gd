@@ -157,15 +157,6 @@ func build_notif_msg(msg_type: String, response_code: int, body: String):
 func create_queries(fields: Dictionary):
 	return HTTPClient.new().query_string_from_dict(fields);
 
-
-func send_files(scene: Node, action: String,
-	url: String, headers: Array, request_data: String
-):
-	return make_http_request(
-		scene, scene._on_http_request_completed.bind(action), 
-		HTTPClient.METHOD_PUT, url, headers, request_data
-	);
-
 # =====================
 # ====== Helpers ======
 # =====================
