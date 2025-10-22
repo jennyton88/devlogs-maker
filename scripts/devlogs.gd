@@ -177,29 +177,31 @@ func _on_http_request_completed(result, response_code, _headers, body, action):
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # update post
-			if (action == "edit_devlog"):
-				var info = response["content"];
-				var edit_ref = post_list.get_edit_ref();
-				if (edit_ref != null):
-					edit_ref.set_meta("sha", info["sha"]);
-					post_list.set_edit_ref(null);
-					clear_post();
-			elif (action == "get_ref"):
-				branch_ref = response["object"]["sha"];
-			elif (action == "update_ref"):
-				pass;
+			match action:
+				#"edit_devlog":
+					#var info = response["content"];
+					#var edit_ref = post_list.get_edit_ref();
+					#if (edit_ref != null):
+						#edit_ref.set_meta("sha", info["sha"]);
+						#post_list.set_edit_ref(null);
+						#clear_post();
+				"get_ref":
+					branch_ref = response["object"]["sha"];
+				"update_ref":
+					pass;
 		HTTPClient.RESPONSE_CREATED: # new post
-			if (action == "post_devlog"):
-				var info = response["content"];
-				post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
-				post_list.update_directory_file(info["name"], "add");
-				clear_post();
-			elif (action == "create_blob"):
-				file_shas.append(response["sha"]); # only need sha of blob
-			elif (action == "create_tree"):
-				tree_sha = response["sha"];
-			elif (action == "create_commit"):
-				commit_sha = response["sha"];
+			match action:
+				#"post_devlog":
+					#var info = response["content"];
+					#post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
+					#post_list.update_directory_file(info["name"], "add");
+					#clear_post();
+				"create_blob":
+					file_shas.append(response["sha"]); # only need sha of blob
+				"create_tree":
+					tree_sha = response["sha"];
+				"create_commit":
+					commit_sha = response["sha"];
 		_:
 			pass;
 		
