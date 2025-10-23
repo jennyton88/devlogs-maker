@@ -3,11 +3,11 @@ extends FileDialog
 signal connect_startup(component: String);
 signal fill_in_details(post_info: Dictionary);
 signal clear_post;
-signal collected_img(img_data, img_name: String);
+signal collected_img(img_data, img_name: String, img_path: String);
 
 signal create_notif_popup(msg);
+signal create_action_popup(msg, button_info, action);
 
-var text_to_save = "";
 var curr_file_mode = "";
 
 func startup():
@@ -27,13 +27,48 @@ func import_file():
 	show();
 
 
-func export_file(filename: String, file_text: String):
-	text_to_save = file_text;
+func export_file(filename: String, file_text: String, file_img_paths: Array[String]):
 	var download_path = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOWNLOADS);
 	
-	current_path = download_path + "/" + filename + ".txt";
-	file_mode = FileDialog.FileMode.FILE_MODE_SAVE_FILE;
-	show();
+	var dir_access = DirAccess.open(download_path);
+	
+	var folder_name = filename.replace("." + filename.get_extension(), "");
+	if (!dir_access.dir_exists(folder_name)):
+		var error = dir_access.make_dir(folder_name);
+		if (error != OK):
+			create_notif_popup.emit("Error %d\nFailed to create folder!" % error);
+		else:
+			save_post_files(download_path, folder_name, filename, file_text, file_img_paths);
+	else:
+		ask_to_overwrite_files(download_path, folder_name, filename, file_text, file_img_paths);
+
+
+func ask_to_overwrite_files(
+	download_path: String, folder_name: String, filename: String, 
+	file_text: String, file_img_paths: Array[String]
+):
+	create_action_popup.emit(
+		"Are you sure you want to overwrite this post?",
+		{ 'yes': "Overwrite", 'no': "Cancel" },
+		save_post_files.bind(download_path, folder_name, filename, file_text, file_img_paths)
+	);
+
+func save_post_files(
+	download_path: String, folder_name: String, filename: String, 
+	file_text: String, file_img_paths: Array[String]
+):
+	var created_file = FileAccess.open(download_path + "/" + folder_name + "/" + filename, FileAccess.WRITE);
+	if (created_file.is_open()):
+		created_file.store_string(file_text);
+	for img_path in file_img_paths:
+		var img = Image.new();
+		img.load("user://assets/" + img_path);
+		match img_path.get_file().get_extension():
+			"jpg":
+				img.save_jpg("%s/%s/%s" % [download_path, folder_name, img_path.get_file()]);
+			"png":
+				img.save_png("%s/%s/%s" % [download_path, folder_name, img_path.get_file()]);
+	create_notif_popup.emit("Saved file(s)!");
 
 
 func import_image():
@@ -77,27 +112,37 @@ func _on_file_selected(path: String):
 			
 			fill_in_details.emit(post_data);
 		elif (curr_file_mode == "img_file"):
+			var request = Requests.new();
+			var config = request.load_config();
+			
+			if (typeof(config) == TYPE_DICTIONARY): # error
+				create_notif_popup.emit("Failed to load config file.");
+				return;
+			
+			create_img_folder(config);
+			
 			var file_exts = ["jpg", "png"];
 			var filename = path.get_file();
 			var ext = filename.get_extension();
+			
+			var img_path = config.get_value("repo_info", "image_path");
+			img_path = img_path.rstrip("/");
 			
 			for file_ext in file_exts:
 				if (ext == file_ext):
 					var img = Image.new();
 					img.load(path);
+					
 					match ext:
 						"jpg":
-							img.save_jpg("res://assets/imported_imgs/%s" % filename);
+							img.save_jpg("user://assets/%s/%s" % [img_path, filename]);
 						"png":
-							img.save_png("res://assets/imported_imgs/%s" % filename);
+							img.save_png("user://assets/%s/%s" % [img_path, filename]);
 					var tex = ImageTexture.new();
 					tex.set_image(img);
-					collected_img.emit(tex, path.get_file());
+					# specific to website removing public folder path
+					collected_img.emit(tex, img_path.replace("public", "") + "/" + filename, img_path);
 					return;
-	else: # export
-		var txt_file = FileAccess.open(path, FileAccess.WRITE);
-		txt_file.store_string(text_to_save);
-		text_to_save = "";
 
 
 func check_file_name(curr_file_name: String) -> String:
@@ -115,3 +160,19 @@ func check_file_name(curr_file_name: String) -> String:
 		return "project";
 	
 	return "";
+
+
+func create_img_folder(config: ConfigFile):
+	var dir_access = DirAccess.open("user://");
+	if (!dir_access.dir_exists("assets")):
+		var error = dir_access.make_dir("assets");
+		if (error != OK):
+			create_notif_popup.emit("Failed to create assets folder!");
+	
+	var img_path = config.get_value("repo_info", "image_path");
+	img_path = img_path.rstrip("/");
+	if (!dir_access.dir_exists("assets/%s" % img_path)):
+		var error = dir_access.make_dir_recursive("assets/%s" % img_path);
+		if (error != OK):
+			create_notif_popup.emit("Failed to create folder(s) for image!");
+	

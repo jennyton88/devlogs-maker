@@ -1,5 +1,8 @@
 extends MarginContainer
 
+signal create_error_popup(error, error_type);
+signal create_notif_popup(msg);
+signal create_action_popup(msg, button_info, action);
 
 @onready var menu_options = $HB/MenuOptions;
 
@@ -21,26 +24,30 @@ extends MarginContainer
 
 # Temporary Variables
 var creation_date = "";
+var branch_ref: String = "";
+var file_shas: Array[String] = [];
+var tree_sha: String = "";
+var commit_sha: String = "";
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	menu_options.connect_startup.connect(_on_connect_startup);
-	menu_options.startup();
+	var modules = [
+		menu_options, file_dialog, 
+		images, post_list, 
+		settings, verify_user
+	];
 	
-	file_dialog.connect_startup.connect(_on_connect_startup);
-	file_dialog.startup();
+	self.create_error_popup.connect(workspace_container.create_error_popup);
+	self.create_notif_popup.connect(workspace_container.create_notif_popup);
+	self.create_action_popup.connect(workspace_container.create_action_popup);
 	
 	editor.startup(update_preview);
 	finalize.startup(_on_text_changed_preview, update_preview);
 	
-	post_list.connect_startup.connect(_on_connect_startup);
-	post_list.startup();
-	
-	settings.connect_startup.connect(_on_connect_startup);
-	settings.startup();
-	
-	verify_user.connect_startup.connect(_on_connect_startup);
-	verify_user.startup();
+	for module in modules:
+		if (module.has_signal("connect_startup")):
+			module.connect_startup.connect(_on_connect_startup);
+			module.startup();
 
 
 # ==========================
@@ -49,33 +56,131 @@ func _ready():
 
 func _on_post_curr_text():
 	if (finalize.text_is_empty() || editor.text_is_empty()):
-		workspace_container.create_notif_popup("You haven't completed all parts of your post yet!");
+		create_notif_popup.emit("You haven't completed all parts of your post yet!");
 		return;
 	
-	var post_request = Requests.new();
+	var request = Requests.new();
+	var config = request.load_config();
 	
-	var error = post_request.create_post_request(
-		self, 
-		post_list.get_edit_ref(), 
-		text_preview.get_text(),
-		finalize.get_filename()
-	);
+	if (!config is ConfigFile):
+		create_error_popup.emit(config["error"], config["error_type"]);
 	
-	if (error.has("error")):
-		workspace_container.create_error_popup(error["error"], error["error_type"]);
+	# Start preparing the data for post/editing
+	var data = {
+		"action_type": "post_devlog",
+		"commit_msg": "Posted devlog.",
+		"files": [],
+	};
+	
+	# Replace messages if editing a devlog
+	var edit_ref = post_list.get_edit_ref();
+	if (edit_ref):
+		data["action_type"] = "edit_devlog";
+		data["sha"] = edit_ref.get_meta("sha");
+		data["commit_msg"] = "Edited devlog.";
+	
+	# The plain text content
+	data["files"].append({
+		"content": Marshalls.utf8_to_base64(text_preview.get_text()),
+		"path": config.get_value("repo_info", "content_path") + finalize.get_filename(),
+		"mode": "100644", # file blob
+		"type": "blob",
+	});
+	
+	# Image(s) data encoded in base64
+	var imgs: Array[String] = text_preview.process_post_for_imgs(images.img_list);
+	for img_path in imgs:
+		var img_data = Image.new();
+		img_data.load("user://assets/%s" % img_path);
+		var encoded_bytes = Marshalls.raw_to_base64(img_data.save_png_to_buffer());
+		data["files"].append({
+			"content": encoded_bytes,
+			"path": img_path, # location of file in repository
+			"mode": "100644", # file blob
+			"type": "blob"
+		});
+	
+	# Get the reference to the branch the changes will be committed to
+	var result = request.get_ref(self);
+	if (result.has("error")):
+		create_error_popup.emit(result["error"], result["error_type"]);
+		return;
+	
+	await result["request_signal"]; # make sure ref is collected
+	
+	var head_ref_sha = branch_ref;
+	branch_ref = "";
+	
+	# Create blobs
+	for file in data["files"]:
+		result = await request.create_blob(self, file["content"]);
+		if (result.has("error")):
+			create_error_popup.emit(result["error"], result["error_type"]);
+			return;
+		
+		await result["request_signal"]; # wait for response to arrive
+		await get_tree().create_timer(1.0).timeout; # for secondary rate limit
+	
+	# Add collected shas to the file data as ordered, and erase "content" entry used in blob
+	for i in range(data["files"].size()):
+		data["files"][i].erase("content");
+		data["files"][i]["sha"] = file_shas[i];
+	
+	file_shas = [];
+	
+	result = await request.create_tree(self, head_ref_sha, data["files"]);
+	if (result.has("error")):
+		create_error_popup.emit(result["error"], result["error_type"]);
+		return;
+	
+	await result["request_signal"];
+	await get_tree().create_timer(1.0).timeout; # for secondary rate limit
+	
+	var new_tree_sha = tree_sha;
+	tree_sha = "";
+	
+	result = await request.create_commit(self, data["commit_msg"], [head_ref_sha], new_tree_sha);
+	if (result.has("error")):
+		create_error_popup.emit(result["error"], result["error_type"]);
+		return;
+	
+	await result["request_signal"];
+	await get_tree().create_timer(1.0).timeout;
+	
+	var new_commit_sha = commit_sha;
+	commit_sha = "";
+	
+	result = await request.update_ref(self, new_commit_sha);
+	if (result.has("error")):
+		create_error_popup.emit(result["error"], result["error_type"]);
+		return;
+	
+	await result["request_signal"];
+	await get_tree().create_timer(1.0).timeout;
+	
+	# TODO update SHA and add post info as before SHA unicode for null  ('\0') is not usable in Godot
+	
+	if (edit_ref): # edited post, dir stays the same
+		#edit_ref.set_meta("sha", response["content"]["sha"]);
+		clear_post();
+	else: # new post, update dir, visuals
+		#var info = response["content"];
+		#post_list.create_post_info(["name"], info["download_url"], info["sha"]);
+		post_list.update_directory(finalize.get_filename(), "add_filename");
+		clear_post();
 
 
 func _on_text_changed_preview(_new_text: String) -> void:
 	update_preview();
 
 
-func _on_http_request_completed(result, response_code, _headers, body, _action):
+func _on_http_request_completed(result, response_code, _headers, body, action):
 	var request = Requests.new();
 	
 	var error = request.process_results(result, response_code);
 	
 	if (error.has("error")):
-		workspace_container.create_notif_popup(error["error"]);  # TODO create error popup type
+		create_notif_popup.emit(error["error"]);  # TODO create error popup type
 		return;
 	
 	var body_str = body.get_string_from_utf8();
@@ -83,22 +188,37 @@ func _on_http_request_completed(result, response_code, _headers, body, _action):
 	
 	match response_code:
 		HTTPClient.RESPONSE_OK: # update post
-			var info = response["content"];
-			var edit_ref = post_list.get_edit_ref();
-			if (edit_ref != null):
-				edit_ref.set_meta("sha", info["sha"]);
-				post_list.set_edit_ref(null);
-				clear_post();
+			match action:
+				#"edit_devlog":
+					#var info = response["content"];
+					#var edit_ref = post_list.get_edit_ref();
+					#if (edit_ref != null):
+						#edit_ref.set_meta("sha", info["sha"]);
+						#post_list.set_edit_ref(null);
+						#clear_post();
+				"get_ref":
+					branch_ref = response["object"]["sha"];
+				"update_ref":
+					pass;
 		HTTPClient.RESPONSE_CREATED: # new post
-			var info = response["content"];
-			post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
-			post_list.update_directory_file(info["name"], "add");
-			clear_post();
+			match action:
+				#"post_devlog":
+					#var info = response["content"];
+					#post_list.create_post_info(info["name"], info["download_url"], info["sha"]);
+					#post_list.update_directory_file(info["name"], "add");
+					#clear_post();
+				"create_blob":
+					file_shas.append(response["sha"]); # only need sha of blob
+				"create_tree":
+					tree_sha = response["sha"];
+				"create_commit":
+					commit_sha = response["sha"];
 		_:
 			pass;
 		
-	var msg = request.build_notif_msg("post", response_code, body_str);
-	workspace_container.create_notif_popup(msg);
+	var msg = request.build_notif_msg(action, response_code, body_str);
+	if (msg != ""):
+		create_notif_popup.emit(msg);
 
 
 func _on_enable_buttons():
@@ -111,13 +231,13 @@ func _on_token_expired(refresh_token: bool):
 	menu_options.get_posts.disabled = true;
 	
 	if (refresh_token):
-		workspace_container.create_notif_popup("Update your refresh token please! (Steps 1,2,3)");
+		create_notif_popup.emit("Update your refresh token please! (Steps 1,2,3)");
 	else:
-		workspace_container.create_notif_popup("Update your user token please! (Step 4)");
+		create_notif_popup.emit("Update your user token please! (Step 4)");
 
 
 func _on_clear_text():
-	workspace_container.create_action_popup(
+	create_action_popup.emit(
 		"Are you sure you want to clear EVERYTHING in this post?\n(Text, title, summary, post, file name, etc.)",
 		{ 'yes': "Clear All", 'no': 'Cancel' },
 		clear_post,
@@ -180,7 +300,15 @@ func fill_in_details(post_info: Dictionary):
 
 
 func _on_export_file():
-	file_dialog.export_file(finalize.get_filename(), text_preview.get_text());
+	if (finalize.get_filename() == ""):
+		create_notif_popup.emit("You haven't named your file yet!");
+		return;
+	
+	file_dialog.export_file(
+		finalize.get_filename(), 
+		text_preview.get_text(), 
+		text_preview.process_post_for_imgs(images.img_list)
+	);
 
 
 func _on_import_file():
@@ -191,8 +319,8 @@ func _on_import_image():
 	file_dialog.import_image();
 
 
-func _on_collected_img(img_data, img_name: String):
-	images.save_img(img_data, img_name);
+func _on_collected_img(img_data, img_name: String, img_path: String):
+	images.save_img(img_data, img_name, img_path);
 
 
 func _on_connect_startup(component: String):
@@ -209,6 +337,10 @@ func _on_connect_startup(component: String):
 			file_dialog.fill_in_details.connect(fill_in_details);
 			file_dialog.collected_img.connect(_on_collected_img);
 			file_dialog.create_notif_popup.connect(workspace_container.create_notif_popup);
+			file_dialog.create_action_popup.connect(workspace_container.create_action_popup);
+		"images":
+			images.create_notif_popup.connect(workspace_container.create_notif_popup);
+			images.create_action_popup.connect(workspace_container.create_action_popup);
 		"verify_user":
 			verify_user.enable_buttons.connect(_on_enable_buttons);
 			verify_user.refresh_token_expired.connect(_on_token_expired.bind(true));

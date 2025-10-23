@@ -1,21 +1,70 @@
 extends MarginContainer
 
+
+signal connect_startup(component: String);
+
+signal create_notif_popup(msg);
+signal create_action_popup(msg, button_info, action);
+
+
 @onready var img_list = $Scroll/VBox;
 
-func save_img(img_data, img_name):
-	img_list.add_child(build_img_part(img_data, img_name));
+func startup():
+	load_imgs();
+	
+	connect_startup.emit("images");
+
+func load_imgs():
+	var request = Requests.new();
+	var config = request.load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY): # error
+		create_notif_popup.emit("Failed to load config file.");
+		return;
+	
+	var img_path =  config.get_value("repo_info", "image_path");
+	img_path = img_path.rstrip("/");
+	var dir_access = DirAccess.open("user://");
+	
+	if (!dir_access.dir_exists("assets")): # startup
+		return;
+	
+	var path = "assets/%s" % img_path;
+	if (dir_access.dir_exists(path)):
+		dir_access.change_dir(path);
+		var files = dir_access.get_files();
+		for filename in files:
+			match filename.get_extension():
+				"jpg":
+					load_curr_img(img_path, filename);
+				"png":
+					load_curr_img(img_path, filename);
+				_:
+					pass;
 
 
-func build_img_part(img_data, img_name):
+func load_curr_img(path: String, filename: String):
+	var img = Image.new();
+	img.load("user://assets/" + path + "/%s" % filename); # should check for errors
+	var tex = ImageTexture.new();
+	tex.set_image(img);
+	# specific to website here removing public folder
+	save_img(tex, path.replace("public", "") + "/" + filename, path);
+
+
+func save_img(img_data, img_name: String, img_path: String):
+	img_list.add_child(build_img_part(img_data, img_name, img_path));
+
+
+func build_img_part(img_data, img_name: String, img_path: String):
 	var panel_cont = PanelContainer.new();
 	panel_cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL;
 	var bg_mat = load("res://assets/materials/image_part.tres");
 	panel_cont.add_theme_stylebox_override("panel", bg_mat);
+	panel_cont.set_meta("file_path", img_path + "/" + img_name.get_file());
+	panel_cont.set_meta("filename", img_name);
 	
 	var hbox = HBoxContainer.new();
-	
-	var check = CheckBox.new();
-	check.size_flags_vertical = Control.SIZE_SHRINK_CENTER;
 	
 	var thumb = TextureRect.new();
 	thumb.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL;
@@ -26,31 +75,58 @@ func build_img_part(img_data, img_name):
 	
 	var filename = Label.new();
 	filename.size_flags_horizontal = Control.SIZE_EXPAND_FILL;
+	filename.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS;
 	filename.text = img_name;
 	
 	var copy_button = Button.new();
 	copy_button.text = "Copy";
 	copy_button.pressed.connect(_on_copy_button_pressed.bind(copy_button));
+	copy_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER;
 	
 	var delete_button = Button.new();
 	delete_button.text = "Delete";
 	delete_button.pressed.connect(_on_delete_button_pressed.bind(delete_button));
+	delete_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER;
 	
-	panel_cont.add_child(hbox);  # TODO ENUM for each feature
-	hbox.add_child(check); # 0
-	hbox.add_child(thumb); # 1
-	hbox.add_child(filename); # 2
-	hbox.add_child(copy_button); # 3
-	hbox.add_child(delete_button); # 4
-	hbox.add_child(MarginContainer.new()); # 5
+	panel_cont.add_child(hbox);
+	hbox.add_child(thumb);
+	hbox.add_child(filename);
+	hbox.add_child(copy_button);
+	hbox.add_child(delete_button);
+	hbox.add_child(MarginContainer.new());
 	
 	return panel_cont;
 
 
-func _on_delete_button_pressed(delete_button):
-	delete_button.get_parent().queue_free();
+func _on_delete_button_pressed(delete_button: Button):
+	create_action_popup.emit(
+		"Are you sure you want to delete this image?",
+		{ 'yes': "Delete Image", 'no': "Cancel" },
+		_on_serious_delete_button_pressed.bind(delete_button) 
+	);
 
+
+func _on_serious_delete_button_pressed(delete_button: Button):
+	var request = Requests.new();
+	var config = request.load_config();
+	
+	if (typeof(config) == TYPE_DICTIONARY): # error
+		create_notif_popup.emit("Failed to load config file.");
+		return;
+	
+	var img_part = delete_button.get_parent();
+	var components = img_part.get_children();
+	for component in components:
+		if (component is Label):
+			var filename = component.text.get_file();
+			var img_path =  config.get_value("repo_info", "image_path");
+			var global_path = ProjectSettings.globalize_path("user://assets/" + img_path + filename);
+			var error = OS.move_to_trash(global_path); # TODO check for errors
+			if (error != OK):
+				create_notif_popup.emit("File doesn't exist / Unsupported\nDeleted image entry.");
+	
+	img_part.queue_free();
 
 func _on_copy_button_pressed(copy_button):
-	DisplayServer.clipboard_set(copy_button.get_parent().get_child(2).text);
+	DisplayServer.clipboard_set(copy_button.get_parent().get_parent().get_meta("filename"));
 	

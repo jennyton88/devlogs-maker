@@ -12,7 +12,7 @@ extends MarginContainer
 # ===== Variables =====
 # =====================
 
-var plain_text_post = "";
+var plain_text_post: String = "";
 
 # =====================
 # ====== Methods ======
@@ -26,44 +26,107 @@ func update_preview(post_data: Dictionary):
 	text += post_data["creation_date"] + "\n";
 	text += post_data["post_title"] + "\n";
 	text += post_data["post_summary"] + "\n";
-	
-	var processed_text = text;
-	processed_text += process_post(post_data["post_body"], post_data["post_images"]);
-	
 	text += post_data["post_body"];
+	plain_text_post = text;
 	
-	plain_text_post = text; # TODO needs replacement real paths to the images
-	post_preview.text = processed_text;
-	#post_preview.text = text;
+	process_post(post_data, post_data["post_images"]);
 
 
-func process_post(post_body: String, img_list):
-	var post_lines = post_body.split("\n", true);
+func process_post(post_data: Dictionary, img_list):
+	post_preview.push_bold();
+	post_preview.add_text(post_data["post_title"]);
+	post_preview.pop();
+	post_preview.newline();
+	post_preview.newline();
+	post_preview.push_italics();
+	post_preview.add_text("Edited: ");
+	post_preview.pop();
+	post_preview.add_text(post_data["edit_date"]);
+	post_preview.push_italics();
+	post_preview.add_text("/ Created: ");
+	post_preview.pop();
+	post_preview.add_text(post_data["creation_date"]);
+	post_preview.newline();
+	post_preview.newline(); 
 	
-	var combine_lines: String = "";
+	var post_lines = post_data["post_body"].split("\n", true);
 	
-	for x in range(0, post_lines.size(), 1):
-		if (post_lines[x].begins_with("![")):
-			combine_lines += attach_img(post_lines[x], img_list) + "\n";
-		else:
-			combine_lines += post_lines[x] + "\n";
-	
-	return combine_lines;
+	for line in post_lines:
+		if (line.contains("## >>")): # header
+			post_preview.push_bold();
+			var a_line = line.replace("#", "");
+			post_preview.add_text(a_line);
+			post_preview.pop();
+			post_preview.newline();
+		elif (line.contains("![")): # image
+			var addt_txt = line.substr(0, line.find("!"));
+			var addt_end_txt = line.substr(line.find(")") + 1);
+			post_preview.add_text(addt_txt);
+				
+			var tex = get_image_texture(line, img_list);
+			if (tex):
+				post_preview.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER);
+				post_preview.add_image(tex, 128);
+				post_preview.pop();
+			
+			post_preview.add_text(addt_end_txt);
+		elif (line.contains("http") && line.contains("[") && line.contains(")")): # url TODO better checks
+			var link_begin = line.find("(");
+			var link_end = line.find(")");
+			var link_txt_begin = line.find("[");
+			var link_txt_end = line.find("]");
+			
+			var addt_txt = line.substr(0, link_txt_begin);
+			var addt_end_txt = line.substr(link_end + 1);
+			post_preview.add_text(addt_txt);
+			var url = line.substr(link_begin + 1, link_end - link_begin - 1);
+			post_preview.push_meta(url);
+			post_preview.add_text(line.substr(link_txt_begin + 1, link_txt_end - link_txt_begin - 1));
+			post_preview.pop();
+			post_preview.add_text(addt_end_txt);
+		else: # regular
+			post_preview.add_text(line);
+		
+		post_preview.newline();
 
 
-func attach_img(img_line: String, img_list):
+func get_image_texture(img_line: String, img_list):
 	var img_path = img_line.get_slice("(", 1);
-	img_path = img_path.rstrip(")");
+	var link_end = img_path.find(")");
+	img_path = img_path.substr(0, link_end); # if there are additional chars at the end
 	
 	var imgs = img_list.get_children();
-	for x in range(1, imgs.size(), 1):
-		var img_name = imgs[x].get_child(0).get_child(2).text; # panel > hbox > img # TODO make this better
-		if (img_name == img_path):
-			img_path = "res://assets/imported_imgs/%s" % img_name;
-			
-			return "[center][img=128]" + "%s[/img][/center]" % img_path;
+	for x in range(1, imgs.size(), 1): #ignoring title
+			var img_name = imgs[x].get_meta("file_path");
+			if (img_name.replace("public", "") == img_path):
+				var components = imgs[x].get_child(0).get_children(); # hbox holds all
+				for component in components:
+					if (component is TextureRect):
+						return component.texture;
 	
-	return img_line;
+	return null;
+
+
+func process_post_for_imgs(img_list):
+	var post_lines = plain_text_post.split("\n", true);
+	
+	var img_paths: Array[String] = [];
+	var imgs_to_send: Array[String] = [];
+	for line in post_lines:
+		if (line.contains("![")): # image
+			img_paths.append(line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1));
+	
+	var dir_access = DirAccess.open("user://");
+	var imgs = img_list.get_children();
+	
+	for img_path in img_paths:
+		for x in range(1, imgs.size(), 1): #ignoring title
+			var img_name = imgs[x].get_meta("file_path");
+			if (img_name.replace("public", "") == img_path):
+				if (dir_access.file_exists("user://assets/" + img_name)):
+					imgs_to_send.append(img_name);
+	
+	return imgs_to_send;
 
 
 func clear_text():
@@ -76,4 +139,4 @@ func clear_text():
 # =====================
 
 func get_text():
-	return post_preview.text;
+	return plain_text_post;
