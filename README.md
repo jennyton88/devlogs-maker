@@ -1,25 +1,27 @@
 # Devlogs Maker
-This is an app that I made to create devlogs and post them to my website hosted on Github. 
-It interfaces with the Github API to GET repo contents, PUT files up on the repo, and DELETE files. 
-It can POST requests to Github to renew user tokens.
+This is an app that I made to create devlogs easily and post them to my static website hosted on GitHub. It's a GitHub app that uses the device flow. It interfaces with the GitHub REST API to commit text files and images to a specific branch specified in settings.
 
-It's a Github app that uses the device flow.
-
-I will update it as I go.
+It'll be updated as I go, when I need another feature.
 
 ### Requirements
-- Godot 4.3
-- Github permissions (user tokens)
-- Config file
 
-For the config file, would need to manually enter the repo info and app info.
+- Godot 4.4.1
+- GitHub permissions for user tokens, and repository access
+- Config file **(needs to be updated)**
+
+For the config file, you would need to manually enter the repo info and app info.
 Also need to add the user name and email under user info.
 And the url for the base repo under urls.
 
-### Assets
+## Assets
+
+### Art
+
+- Plane sprite image
+- Airmail stripes border
+
+### Fonts
 - Courier Prime Regular Font
-- My plane sprite image
-- My airmail border
 
 ## Workspace
 
