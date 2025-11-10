@@ -114,7 +114,7 @@ func _on_serious_delete_button_pressed(delete_button: Button):
 		create_notif_popup.emit("Failed to load config file.");
 		return;
 	
-	var img_part = delete_button.get_parent();
+	var img_part = delete_button.get_parent().get_parent(); # panel container
 	var components = img_part.get_children();
 	for component in components:
 		if (component is Label):
